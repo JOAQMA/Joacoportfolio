@@ -6,6 +6,127 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Joaco Mansilla — Video Editor</title>
 <style>
+/* SPACE BACKGROUND */
+
+.environment {
+  background:
+    radial-gradient(ellipse at 78% 25%, #455bff90, transparent 38%),
+    radial-gradient(ellipse at 30% 80%, #7138d580, transparent 40%),
+    linear-gradient(125deg, #03040c, #0d1240 55%, #10103c);
+}
+
+.environment::before {
+  inset: 0;
+  background-image:
+    radial-gradient(2px 2px at 10px 20px, #fff, transparent),
+    radial-gradient(1px 1px at 70px 90px, #c4c0ff, transparent),
+    radial-gradient(2px 2px at 160px 120px, #a5baff, transparent),
+    radial-gradient(1px 1px at 220px 35px, #fff, transparent),
+    radial-gradient(1px 1px at 300px 190px, #d4baff, transparent);
+  background-size: 340px 240px;
+  opacity: .65;
+  transform: none;
+  animation: starDrift 75s linear infinite;
+}
+
+.environment::after {
+  background:
+    radial-gradient(ellipse at 60% 50%, transparent 10%, #03040bc0 95%),
+    linear-gradient(90deg, #03040b88, transparent 75%);
+}
+
+@keyframes starDrift {
+  from { background-position: 0 0; }
+  to { background-position: -340px 240px; }
+}
+
+/* DIFFERENT SPACE ENVIRONMENTS */
+
+#app[data-page="work"] .environment {
+  background:
+    radial-gradient(ellipse at 75% 35%, #344bffb0, transparent 45%),
+    radial-gradient(ellipse at 15% 85%, #6a40e880, transparent 40%),
+    #030514;
+}
+
+#app[data-page="reel"] .environment {
+  background:
+    radial-gradient(ellipse at 60% 55%, #6436d6a0, transparent 43%),
+    radial-gradient(ellipse at 90% 15%, #2734a080, transparent 35%),
+    #020209;
+}
+
+#app[data-page="about"] .environment {
+  background:
+    radial-gradient(ellipse at 35% 30%, #7949f0a0, transparent 42%),
+    radial-gradient(ellipse at 85% 80%, #354aff88, transparent 40%),
+    #070516;
+}
+
+#app[data-page="contact"] .environment {
+  background:
+    radial-gradient(ellipse at 80% 65%, #4a5cffaa, transparent 42%),
+    radial-gradient(ellipse at 25% 15%, #4425a080, transparent 35%),
+    #030512;
+}
+
+/* DIRECTIONAL TRANSITIONS */
+
+.transition {
+  background:
+    linear-gradient(120deg, #05050b, #293df4 52%, #7548f2);
+  clip-path: polygon(0 0, 100% 0, 85% 100%, 0 100%);
+  transform: translateX(-150%);
+}
+
+.transition.play.dir-work {
+  animation: wipeRight .78s ease-in-out forwards;
+}
+
+.transition.play.dir-reel {
+  animation: wipeLeft .78s ease-in-out forwards;
+}
+
+.transition.play.dir-about {
+  animation: wipeUp .78s ease-in-out forwards;
+}
+
+.transition.play.dir-contact {
+  animation: wipeDown .78s ease-in-out forwards;
+}
+
+.transition.play.dir-home {
+  animation: wipeLeft .78s ease-in-out forwards;
+}
+
+@keyframes wipeRight {
+  0% { transform:translateX(-150%); }
+  45%,55% { transform:translateX(0); }
+  100% { transform:translateX(150%); }
+}
+
+@keyframes wipeLeft {
+  0% { transform:translateX(150%); }
+  45%,55% { transform:translateX(0); }
+  100% { transform:translateX(-150%); }
+}
+
+@keyframes wipeUp {
+  0% { transform:translateY(150%); }
+  45%,55% { transform:translateY(0); }
+  100% { transform:translateY(-150%); }
+}
+
+@keyframes wipeDown {
+  0% { transform:translateY(-150%); }
+  45%,55% { transform:translateY(0); }
+  100% { transform:translateY(150%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .environment::before { animation:none; }
+}
+
 @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,700;0,800;0,900;1,800;1,900&family=DM+Sans:wght@400;500;700&display=swap');
 
 :root {
@@ -446,7 +567,39 @@ function showPage(page){
   window.scrollTo({top:0,behavior:"instant"});
 }
 
-function navigate(page){
+
+function navigate(page) {
+  if (navigating || page === currentPage) return;
+
+  if (reducedMotion.matches) {
+    showPage(page);
+    return;
+  }
+
+  navigating = true;
+
+  const direction =
+    page === "detail" ? "work" : page;
+
+  overlay.className = "transition";
+
+  // Reset animation before starting the next one
+  void overlay.offsetWidth;
+
+  overlay.classList.add("dir-" + direction, "play");
+
+  // Switch pages while the transition covers the screen
+  setTimeout(() => {
+    showPage(page);
+  }, 390);
+
+  // Finish transition and unlock navigation
+  setTimeout(() => {
+    overlay.className = "transition";
+    navigating = false;
+  }, 800);
+}
+
   if(navigating||page===currentPage)return;
   if(reducedMotion.matches){
     showPage(page);
