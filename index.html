@@ -5,17 +5,64 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Joaco Mansilla — Video Editor</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,700;0,800;0,900;1,800;1,900&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+
 <style>
-/* SPACE BACKGROUND */
+:root {
+  --black: #05050b;
+  --blue: #3449f5;
+  --violet: #7548f2;
+  --white: #f8f7ff;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  background: var(--black);
+  color: var(--white);
+  font-family: 'DM Sans', sans-serif;
+  overflow-x: hidden;
+}
+
+button { cursor: pointer; font: inherit; }
+
+button:focus-visible {
+  outline: 2px solid white;
+  outline-offset: 3px;
+}
+
+#app {
+  min-height: 100svh;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* SPACE ENVIRONMENT */
 
 .environment {
+  position: absolute;
+  inset: -15%;
+  z-index: -1;
+  pointer-events: none;
   background:
     radial-gradient(ellipse at 78% 25%, #455bff90, transparent 38%),
     radial-gradient(ellipse at 30% 80%, #7138d580, transparent 40%),
     linear-gradient(125deg, #03040c, #0d1240 55%, #10103c);
+  transition: background 650ms ease, transform 850ms ease;
 }
 
 .environment::before {
+  content: "";
+  position: absolute;
   inset: 0;
   background-image:
     radial-gradient(2px 2px at 10px 20px, #fff, transparent),
@@ -25,11 +72,13 @@
     radial-gradient(1px 1px at 300px 190px, #d4baff, transparent);
   background-size: 340px 240px;
   opacity: .65;
-  transform: none;
   animation: starDrift 75s linear infinite;
 }
 
 .environment::after {
+  content: "";
+  position: absolute;
+  inset: 0;
   background:
     radial-gradient(ellipse at 60% 50%, transparent 10%, #03040bc0 95%),
     linear-gradient(90deg, #03040b88, transparent 75%);
@@ -40,13 +89,12 @@
   to { background-position: -340px 240px; }
 }
 
-/* DIFFERENT SPACE ENVIRONMENTS */
-
 #app[data-page="work"] .environment {
   background:
     radial-gradient(ellipse at 75% 35%, #344bffb0, transparent 45%),
     radial-gradient(ellipse at 15% 85%, #6a40e880, transparent 40%),
     #030514;
+  transform: scale(1.13) rotate(-3deg);
 }
 
 #app[data-page="reel"] .environment {
@@ -54,6 +102,7 @@
     radial-gradient(ellipse at 60% 55%, #6436d6a0, transparent 43%),
     radial-gradient(ellipse at 90% 15%, #2734a080, transparent 35%),
     #020209;
+  transform: scale(1.16) rotate(3deg);
 }
 
 #app[data-page="about"] .environment {
@@ -61,6 +110,7 @@
     radial-gradient(ellipse at 35% 30%, #7949f0a0, transparent 42%),
     radial-gradient(ellipse at 85% 80%, #354aff88, transparent 40%),
     #070516;
+  transform: scale(1.12) translateX(-3%);
 }
 
 #app[data-page="contact"] .environment {
@@ -68,22 +118,278 @@
     radial-gradient(ellipse at 80% 65%, #4a5cffaa, transparent 42%),
     radial-gradient(ellipse at 25% 15%, #4425a080, transparent 35%),
     #030512;
+  transform: scale(1.1) translateY(-3%);
 }
 
-/* DIRECTIONAL TRANSITIONS */
+/* HEADER AND FOOTER */
+
+header, footer {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  padding: 25px 5vw;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .13em;
+}
+
+header span:last-child,
+footer {
+  opacity: .7;
+}
+
+footer { font-size: 10px; }
+
+/* PAGE LAYOUT */
+
+.screen {
+  position: relative;
+  z-index: 1;
+  min-height: calc(100svh - 140px);
+  padding: 6vh 7vw;
+}
+
+.screen[hidden] { display: none !important; }
+
+.home {
+  display: grid;
+  grid-template-columns: 48% 52%;
+  align-items: center;
+}
+
+.identity {
+  position: relative;
+  z-index: 1;
+}
+
+.eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .22em;
+  margin-bottom: 25px;
+}
+
+h1, h2, h3, .menu {
+  font-family: 'Barlow Condensed', Impact, sans-serif;
+  text-transform: uppercase;
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(68px, 11vw, 175px);
+  line-height: .76;
+  font-weight: 900;
+  font-style: italic;
+  letter-spacing: -.045em;
+  transform: skewY(-5deg);
+  text-shadow: 6px 8px 0 #08081899;
+}
+
+h1 span { color: #a8a4ff; }
+
+.role {
+  margin-top: 42px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .22em;
+}
+
+.geometry {
+  position: absolute;
+  width: 340px;
+  height: 340px;
+  border: 1px solid #ffffff30;
+  transform: rotate(32deg) skew(-12deg);
+  left: -110px;
+  bottom: -150px;
+  pointer-events: none;
+}
+
+.geometry::before,
+.geometry::after {
+  content: "";
+  position: absolute;
+  inset: 35px;
+  border: 1px solid #ffffff30;
+}
+
+.geometry::after { inset: 75px; }
+
+/* MAIN MENU */
+
+.navigation {
+  position: relative;
+  z-index: 2;
+  transform: skewY(-6deg);
+}
+
+.menu {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 17px;
+  padding: 13px 18px;
+  border: 0;
+  color: white;
+  background: transparent;
+  text-align: left;
+  clip-path: polygon(0 0, 100% 0, 96% 100%, 0 100%);
+  transition: background .18s, color .18s, transform .18s;
+}
+
+.menu small {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  opacity: .7;
+}
+
+.menu strong {
+  font-size: clamp(38px, 5.3vw, 82px);
+  line-height: .95;
+  font-weight: 900;
+  font-style: italic;
+  letter-spacing: -.025em;
+}
+
+.menu .arrow {
+  margin-left: auto;
+  font-size: 25px;
+}
+
+.menu:hover,
+.menu:focus-visible {
+  background: #fff;
+  color: #08080e;
+  transform: translateX(-15px);
+}
+
+/* INNER PAGES */
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.back {
+  background: white;
+  color: black;
+  border: 0;
+  padding: 12px 18px;
+  font-weight: 700;
+  font-size: 12px;
+}
+
+h2 {
+  font-size: clamp(75px, 12vw, 170px);
+  font-weight: 900;
+  font-style: italic;
+  letter-spacing: -.045em;
+  line-height: .85;
+  transform: skewY(-4deg);
+  margin: 65px 0 50px;
+  text-shadow: 5px 7px #08081870;
+}
+
+.page-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .2em;
+}
+
+/* PROJECTS */
+
+.project-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  max-width: 1150px;
+}
+
+.project {
+  min-height: 210px;
+  padding: 22px;
+  border: 1px solid #ffffff55;
+  background: #09091bb8;
+  color: white;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform .2s, background .2s, color .2s;
+}
+
+.project:hover,
+.project:focus-visible {
+  transform: translateY(-8px) skewY(-2deg);
+  background: white;
+  color: black;
+}
+
+.project small {
+  font-size: 10px;
+  letter-spacing: .13em;
+}
+
+.project strong {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 900;
+  font-style: italic;
+  font-size: clamp(26px, 3vw, 42px);
+  line-height: 1;
+}
+
+.content {
+  max-width: 750px;
+  font-size: clamp(16px, 2vw, 21px);
+  line-height: 1.65;
+}
+
+.placeholder {
+  min-height: 280px;
+  border: 1px solid #ffffff55;
+  background: #080818b0;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  letter-spacing: .15em;
+  text-align: center;
+  padding: 25px;
+}
+
+.detail-info {
+  margin-top: 24px;
+  max-width: 750px;
+  line-height: 1.7;
+}
+
+.detail-info p { color: #e1dfff; }
+.detail-info small { letter-spacing: .1em; }
+
+/* TRANSITION OVERLAY */
 
 .transition {
+  position: fixed;
+  z-index: 20;
+  inset: 0;
   background:
     linear-gradient(120deg, #05050b, #293df4 52%, #7548f2);
   clip-path: polygon(0 0, 100% 0, 85% 100%, 0 100%);
   transform: translateX(-150%);
+  pointer-events: none;
 }
 
 .transition.play.dir-work {
   animation: wipeRight .78s ease-in-out forwards;
 }
 
-.transition.play.dir-reel {
+.transition.play.dir-reel,
+.transition.play.dir-home {
   animation: wipeLeft .78s ease-in-out forwards;
 }
 
@@ -95,340 +401,68 @@
   animation: wipeDown .78s ease-in-out forwards;
 }
 
-.transition.play.dir-home {
-  animation: wipeLeft .78s ease-in-out forwards;
-}
-
 @keyframes wipeRight {
-  0% { transform:translateX(-150%); }
-  45%,55% { transform:translateX(0); }
-  100% { transform:translateX(150%); }
+  0% { transform: translateX(-150%); }
+  45%, 55% { transform: translateX(0); }
+  100% { transform: translateX(150%); }
 }
 
 @keyframes wipeLeft {
-  0% { transform:translateX(150%); }
-  45%,55% { transform:translateX(0); }
-  100% { transform:translateX(-150%); }
+  0% { transform: translateX(150%); }
+  45%, 55% { transform: translateX(0); }
+  100% { transform: translateX(-150%); }
 }
 
 @keyframes wipeUp {
-  0% { transform:translateY(150%); }
-  45%,55% { transform:translateY(0); }
-  100% { transform:translateY(-150%); }
+  0% { transform: translateY(150%); }
+  45%, 55% { transform: translateY(0); }
+  100% { transform: translateY(-150%); }
 }
 
 @keyframes wipeDown {
-  0% { transform:translateY(-150%); }
-  45%,55% { transform:translateY(0); }
-  100% { transform:translateY(150%); }
+  0% { transform: translateY(-150%); }
+  45%, 55% { transform: translateY(0); }
+  100% { transform: translateY(150%); }
+}
+
+/* MOBILE */
+
+@media (max-width: 750px) {
+  header { padding: 22px; }
+  .screen { padding: 30px 22px; }
+  .home {
+    grid-template-columns: 1fr;
+    gap: 55px;
+    align-content: center;
+  }
+  h1 { font-size: clamp(75px, 17vw, 140px); }
+  .menu strong { font-size: clamp(38px, 10vw, 65px); }
+  .project-grid { grid-template-columns: 1fr 1fr; }
+  .project { min-height: 170px; }
+  footer { padding: 20px 22px; }
+}
+
+@media (max-width: 480px) {
+  .project-grid { grid-template-columns: 1fr; }
+  .project { min-height: 130px; }
+  header span:last-child,
+  footer span:last-child { display: none; }
+  h2 { margin: 50px 0 35px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .environment::before { animation:none; }
-}
-
-@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,700;0,800;0,900;1,800;1,900&family=DM+Sans:wght@400;500;700&display=swap');
-
-:root {
-  --black:#08080e;
-  --blue:#3449f5;
-  --violet:#7548f2;
-  --white:#f8f7ff;
-}
-* { box-sizing:border-box; }
-html,body { margin:0; min-height:100%; }
-body {
-  background:var(--black);
-  color:var(--white);
-  font-family:'DM Sans',sans-serif;
-  overflow-x:hidden;
-}
-button,a { -webkit-tap-highlight-color:transparent; }
-button { cursor:pointer; }
-button:focus-visible,a:focus-visible {
-  outline:2px solid white;
-  outline-offset:4px;
-}
-#app { min-height:100svh; position:relative; overflow:hidden; }
-.environment {
-  position:absolute;
-  inset:-15%;
-  z-index:0;
-  background:linear-gradient(125deg,#090913 10%,#1723a1 65%,#794bfa);
-  transition:background 650ms ease,transform 850ms cubic-bezier(.2,.8,.2,1);
-  pointer-events:none;
-}
-.environment::before {
-  content:"";
-  position:absolute;
-  inset:0;
-  background:
-    repeating-radial-gradient(ellipse at 80% 48%,
-      transparent 0 65px,#a6a1ff26 67px 69px,
-      transparent 71px 140px);
-  transform:rotate(-18deg) scale(1.3);
-}
-.environment::after {
-  content:"";
-  position:absolute;
-  inset:0;
-  background:linear-gradient(90deg,#05050dbb,transparent 70%);
-}
-#app[data-page="work"] .environment {
-  background:linear-gradient(125deg,#05050b 10%,#243bf0 58%,#674df1);
-  transform:scale(1.13) rotate(-3deg);
-}
-#app[data-page="reel"] .environment {
-  background:linear-gradient(125deg,#05050a 15%,#141447 55%,#5438b6);
-  transform:scale(1.16) rotate(3deg);
-}
-#app[data-page="about"] .environment {
-  background:linear-gradient(125deg,#070611,#38238d 55%,#8558ff);
-  transform:scale(1.12) translateX(-3%);
-}
-#app[data-page="contact"] .environment {
-  background:linear-gradient(125deg,#080810 10%,#1c2cc6 65%,#5140ba);
-  transform:scale(1.1) translateY(-3%);
-}
-header {
-  position:relative;
-  z-index:3;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:15px;
-  padding:28px 5vw;
-  font-size:12px;
-  font-weight:700;
-  letter-spacing:.13em;
-}
-header span:last-child { opacity:.65; font-size:10px; }
-.screen {
-  position:relative;
-  z-index:2;
-  min-height:calc(100svh - 140px);
-  padding:6vh 7vw;
-}
-.screen[hidden] { display:none; }
-.home {
-  display:grid;
-  grid-template-columns:48% 52%;
-  align-items:center;
-  gap:0;
-}
-.identity { position:relative; z-index:1; }
-.eyebrow {
-  font-size:11px;
-  font-weight:700;
-  letter-spacing:.22em;
-  margin-bottom:25px;
-}
-h1,h2,h3,.menu {
-  font-family:'Barlow Condensed',Impact,sans-serif;
-  text-transform:uppercase;
-}
-h1 {
-  margin:0;
-  font-size:clamp(68px,11vw,175px);
-  line-height:.76;
-  font-weight:900;
-  font-style:italic;
-  letter-spacing:-.045em;
-  transform:skewY(-5deg);
-  text-shadow:6px 8px 0 #08081899;
-}
-h1 span { color:#a8a4ff; }
-.role {
-  margin-top:42px;
-  font-size:13px;
-  font-weight:700;
-  letter-spacing:.22em;
-}
-.geometry {
-  position:absolute;
-  width:340px;
-  height:340px;
-  border:1px solid #ffffff30;
-  transform:rotate(32deg) skew(-12deg);
-  left:-110px;
-  bottom:-150px;
-  pointer-events:none;
-}
-.geometry::before,.geometry::after {
-  content:"";
-  position:absolute;
-  inset:35px;
-  border:1px solid #ffffff30;
-}
-.geometry::after { inset:75px; }
-.navigation { position:relative; z-index:2; transform:skewY(-6deg); }
-.menu {
-  width:100%;
-  display:flex;
-  align-items:center;
-  gap:17px;
-  padding:13px 18px;
-  border:0;
-  color:white;
-  background:transparent;
-  text-align:left;
-  clip-path:polygon(0 0,100% 0,96% 100%,0 100%);
-  transition:background .18s,color .18s,transform .18s;
-}
-.menu small {
-  font-family:'DM Sans',sans-serif;
-  font-size:11px;
-  font-weight:700;
-  opacity:.7;
-}
-.menu strong {
-  font-size:clamp(38px,5.3vw,82px);
-  line-height:.95;
-  font-weight:900;
-  font-style:italic;
-  letter-spacing:-.025em;
-}
-.menu .arrow { margin-left:auto; font-size:25px; }
-.menu:hover,.menu:focus-visible {
-  background:#fff;
-  color:#08080e;
-  transform:translateX(-15px);
-}
-.page-header {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:20px;
-}
-.back {
-  background:white;
-  color:black;
-  border:0;
-  padding:12px 18px;
-  font-weight:700;
-  font-size:12px;
-}
-h2 {
-  font-size:clamp(75px,12vw,170px);
-  font-weight:900;
-  font-style:italic;
-  letter-spacing:-.045em;
-  line-height:.85;
-  transform:skewY(-4deg);
-  margin:65px 0 50px;
-  text-shadow:5px 7px #08081870;
-}
-.page-label {
-  font-size:11px;
-  font-weight:700;
-  letter-spacing:.2em;
-}
-.project-grid {
-  display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));
-  gap:18px;
-  max-width:1150px;
-}
-.project {
-  min-height:210px;
-  padding:22px;
-  border:1px solid #ffffff55;
-  background:#09091bb8;
-  color:white;
-  text-align:left;
-  display:flex;
-  flex-direction:column;
-  justify-content:space-between;
-  transition:transform .2s,background .2s;
-}
-.project:hover {
-  transform:translateY(-8px) skewY(-2deg);
-  background:#fff;
-  color:#08080e;
-}
-.project small { font-size:10px; letter-spacing:.13em; }
-.project strong {
-  font-family:'Barlow Condensed',sans-serif;
-  font-weight:900;
-  font-style:italic;
-  font-size:clamp(26px,3vw,42px);
-  line-height:1;
-}
-.content {
-  max-width:750px;
-  font-size:clamp(16px,2vw,21px);
-  line-height:1.65;
-}
-.placeholder {
-  min-height:280px;
-  border:1px solid #ffffff55;
-  background:#080818b0;
-  display:grid;
-  place-items:center;
-  font-size:12px;
-  letter-spacing:.15em;
-  text-align:center;
-  padding:25px;
-}
-.detail-info {
-  margin-top:24px;
-  max-width:750px;
-  line-height:1.7;
-}
-.detail-info p { color:#e1dfff; }
-.detail-info small { letter-spacing:.1em; }
-footer {
-  position:relative;
-  z-index:2;
-  display:flex;
-  justify-content:space-between;
-  gap:15px;
-  padding:20px 5vw;
-  font-size:10px;
-  letter-spacing:.12em;
-  opacity:.65;
-}
-.transition {
-  position:fixed;
-  z-index:20;
-  inset:0;
-  background:linear-gradient(120deg,#050509,#283bf0 55%,#7548f2);
-  clip-path:polygon(-20% 0,-20% 0,-35% 100%,-35% 100%);
-  pointer-events:none;
-}
-.transition.play {
-  animation:warp .75s cubic-bezier(.65,0,.2,1) forwards;
-}
-@keyframes warp {
-  0% { clip-path:polygon(-40% 0,-10% 0,-30% 100%,-60% 100%); }
-  42% { clip-path:polygon(-10% 0,120% 0,100% 100%,-30% 100%); }
-  65% { clip-path:polygon(0 0,140% 0,120% 100%,0 100%); }
-  100% { clip-path:polygon(140% 0,170% 0,150% 100%,120% 100%); }
-}
-@media(max-width:750px) {
-  header { padding:22px; }
-  .screen { padding:30px 22px; }
-  .home { grid-template-columns:1fr; gap:55px; align-content:center; }
-  h1 { font-size:clamp(75px,17vw,140px); }
-  .menu strong { font-size:clamp(38px,10vw,65px); }
-  .project-grid { grid-template-columns:1fr 1fr; }
-  .project { min-height:170px; }
-  footer { padding:20px 22px; }
-}
-@media(max-width:480px) {
-  .project-grid { grid-template-columns:1fr; }
-  .project { min-height:130px; }
-  header span:last-child,footer span:last-child { display:none; }
-  h2 { margin:50px 0 35px; }
-}
-@media(prefers-reduced-motion:reduce) {
-  *,*::before,*::after { animation:none!important; transition:none!important; }
-  .transition { display:none; }
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+  .transition { display: none; }
 }
 </style>
 </head>
+
 <body>
 <div id="app" data-page="home">
+
   <div class="environment"></div>
 
   <header>
@@ -437,6 +471,7 @@ footer {
   </header>
 
   <main>
+
     <section class="screen home" id="home">
       <div class="identity">
         <div class="eyebrow">VIDEO EDITOR</div>
@@ -444,22 +479,37 @@ footer {
         <div class="role">FREELANCE / POST-PRODUCTION</div>
         <div class="geometry"></div>
       </div>
+
       <nav class="navigation" aria-label="Main navigation">
-        <button class="menu" data-target="work"><small>01</small><strong>WORK</strong><span class="arrow">↗</span></button>
-        <button class="menu" data-target="reel"><small>02</small><strong>DEMO REEL</strong><span class="arrow">↗</span></button>
-        <button class="menu" data-target="about"><small>03</small><strong>ABOUT</strong><span class="arrow">↗</span></button>
-        <button class="menu" data-target="contact"><small>04</small><strong>CONTACT</strong><span class="arrow">↗</span></button>
+        <button class="menu" data-target="work">
+          <small>01</small><strong>WORK</strong><span class="arrow">↗</span>
+        </button>
+        <button class="menu" data-target="reel">
+          <small>02</small><strong>DEMO REEL</strong><span class="arrow">↗</span>
+        </button>
+        <button class="menu" data-target="about">
+          <small>03</small><strong>ABOUT</strong><span class="arrow">↗</span>
+        </button>
+        <button class="menu" data-target="contact">
+          <small>04</small><strong>CONTACT</strong><span class="arrow">↗</span>
+        </button>
       </nav>
     </section>
 
     <section class="screen" id="work" hidden>
-      <div class="page-header"><span class="page-label">01 / WORK</span><button class="back" data-target="home">← BACK</button></div>
+      <div class="page-header">
+        <span class="page-label">01 / WORK</span>
+        <button class="back" data-target="home">← BACK</button>
+      </div>
       <h2>SELECTED<br>WORK.</h2>
       <div class="project-grid" id="project-grid"></div>
     </section>
 
     <section class="screen" id="detail" hidden>
-      <div class="page-header"><span class="page-label">PROJECT</span><button class="back" data-target="work">← BACK</button></div>
+      <div class="page-header">
+        <span class="page-label">PROJECT</span>
+        <button class="back" data-target="work">← BACK</button>
+      </div>
       <h2 id="detail-title"></h2>
       <div class="placeholder">VIDEO PREVIEW — COMING SOON</div>
       <div class="detail-info">
@@ -469,13 +519,19 @@ footer {
     </section>
 
     <section class="screen" id="reel" hidden>
-      <div class="page-header"><span class="page-label">02 / DEMO REEL</span><button class="back" data-target="home">← BACK</button></div>
+      <div class="page-header">
+        <span class="page-label">02 / DEMO REEL</span>
+        <button class="back" data-target="home">← BACK</button>
+      </div>
       <h2>DEMO<br>REEL.</h2>
       <div class="placeholder">SHOWREEL — COMING SOON</div>
     </section>
 
     <section class="screen" id="about" hidden>
-      <div class="page-header"><span class="page-label">03 / ABOUT</span><button class="back" data-target="home">← BACK</button></div>
+      <div class="page-header">
+        <span class="page-label">03 / ABOUT</span>
+        <button class="back" data-target="home">← BACK</button>
+      </div>
       <h2>JOACO<br>MANSILLA.</h2>
       <div class="content">
         <p>I'm a video editor working across documentary, commercial, entertainment, and short-form content.</p>
@@ -484,53 +540,59 @@ footer {
     </section>
 
     <section class="screen" id="contact" hidden>
-      <div class="page-header"><span class="page-label">04 / CONTACT</span><button class="back" data-target="home">← BACK</button></div>
+      <div class="page-header">
+        <span class="page-label">04 / CONTACT</span>
+        <button class="back" data-target="home">← BACK</button>
+      </div>
       <h2>CONTACT.</h2>
       <div class="content">
         <p>Available for freelance video editing projects.</p>
         <p>Contact information will be added before launch.</p>
       </div>
     </section>
+
   </main>
 
   <footer>
     <span>JOACO MANSILLA © 2026</span>
     <span>VIDEO EDITING / POST-PRODUCTION</span>
   </footer>
+
   <div class="transition" id="transition"></div>
+
 </div>
 
 <script>
 const projects = [
   {
-    name:"Haiti — Nonprofit Film",
-    category:"DOCUMENTARY",
-    role:"CONCEPT / EDITING / STORYTELLING",
-    desc:"An academic documentary-style nonprofit project focused on atmosphere and emotional storytelling."
+    name: "Haiti — Nonprofit Film",
+    category: "DOCUMENTARY",
+    role: "CONCEPT / EDITING / STORYTELLING",
+    desc: "An academic documentary-style nonprofit project focused on atmosphere and emotional storytelling."
   },
   {
-    name:"Joey Calveiro — Jazz Teaser",
-    category:"CINEMATIC",
-    role:"RESEARCH / CONCEPT / EDITING",
-    desc:"A cinematic introduction connecting jazz history with a contemporary musician."
+    name: "Joey Calveiro — Jazz Teaser",
+    category: "CINEMATIC",
+    role: "RESEARCH / CONCEPT / EDITING",
+    desc: "A cinematic introduction connecting jazz history with a contemporary musician."
   },
   {
-    name:"RAW FIT",
-    category:"COMMERCIAL",
-    role:"EDITING / COLOR / SOUND DESIGN",
-    desc:"A music-driven fitness commercial with color grading and camera-flash effects."
+    name: "RAW FIT",
+    category: "COMMERCIAL",
+    role: "EDITING / COLOR / SOUND DESIGN",
+    desc: "A music-driven fitness commercial with color grading and camera-flash effects."
   },
   {
-    name:"SharkCast",
-    category:"PODCAST",
-    role:"EDITORIAL DIRECTION / EDITING",
-    desc:"Podcast reels and promotional edits featuring contextual footage and editorial storytelling."
+    name: "SharkCast",
+    category: "PODCAST",
+    role: "EDITORIAL DIRECTION / EDITING",
+    desc: "Podcast reels and promotional edits featuring contextual footage and editorial storytelling."
   },
   {
-    name:"3y4 Music Promos",
-    category:"MUSIC",
-    role:"EDITING / POST-PRODUCTION",
-    desc:"Commissioned short-form promotional edits for live music and events."
+    name: "3y4 Music Promos",
+    category: "MUSIC",
+    role: "EDITING / POST-PRODUCTION",
+    desc: "Commissioned short-form promotional edits for live music and events."
   }
 ];
 
@@ -538,35 +600,43 @@ const app = document.getElementById("app");
 const overlay = document.getElementById("transition");
 const grid = document.getElementById("project-grid");
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
 let currentPage = "home";
 let navigating = false;
 
-projects.forEach((project,index)=>{
-  const button=document.createElement("button");
-  button.className="project";
-  const category=document.createElement("small");
-  category.textContent=String(index+1).padStart(2,"0")+" / "+project.category;
-  const name=document.createElement("strong");
-  name.textContent=project.name;
-  button.append(category,name);
-  button.addEventListener("click",()=>{
-    document.getElementById("detail-title").textContent=project.name;
-    document.getElementById("detail-role").textContent=project.role;
-    document.getElementById("detail-desc").textContent=project.desc;
+projects.forEach((project, index) => {
+  const button = document.createElement("button");
+  button.className = "project";
+
+  const category = document.createElement("small");
+  category.textContent =
+    String(index + 1).padStart(2, "0") + " / " + project.category;
+
+  const name = document.createElement("strong");
+  name.textContent = project.name;
+
+  button.append(category, name);
+
+  button.addEventListener("click", () => {
+    document.getElementById("detail-title").textContent = project.name;
+    document.getElementById("detail-role").textContent = project.role;
+    document.getElementById("detail-desc").textContent = project.desc;
     navigate("detail");
   });
+
   grid.appendChild(button);
 });
 
-function showPage(page){
-  document.querySelectorAll(".screen").forEach(screen=>{
-    screen.hidden=screen.id!==page;
+function showPage(page) {
+  document.querySelectorAll(".screen").forEach(screen => {
+    screen.hidden = screen.id !== page;
   });
-  app.dataset.page=page==="detail"?"work":page;
-  currentPage=page;
-  window.scrollTo({top:0,behavior:"instant"});
-}
 
+  app.dataset.page = page === "detail" ? "work" : page;
+  currentPage = page;
+
+  window.scrollTo({ top: 0, behavior: "instant" });
+}
 
 function navigate(page) {
   if (navigating || page === currentPage) return;
@@ -578,51 +648,32 @@ function navigate(page) {
 
   navigating = true;
 
-  const direction =
-    page === "detail" ? "work" : page;
+  const direction = page === "detail" ? "work" : page;
 
   overlay.className = "transition";
-
-  // Reset animation before starting the next one
   void overlay.offsetWidth;
 
   overlay.classList.add("dir-" + direction, "play");
 
-  // Switch pages while the transition covers the screen
   setTimeout(() => {
     showPage(page);
   }, 390);
 
-  // Finish transition and unlock navigation
   setTimeout(() => {
     overlay.className = "transition";
     navigating = false;
   }, 800);
 }
 
-  if(navigating||page===currentPage)return;
-  if(reducedMotion.matches){
-    showPage(page);
-    return;
-  }
-  navigating=true;
-  overlay.classList.remove("play");
-  void overlay.offsetWidth;
-  overlay.classList.add("play");
-  setTimeout(()=>showPage(page),320);
-  setTimeout(()=>{
-    overlay.classList.remove("play");
-    navigating=false;
-  },780);
-}
-
-document.querySelectorAll("[data-target]").forEach(button=>{
-  button.addEventListener("click",()=>navigate(button.dataset.target));
+document.querySelectorAll("[data-target]").forEach(button => {
+  button.addEventListener("click", () => {
+    navigate(button.dataset.target);
+  });
 });
 
-document.addEventListener("keydown",event=>{
-  if(event.key==="Escape"&&currentPage!=="home"){
-    navigate(currentPage==="detail"?"work":"home");
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape" && currentPage !== "home") {
+    navigate(currentPage === "detail" ? "work" : "home");
   }
 });
 </script>
