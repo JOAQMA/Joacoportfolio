@@ -1,1 +1,477 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Joaco Mansilla — Video Editor</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,700;0,800;0,900;1,800;1,900&family=DM+Sans:wght@400;500;700&display=swap');
+
+:root {
+  --black:#08080e;
+  --blue:#3449f5;
+  --violet:#7548f2;
+  --white:#f8f7ff;
+}
+* { box-sizing:border-box; }
+html,body { margin:0; min-height:100%; }
+body {
+  background:var(--black);
+  color:var(--white);
+  font-family:'DM Sans',sans-serif;
+  overflow-x:hidden;
+}
+button,a { -webkit-tap-highlight-color:transparent; }
+button { cursor:pointer; }
+button:focus-visible,a:focus-visible {
+  outline:2px solid white;
+  outline-offset:4px;
+}
+#app { min-height:100svh; position:relative; overflow:hidden; }
+.environment {
+  position:absolute;
+  inset:-15%;
+  z-index:0;
+  background:linear-gradient(125deg,#090913 10%,#1723a1 65%,#794bfa);
+  transition:background 650ms ease,transform 850ms cubic-bezier(.2,.8,.2,1);
+  pointer-events:none;
+}
+.environment::before {
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    repeating-radial-gradient(ellipse at 80% 48%,
+      transparent 0 65px,#a6a1ff26 67px 69px,
+      transparent 71px 140px);
+  transform:rotate(-18deg) scale(1.3);
+}
+.environment::after {
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(90deg,#05050dbb,transparent 70%);
+}
+#app[data-page="work"] .environment {
+  background:linear-gradient(125deg,#05050b 10%,#243bf0 58%,#674df1);
+  transform:scale(1.13) rotate(-3deg);
+}
+#app[data-page="reel"] .environment {
+  background:linear-gradient(125deg,#05050a 15%,#141447 55%,#5438b6);
+  transform:scale(1.16) rotate(3deg);
+}
+#app[data-page="about"] .environment {
+  background:linear-gradient(125deg,#070611,#38238d 55%,#8558ff);
+  transform:scale(1.12) translateX(-3%);
+}
+#app[data-page="contact"] .environment {
+  background:linear-gradient(125deg,#080810 10%,#1c2cc6 65%,#5140ba);
+  transform:scale(1.1) translateY(-3%);
+}
+header {
+  position:relative;
+  z-index:3;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:15px;
+  padding:28px 5vw;
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:.13em;
+}
+header span:last-child { opacity:.65; font-size:10px; }
+.screen {
+  position:relative;
+  z-index:2;
+  min-height:calc(100svh - 140px);
+  padding:6vh 7vw;
+}
+.screen[hidden] { display:none; }
+.home {
+  display:grid;
+  grid-template-columns:48% 52%;
+  align-items:center;
+  gap:0;
+}
+.identity { position:relative; z-index:1; }
+.eyebrow {
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.22em;
+  margin-bottom:25px;
+}
+h1,h2,h3,.menu {
+  font-family:'Barlow Condensed',Impact,sans-serif;
+  text-transform:uppercase;
+}
+h1 {
+  margin:0;
+  font-size:clamp(68px,11vw,175px);
+  line-height:.76;
+  font-weight:900;
+  font-style:italic;
+  letter-spacing:-.045em;
+  transform:skewY(-5deg);
+  text-shadow:6px 8px 0 #08081899;
+}
+h1 span { color:#a8a4ff; }
+.role {
+  margin-top:42px;
+  font-size:13px;
+  font-weight:700;
+  letter-spacing:.22em;
+}
+.geometry {
+  position:absolute;
+  width:340px;
+  height:340px;
+  border:1px solid #ffffff30;
+  transform:rotate(32deg) skew(-12deg);
+  left:-110px;
+  bottom:-150px;
+  pointer-events:none;
+}
+.geometry::before,.geometry::after {
+  content:"";
+  position:absolute;
+  inset:35px;
+  border:1px solid #ffffff30;
+}
+.geometry::after { inset:75px; }
+.navigation { position:relative; z-index:2; transform:skewY(-6deg); }
+.menu {
+  width:100%;
+  display:flex;
+  align-items:center;
+  gap:17px;
+  padding:13px 18px;
+  border:0;
+  color:white;
+  background:transparent;
+  text-align:left;
+  clip-path:polygon(0 0,100% 0,96% 100%,0 100%);
+  transition:background .18s,color .18s,transform .18s;
+}
+.menu small {
+  font-family:'DM Sans',sans-serif;
+  font-size:11px;
+  font-weight:700;
+  opacity:.7;
+}
+.menu strong {
+  font-size:clamp(38px,5.3vw,82px);
+  line-height:.95;
+  font-weight:900;
+  font-style:italic;
+  letter-spacing:-.025em;
+}
+.menu .arrow { margin-left:auto; font-size:25px; }
+.menu:hover,.menu:focus-visible {
+  background:#fff;
+  color:#08080e;
+  transform:translateX(-15px);
+}
+.page-header {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:20px;
+}
+.back {
+  background:white;
+  color:black;
+  border:0;
+  padding:12px 18px;
+  font-weight:700;
+  font-size:12px;
+}
+h2 {
+  font-size:clamp(75px,12vw,170px);
+  font-weight:900;
+  font-style:italic;
+  letter-spacing:-.045em;
+  line-height:.85;
+  transform:skewY(-4deg);
+  margin:65px 0 50px;
+  text-shadow:5px 7px #08081870;
+}
+.page-label {
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.2em;
+}
+.project-grid {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:18px;
+  max-width:1150px;
+}
+.project {
+  min-height:210px;
+  padding:22px;
+  border:1px solid #ffffff55;
+  background:#09091bb8;
+  color:white;
+  text-align:left;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  transition:transform .2s,background .2s;
+}
+.project:hover {
+  transform:translateY(-8px) skewY(-2deg);
+  background:#fff;
+  color:#08080e;
+}
+.project small { font-size:10px; letter-spacing:.13em; }
+.project strong {
+  font-family:'Barlow Condensed',sans-serif;
+  font-weight:900;
+  font-style:italic;
+  font-size:clamp(26px,3vw,42px);
+  line-height:1;
+}
+.content {
+  max-width:750px;
+  font-size:clamp(16px,2vw,21px);
+  line-height:1.65;
+}
+.placeholder {
+  min-height:280px;
+  border:1px solid #ffffff55;
+  background:#080818b0;
+  display:grid;
+  place-items:center;
+  font-size:12px;
+  letter-spacing:.15em;
+  text-align:center;
+  padding:25px;
+}
+.detail-info {
+  margin-top:24px;
+  max-width:750px;
+  line-height:1.7;
+}
+.detail-info p { color:#e1dfff; }
+.detail-info small { letter-spacing:.1em; }
+footer {
+  position:relative;
+  z-index:2;
+  display:flex;
+  justify-content:space-between;
+  gap:15px;
+  padding:20px 5vw;
+  font-size:10px;
+  letter-spacing:.12em;
+  opacity:.65;
+}
+.transition {
+  position:fixed;
+  z-index:20;
+  inset:0;
+  background:linear-gradient(120deg,#050509,#283bf0 55%,#7548f2);
+  clip-path:polygon(-20% 0,-20% 0,-35% 100%,-35% 100%);
+  pointer-events:none;
+}
+.transition.play {
+  animation:warp .75s cubic-bezier(.65,0,.2,1) forwards;
+}
+@keyframes warp {
+  0% { clip-path:polygon(-40% 0,-10% 0,-30% 100%,-60% 100%); }
+  42% { clip-path:polygon(-10% 0,120% 0,100% 100%,-30% 100%); }
+  65% { clip-path:polygon(0 0,140% 0,120% 100%,0 100%); }
+  100% { clip-path:polygon(140% 0,170% 0,150% 100%,120% 100%); }
+}
+@media(max-width:750px) {
+  header { padding:22px; }
+  .screen { padding:30px 22px; }
+  .home { grid-template-columns:1fr; gap:55px; align-content:center; }
+  h1 { font-size:clamp(75px,17vw,140px); }
+  .menu strong { font-size:clamp(38px,10vw,65px); }
+  .project-grid { grid-template-columns:1fr 1fr; }
+  .project { min-height:170px; }
+  footer { padding:20px 22px; }
+}
+@media(max-width:480px) {
+  .project-grid { grid-template-columns:1fr; }
+  .project { min-height:130px; }
+  header span:last-child,footer span:last-child { display:none; }
+  h2 { margin:50px 0 35px; }
+}
+@media(prefers-reduced-motion:reduce) {
+  *,*::before,*::after { animation:none!important; transition:none!important; }
+  .transition { display:none; }
+}
+</style>
+</head>
+<body>
+<div id="app" data-page="home">
+  <div class="environment"></div>
+
+  <header>
+    <span>JOACO MANSILLA</span>
+    <span>VIDEO EDITOR / PORTFOLIO</span>
+  </header>
+
+  <main>
+    <section class="screen home" id="home">
+      <div class="identity">
+        <div class="eyebrow">VIDEO EDITOR</div>
+        <h1>JOACO<br><span>MANSILLA.</span></h1>
+        <div class="role">FREELANCE / POST-PRODUCTION</div>
+        <div class="geometry"></div>
+      </div>
+      <nav class="navigation" aria-label="Main navigation">
+        <button class="menu" data-target="work"><small>01</small><strong>WORK</strong><span class="arrow">↗</span></button>
+        <button class="menu" data-target="reel"><small>02</small><strong>DEMO REEL</strong><span class="arrow">↗</span></button>
+        <button class="menu" data-target="about"><small>03</small><strong>ABOUT</strong><span class="arrow">↗</span></button>
+        <button class="menu" data-target="contact"><small>04</small><strong>CONTACT</strong><span class="arrow">↗</span></button>
+      </nav>
+    </section>
+
+    <section class="screen" id="work" hidden>
+      <div class="page-header"><span class="page-label">01 / WORK</span><button class="back" data-target="home">← BACK</button></div>
+      <h2>SELECTED<br>WORK.</h2>
+      <div class="project-grid" id="project-grid"></div>
+    </section>
+
+    <section class="screen" id="detail" hidden>
+      <div class="page-header"><span class="page-label">PROJECT</span><button class="back" data-target="work">← BACK</button></div>
+      <h2 id="detail-title"></h2>
+      <div class="placeholder">VIDEO PREVIEW — COMING SOON</div>
+      <div class="detail-info">
+        <small id="detail-role"></small>
+        <p id="detail-desc"></p>
+      </div>
+    </section>
+
+    <section class="screen" id="reel" hidden>
+      <div class="page-header"><span class="page-label">02 / DEMO REEL</span><button class="back" data-target="home">← BACK</button></div>
+      <h2>DEMO<br>REEL.</h2>
+      <div class="placeholder">SHOWREEL — COMING SOON</div>
+    </section>
+
+    <section class="screen" id="about" hidden>
+      <div class="page-header"><span class="page-label">03 / ABOUT</span><button class="back" data-target="home">← BACK</button></div>
+      <h2>JOACO<br>MANSILLA.</h2>
+      <div class="content">
+        <p>I'm a video editor working across documentary, commercial, entertainment, and short-form content.</p>
+        <p>Adobe Certified Professional in Premiere Pro.</p>
+      </div>
+    </section>
+
+    <section class="screen" id="contact" hidden>
+      <div class="page-header"><span class="page-label">04 / CONTACT</span><button class="back" data-target="home">← BACK</button></div>
+      <h2>CONTACT.</h2>
+      <div class="content">
+        <p>Available for freelance video editing projects.</p>
+        <p>Contact information will be added before launch.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span>JOACO MANSILLA © 2026</span>
+    <span>VIDEO EDITING / POST-PRODUCTION</span>
+  </footer>
+  <div class="transition" id="transition"></div>
+</div>
+
+<script>
+const projects = [
+  {
+    name:"Haiti — Nonprofit Film",
+    category:"DOCUMENTARY",
+    role:"CONCEPT / EDITING / STORYTELLING",
+    desc:"An academic documentary-style nonprofit project focused on atmosphere and emotional storytelling."
+  },
+  {
+    name:"Joey Calveiro — Jazz Teaser",
+    category:"CINEMATIC",
+    role:"RESEARCH / CONCEPT / EDITING",
+    desc:"A cinematic introduction connecting jazz history with a contemporary musician."
+  },
+  {
+    name:"RAW FIT",
+    category:"COMMERCIAL",
+    role:"EDITING / COLOR / SOUND DESIGN",
+    desc:"A music-driven fitness commercial with color grading and camera-flash effects."
+  },
+  {
+    name:"SharkCast",
+    category:"PODCAST",
+    role:"EDITORIAL DIRECTION / EDITING",
+    desc:"Podcast reels and promotional edits featuring contextual footage and editorial storytelling."
+  },
+  {
+    name:"3y4 Music Promos",
+    category:"MUSIC",
+    role:"EDITING / POST-PRODUCTION",
+    desc:"Commissioned short-form promotional edits for live music and events."
+  }
+];
+
+const app = document.getElementById("app");
+const overlay = document.getElementById("transition");
+const grid = document.getElementById("project-grid");
+const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+let currentPage = "home";
+let navigating = false;
+
+projects.forEach((project,index)=>{
+  const button=document.createElement("button");
+  button.className="project";
+  const category=document.createElement("small");
+  category.textContent=String(index+1).padStart(2,"0")+" / "+project.category;
+  const name=document.createElement("strong");
+  name.textContent=project.name;
+  button.append(category,name);
+  button.addEventListener("click",()=>{
+    document.getElementById("detail-title").textContent=project.name;
+    document.getElementById("detail-role").textContent=project.role;
+    document.getElementById("detail-desc").textContent=project.desc;
+    navigate("detail");
+  });
+  grid.appendChild(button);
+});
+
+function showPage(page){
+  document.querySelectorAll(".screen").forEach(screen=>{
+    screen.hidden=screen.id!==page;
+  });
+  app.dataset.page=page==="detail"?"work":page;
+  currentPage=page;
+  window.scrollTo({top:0,behavior:"instant"});
+}
+
+function navigate(page){
+  if(navigating||page===currentPage)return;
+  if(reducedMotion.matches){
+    showPage(page);
+    return;
+  }
+  navigating=true;
+  overlay.classList.remove("play");
+  void overlay.offsetWidth;
+  overlay.classList.add("play");
+  setTimeout(()=>showPage(page),320);
+  setTimeout(()=>{
+    overlay.classList.remove("play");
+    navigating=false;
+  },780);
+}
+
+document.querySelectorAll("[data-target]").forEach(button=>{
+  button.addEventListener("click",()=>navigate(button.dataset.target));
+});
+
+document.addEventListener("keydown",event=>{
+  if(event.key==="Escape"&&currentPage!=="home"){
+    navigate(currentPage==="detail"?"work":"home");
+  }
+});
+</script>
+</body>
+</html>
