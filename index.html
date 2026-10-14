@@ -3,852 +3,910 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#f1f1ee">
-<title>Joaco — Video Editor</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#f4f3ef">
+<title>Joaqo — Video Editor</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-:root {
-  --ink:#111116;
-  --paper:#f2f2ef;
-  --blue:#3048ef;
-  --violet:#6e43e9;
+:root{
+  --paper:#f4f3ef;
+  --ink:#101014;
+  --blue:#344df1;
+  --violet:#6244ef;
 }
-* { box-sizing:border-box; }
-html { scroll-behavior:smooth; }
-body {
-  margin:0;
-  background:var(--ink);
-  color:var(--paper);
-  font-family:"IBM Plex Mono",monospace;
-}
-button,a { font:inherit; }
-button { cursor:pointer; }
-button:focus-visible,a:focus-visible {
-  outline:2px solid #516cff;
-  outline-offset:4px;
-}
-[hidden] { display:none!important; }
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--paper)}
+body{font-family:"IBM Plex Mono",monospace;color:var(--ink);overflow-x:hidden}
+button,a{font:inherit}
+button{cursor:pointer}
+button:focus-visible,a:focus-visible{outline:2px solid var(--blue);outline-offset:4px}
+[hidden]{display:none!important}
+#app{position:relative;min-height:100svh;overflow:hidden}
 
-/* SITE */
-
-#site { min-height:100svh; }
-.page { min-height:100svh; position:relative; }
-.page:not(.home) { overflow:hidden; }
-
-/* HOME: EXACT REFERENCE ARTWORK */
-
-.home {
-  background:#f2f2ef;
-  color:#111;
-  min-height:100svh;
-  overflow:hidden;
-}
-.home-art {
-  position:absolute;
-  inset:0;
-  width:100%;
-  height:100%;
-  object-fit:cover;
-  object-position:center;
-  display:block;
-}
-.home::after {
-  content:"";
-  position:absolute;
-  inset:0;
-  pointer-events:none;
-  background-image:
-    linear-gradient(#0b173008 1px,transparent 1px),
-    linear-gradient(90deg,#0b173008 1px,transparent 1px);
+/* PAPER / TECHNICAL GRID */
+.paper{
+  position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    linear-gradient(#1010200a 1px,transparent 1px),
+    linear-gradient(90deg,#1010200a 1px,transparent 1px),
+    var(--paper);
   background-size:24px 24px;
-  mix-blend-mode:multiply;
 }
+.paper:after{
+  content:"";position:absolute;inset:0;
+  background:radial-gradient(ellipse at center,transparent 30%,#e0e0e04a);
+}
+.page{position:relative;z-index:1;min-height:100svh}
+.page:not(.home){padding:30px 5vw 90px}
 
-/* Transparent interactive navigation aligned to reference image.
-   Positions are percentages of the original 1648 x 928 layout. */
+/* HEADER */
+.site-header{
+  position:absolute;z-index:15;top:0;left:0;width:100%;
+  padding:30px 4.5vw;display:flex;justify-content:space-between;
+  align-items:start;gap:20px;pointer-events:none;
+}
+.site-header>*{pointer-events:auto}
+.brand{
+  font-family:"Archivo Black",Arial,sans-serif;
+  font-size:clamp(19px,2vw,31px);
+  letter-spacing:-.09em;
+  line-height:1;
+}
+.brand small{
+  display:block;font-family:"IBM Plex Mono",monospace;
+  font-size:9px;line-height:1.8;letter-spacing:.13em;
+  margin-top:14px;font-weight:500;
+}
+.top-meta{font-size:10px;letter-spacing:.15em;text-align:right;line-height:1.8}
 
-.home-nav {
-  position:absolute;
-  left:4.5%;
-  top:22.5%;
-  width:9%;
-  height:18%;
-  z-index:3;
-  display:flex;
-  flex-direction:column;
-}
-.home-nav button {
-  flex:1;
-  border:0;
-  background:transparent;
-  color:transparent;
-  font-size:0;
-  position:relative;
-}
-.home-nav button:hover::after,
-.home-nav button:focus-visible::after {
-  content:"";
-  position:absolute;
-  inset:5% -8%;
-  border:1px solid #3448ee;
-  background:#4255ff22;
-  pointer-events:none;
-}
-.home-nav button:focus-visible {
-  outline:2px solid #3448ee;
-}
-.home-nav button[aria-label="Home"] { cursor:default; }
-
-/* Small hint only when focused, so artwork stays untouched */
-.home-nav button:focus-visible::before {
-  content:attr(aria-label);
-  position:absolute;
-  left:110%;
-  top:0;
-  color:#111;
-  background:#fff;
-  padding:4px 8px;
-  font-size:11px;
-  white-space:nowrap;
-}
-
-/* FRAGMENT RECONSTRUCTION */
-
-.fragment-layer {
-  position:absolute;
-  inset:0;
-  z-index:5;
-  pointer-events:none;
-  overflow:hidden;
-}
-.fragment {
-  position:absolute;
-  background-image:url("Glitch%20City%20Video%20Editor%20Portfolio(1).png");
-  background-repeat:no-repeat;
-  opacity:0;
-  transform:translate(var(--dx),var(--dy)) scale(1.12);
-  filter:contrast(1.5) saturate(1.5);
-  animation:fragmentSettle .9s cubic-bezier(.16,1,.3,1) forwards;
-  animation-delay:var(--delay);
-}
-@keyframes fragmentSettle {
-  0% { opacity:0; transform:translate(var(--dx),var(--dy)) scale(1.12); }
-  35% { opacity:1; }
-  80% { opacity:1; transform:translate(0,0) scale(1); }
-  100% { opacity:0; transform:translate(0,0) scale(1); }
-}
-
-/* INNER PAGE ENVIRONMENT */
-
-.inner {
-  background:#f1f1ef;
-  color:#101014;
+/* HOME EDITORIAL COMPOSITION */
+.home{
+  min-height:900px;height:100svh;max-height:1300px;
   isolation:isolate;
 }
-.inner::before {
-  content:"";
-  position:absolute;
-  inset:0;
-  z-index:-2;
-  background-image:
-    linear-gradient(#15204310 1px,transparent 1px),
-    linear-gradient(90deg,#15204310 1px,transparent 1px);
-  background-size:26px 26px;
-}
-.inner::after {
-  content:"";
-  position:absolute;
-  right:-15%;
-  top:-20%;
-  width:70vw;
-  height:110vh;
-  z-index:-1;
-  background:
-    linear-gradient(135deg,#a9c9f6 0%,#335cbd 45%,#131a35 100%);
-  clip-path:polygon(28% 0,100% 0,100% 100%,0 100%);
-  opacity:.85;
-}
-#about::after {
-  background:linear-gradient(135deg,#d3c2ff,#5d47ba 55%,#161227);
-}
-#contact::after {
-  background:linear-gradient(135deg,#8fc6ee,#2849d8 55%,#0d1238);
-}
-#reel::after {
-  background:linear-gradient(135deg,#8788cb,#272d6d 55%,#05050d);
-}
-
-.topbar {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:20px;
-  padding:32px 5vw;
-  position:relative;
-  z-index:2;
-}
-.brand {
-  font-family:Arial,sans-serif;
-  font-size:clamp(20px,2vw,30px);
-  font-weight:900;
-  letter-spacing:-.08em;
-}
-.micro {
-  font-size:10px;
-  font-weight:600;
-  letter-spacing:.13em;
-  line-height:1.7;
-}
-.back {
-  border:1px solid #111;
-  background:#111;
-  color:#fff;
-  padding:12px 20px;
-  font-size:11px;
-  letter-spacing:.1em;
-  transition:background .2s,color .2s;
-}
-.back:hover { background:#fff;color:#111; }
-
-.page-body {
-  position:relative;
-  z-index:1;
-  padding:4vh 6vw 10vh;
-}
-h1 {
-  font-family:Arial,Helvetica,sans-serif;
-  font-weight:900;
-  letter-spacing:-.095em;
-  line-height:.83;
-  font-size:clamp(85px,14vw,220px);
-  margin:3vh 0 8vh;
-  transform:scaleX(1.06);
-  transform-origin:left;
-  max-width:90%;
-}
-h1 span { color:#3649c9; }
-.section-kicker {
-  font-size:11px;
-  letter-spacing:.2em;
-  font-weight:600;
-}
-.description {
-  max-width:650px;
-  font-size:clamp(14px,1.5vw,18px);
-  line-height:1.9;
-  background:#f2f2efd9;
-  padding:18px;
-}
-
-/* WORK SHOWCASE */
-
-.work-layout {
-  display:grid;
-  grid-template-columns:minmax(250px,.8fr) minmax(0,1.2fr);
-  gap:5vw;
-  align-items:start;
-}
-.project-list {
-  border-top:1px solid #111;
-}
-.project {
-  width:100%;
-  display:flex;
-  align-items:center;
-  gap:18px;
-  padding:18px 12px;
-  border:0;
-  border-bottom:1px solid #1118;
-  background:transparent;
-  color:#111;
-  text-align:left;
-  transition:background .2s,color .2s,transform .2s;
-}
-.project small { font-size:10px; }
-.project strong {
-  font-family:"Barlow Condensed",Impact,sans-serif;
-  font-size:clamp(28px,3vw,48px);
-  line-height:1;
-  text-transform:uppercase;
-}
-.project:hover,
-.project:focus-visible,
-.project.active {
-  background:#111;
-  color:#fff;
-  transform:translateX(5px);
-}
-.showcase { position:relative; }
-.preview {
-  width:100%;
-  aspect-ratio:16/10;
-  position:relative;
+.home-grid{
+  position:absolute;inset:0;
+  display:grid;grid-template-columns:repeat(12,1fr);
+  grid-template-rows:repeat(12,1fr);
   overflow:hidden;
-  background:
-    radial-gradient(circle at 65% 35%,#6651fa,transparent 40%),
-    linear-gradient(135deg,#0b0c1c,#274ab8,#080b19);
-  display:flex;
-  flex-direction:column;
-  justify-content:space-between;
-  color:white;
-  padding:24px;
 }
-.preview::before {
-  content:"";
+.home-grid:before{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(90deg,#ffffff7a 0 48%,transparent 62%);
+  pointer-events:none;z-index:2;
+}
+.photo{
+  position:relative;overflow:hidden;
+  background:#101524;
+  isolation:isolate;
+  opacity:0;
+  transition:opacity .3s;
+}
+.photo.ready{opacity:1}
+.photo:after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(120deg,#183dc42c,#8b51ff18);
+  mix-blend-mode:screen;z-index:4;
+}
+.photo .tile{
   position:absolute;
-  inset:0;
-  background:
-    repeating-linear-gradient(90deg,transparent 0 12%,#ffffff15 12.1% 12.3%),
-    repeating-linear-gradient(0deg,transparent 0 18%,#ffffff15 18.1% 18.3%);
+  background-repeat:no-repeat;
+  will-change:transform,opacity,filter;
+  opacity:0;
+  transform:translate(var(--tx),var(--ty)) scale(var(--scale));
+  filter:contrast(1.7) saturate(1.8);
+}
+.photo .tile.in{
+  animation:assemble var(--duration) cubic-bezier(.16,1,.3,1) forwards;
+  animation-delay:var(--delay);
+}
+@keyframes assemble{
+  0%{opacity:0;transform:translate(var(--tx),var(--ty)) scale(var(--scale));filter:brightness(2) contrast(2) hue-rotate(55deg)}
+  32%{opacity:1}
+  75%{transform:translate(0,0) scale(1);filter:brightness(1.3) contrast(1.4)}
+  100%{opacity:1;transform:none;filter:none}
+}
+.photo.flicker .tile:nth-child(5n+2){
+  animation:microShift .3s steps(3,end);
+}
+@keyframes microShift{
+  0%{transform:translateX(0)}
+  25%{transform:translateX(13px);filter:hue-rotate(90deg)}
+  65%{transform:translateX(-8px)}
+  100%{transform:none;filter:none}
+}
+
+/* Independent photographic collage panels */
+.photo-a{grid-column:7/13;grid-row:1/9}
+.photo-b{grid-column:1/7;grid-row:8/11}
+.photo-c{grid-column:6/10;grid-row:9/13}
+.photo-d{grid-column:10/13;grid-row:9/12}
+.photo-e{grid-column:10/12;grid-row:2/5;z-index:1}
+.photo-f{grid-column:7/9;grid-row:5/8;z-index:1}
+
+/* PHOTO LABELS */
+.image-label{
+  position:absolute;z-index:7;font-size:9px;
+  letter-spacing:.16em;line-height:1.7;
+}
+.coordinates{right:5.5%;top:24%}
+.category-list{left:2.3%;bottom:15%;}
+
+/* MAIN TYPOGRAPHY */
+.hero{
+  position:absolute;z-index:8;
+  left:16%;top:18%;width:48%;
   pointer-events:none;
 }
-.preview.glitch { animation:previewGlitch .5s steps(4,end); }
-@keyframes previewGlitch {
-  0% { clip-path:inset(20% 0 55% 0); filter:hue-rotate(45deg); }
-  25% { clip-path:inset(55% 0 15% 0); }
-  50% { clip-path:inset(0 0 30% 0); transform:translateX(9px); }
-  75% { clip-path:inset(10% 0 10% 0); }
-  100% { clip-path:inset(0); transform:none; filter:none; }
-}
-.preview-title {
-  font-family:Arial,sans-serif;
-  font-size:clamp(38px,5vw,84px);
-  font-weight:900;
-  line-height:.88;
-  letter-spacing:-.07em;
-  max-width:85%;
+.hero-title{
+  font-family:"Archivo Black",Arial,sans-serif;
+  font-size:clamp(100px,15.2vw,280px);
+  font-weight:900;line-height:.69;
+  letter-spacing:-.105em;
+  transform:scaleX(1.09);
+  transform-origin:left center;
+  color:#08080d;
   position:relative;
+  opacity:0;
+  filter:blur(15px);
+  transition:opacity .5s,filter .7s,transform .8s;
 }
-.preview-top {
-  position:relative;
-  font-size:10px;
+.hero-title.visible{
+  opacity:1;filter:none;
+  transform:scaleX(1.09) translateY(0);
+}
+.hero-title .line{display:block;position:relative;white-space:nowrap}
+.hero-title .line:last-child{margin-left:11%}
+.hero-title .line:before,
+.hero-title .line:after{
+  content:attr(data-text);
+  position:absolute;left:0;top:0;width:100%;
+  overflow:hidden;opacity:0;
+  pointer-events:none;
+}
+.hero-title.glitching .line:before{
+  opacity:.8;color:#344bff;
+  clip-path:inset(12% 0 58% 0);
+  transform:translate(-12px,3px);
+}
+.hero-title.glitching .line:after{
+  opacity:.8;color:#8c42fa;
+  clip-path:inset(61% 0 12% 0);
+  transform:translate(13px,-4px);
+}
+.hero-title.glitching{
+  animation:wordGlitch .35s steps(3,end);
+}
+@keyframes wordGlitch{
+  0%,100%{filter:none}
+  25%{filter:contrast(2);transform:scaleX(1.14) skewX(-4deg)}
+  60%{transform:scaleX(1.04) skewX(3deg)}
+}
+.hero-caption{
+  position:absolute;left:0;top:115%;
+  font-size:10px;letter-spacing:.15em;line-height:1.8;
+}
+
+/* NAVIGATION */
+.main-nav{
+  position:absolute;z-index:12;
+  left:4.5%;top:24%;width:175px;
+  display:flex;flex-direction:column;
+}
+.nav-button{
+  display:flex;align-items:center;gap:16px;
+  border:0;background:transparent;color:#111;
+  padding:13px 15px;
+  text-align:left;position:relative;
+  font-size:13px;font-weight:600;
+  letter-spacing:.05em;
+  opacity:0;transform:translateX(-35px);
+  transition:opacity .5s,transform .5s,background .2s,color .2s;
+}
+.nav-button.show{opacity:1;transform:none}
+.nav-button small{font-size:10px;font-weight:400}
+.nav-button .arr{margin-left:auto}
+.nav-button:hover,
+.nav-button:focus-visible,
+.nav-button.current{
+  background:#111;color:#fff;
+}
+.nav-button.glitching{
+  animation:navGlitch .3s steps(3,end);
+}
+@keyframes navGlitch{
+  25%{transform:translateX(12px) skewX(-10deg)}
+  50%{transform:translateX(-5px)}
+  75%{transform:translateX(4px) skewX(5deg)}
+}
+.home-footer{
+  position:absolute;z-index:9;
+  left:4.5%;bottom:3%;font-size:10px;
   letter-spacing:.15em;
 }
-.view-button {
-  margin-top:12px;
-  padding:13px 17px;
-  background:#111;
-  border:0;
-  color:#fff;
-  font-size:11px;
-}
-.view-button:hover { background:#354af2; }
 
-/* VIDEO AND PROJECT DETAILS */
-
-.video-slot {
-  width:min(100%,1000px);
-  aspect-ratio:16/9;
-  background:#090b1b;
-  color:#fff;
-  border:8px solid #111;
-  display:grid;
-  place-items:center;
-  padding:20px;
-  text-align:center;
-  font-size:12px;
-  letter-spacing:.16em;
+/* SECTION PAGES */
+.section-header{
+  display:flex;justify-content:space-between;align-items:center;
+  gap:15px;margin-bottom:9vh;
 }
-.detail-text {
-  max-width:800px;
-  margin-top:30px;
-  background:#f2f2efdd;
-  padding:20px;
+.section-brand{
+  font-family:"Archivo Black",sans-serif;
+  font-size:24px;letter-spacing:-.08em;
+}
+.back{
+  border:1px solid #111;background:#111;color:#fff;
+  padding:12px 20px;font-size:11px;letter-spacing:.1em;
+}
+.back:hover{background:#fff;color:#111}
+.section-title{
+  font-family:"Archivo Black",Arial,sans-serif;
+  font-size:clamp(65px,12vw,175px);
+  line-height:.83;letter-spacing:-.09em;
+  margin:0 0 60px;
+}
+.section-title span{color:var(--blue)}
+.section-kicker{
+  font-size:10px;letter-spacing:.2em;margin-bottom:25px;
+}
+.section-copy{
+  max-width:720px;font-size:clamp(16px,2vw,23px);
   line-height:1.8;
 }
-.detail-text small { font-weight:600; }
-.contact-link {
-  display:inline-block;
-  margin-top:30px;
-  background:#111;
+#work{background:linear-gradient(125deg,#f4f3ef 40%,#c7d6fa)}
+#about{background:linear-gradient(125deg,#f4f3ef 45%,#d3c5fa)}
+#contact{background:linear-gradient(125deg,#f4f3ef 45%,#c3d7fa)}
+#reel{background:linear-gradient(125deg,#f4f3ef 45%,#b6b7f0)}
+#detail{background:#f4f3ef}
+
+/* PROJECT SHOWCASE */
+.work-layout{
+  display:grid;grid-template-columns:.85fr 1.15fr;gap:5vw;
+}
+.project-list{border-top:1px solid #111}
+.project-button{
+  width:100%;display:flex;gap:14px;align-items:center;
+  text-align:left;padding:17px 12px;
+  border:0;border-bottom:1px solid #1117;
+  background:transparent;color:#111;
+}
+.project-button small{font-size:10px}
+.project-button strong{
+  font-family:"Archivo Black",sans-serif;
+  font-size:clamp(18px,2.5vw,36px);
+  letter-spacing:-.055em;
+}
+.project-button:hover,
+.project-button:focus-visible,
+.project-button.selected{background:#111;color:#fff}
+.project-preview{
+  position:relative;aspect-ratio:16/10;overflow:hidden;
+  background:#101020;
+}
+.project-preview .photo{
+  position:absolute;inset:0;width:100%;height:100%;
+}
+.preview-overlay{
+  position:absolute;inset:0;z-index:5;
+  display:flex;flex-direction:column;
+  justify-content:space-between;padding:24px;
   color:white;
-  text-decoration:none;
-  padding:18px 25px;
-}
-.contact-link:hover { background:#3348df; }
-
-/* INTRO */
-
-.intro {
-  position:fixed;
-  inset:0;
-  z-index:100;
-  background:#08090f;
-  color:#fff;
-  display:grid;
-  place-items:center;
-  transition:opacity .8s,visibility .8s;
-}
-.intro.finished {
-  opacity:0;
-  visibility:hidden;
+  background:linear-gradient(transparent 30%,#03030bbd);
   pointer-events:none;
 }
-.intro-center {
-  width:min(700px,80vw);
+.preview-overlay strong{
+  font-family:"Archivo Black",sans-serif;
+  font-size:clamp(30px,4vw,65px);
+  letter-spacing:-.07em;line-height:.95;
 }
-.intro-label {
-  font-size:10px;
-  letter-spacing:.3em;
-  margin-bottom:35px;
+.preview-overlay small{letter-spacing:.18em}
+.view-project{
+  border:0;background:#111;color:white;
+  padding:15px 20px;margin-top:15px;font-size:11px;
 }
-.intro-name {
-  font-family:Arial,sans-serif;
-  font-weight:900;
-  font-size:clamp(65px,11vw,150px);
-  letter-spacing:-.095em;
-  line-height:.85;
-  transform:translateY(35px) scaleX(1.05);
-  opacity:0;
-  transition:transform .8s,opacity .8s;
+.view-project:hover{background:var(--blue)}
+.video-box{
+  width:min(100%,1000px);aspect-ratio:16/9;
+  background:#0b0c18;color:white;
+  display:grid;place-items:center;
+  font-size:11px;letter-spacing:.2em;
+  text-align:center;padding:20px;
 }
-.intro-name span { color:#8883ff; }
-.intro.reveal .intro-name {
-  opacity:1;
-  transform:translateY(0) scaleX(1.05);
+.detail-copy{max-width:800px;line-height:1.8;margin-top:30px}
+
+/* LOADER */
+.loader{
+  position:fixed;inset:0;z-index:100;
+  background:#090910;color:white;
+  display:grid;place-items:center;
+  transition:opacity .65s,visibility .65s;
 }
-.load-track {
-  height:2px;
-  background:#ffffff25;
-  margin-top:55px;
+.loader.done{opacity:0;visibility:hidden;pointer-events:none}
+.loader-inner{width:min(700px,80vw)}
+.loader-label{font-size:10px;letter-spacing:.2em;margin-bottom:35px}
+.loader-word{
+  font-family:"Archivo Black",sans-serif;
+  font-size:clamp(55px,11vw,150px);
+  letter-spacing:-.095em;line-height:.9;
+  opacity:0;transform:translateY(35px);
+  transition:opacity .7s,transform .7s;
 }
-.load-progress {
-  height:100%;
-  width:0;
-  background:#7182ff;
+.loader-word.show{opacity:1;transform:none}
+.loader-word span{color:#8e83ff}
+.loader-progress{height:2px;background:#ffffff30;margin-top:45px}
+.loader-progress div{
+  width:0;height:100%;background:#8a94ff;
   transition:width 2s linear;
 }
-.intro.reveal .load-progress { width:100%; }
-.skip {
-  position:absolute;
-  top:30px;
-  right:5vw;
-  background:transparent;
-  border:1px solid #ffffff80;
-  color:#fff;
-  padding:11px 16px;
-  font-size:10px;
+.loader-progress div.fill{width:100%}
+.skip{
+  position:absolute;top:25px;right:5vw;
+  border:1px solid #ffffff66;background:transparent;
+  color:white;padding:12px 17px;font-size:10px;
 }
 
-/* PAGE TRANSITIONS */
-
-.transition {
-  position:fixed;
-  inset:0;
-  z-index:50;
-  pointer-events:none;
-  visibility:hidden;
-  background:#090b18;
+/* TRANSITIONS */
+.transition{
+  position:fixed;inset:0;z-index:50;pointer-events:none;
+  visibility:hidden;overflow:hidden;
 }
-.transition.active { visibility:visible; }
-.transition.work {
-  animation:pixelCover 1s steps(12,end) both;
-  background:
-    repeating-linear-gradient(90deg,#111 0 7%,#3044df 7% 9%,#111 9% 16%);
+.transition.active{visibility:visible}
+.transition.work{
+  background:repeating-linear-gradient(
+    90deg,#101018 0 8%,#344df1 8% 10%,#101018 10% 16%);
+  animation:workTransition 1s steps(12,end) both;
 }
-@keyframes pixelCover {
-  0% { clip-path:inset(0 100% 0 0); }
-  48%,55% { clip-path:inset(0 0 0 0); }
-  100% { clip-path:inset(0 0 0 100%); }
+@keyframes workTransition{
+  0%{clip-path:inset(0 100% 0 0)}
+  48%,55%{clip-path:inset(0)}
+  100%{clip-path:inset(0 0 0 100%)}
 }
-.transition.about {
-  background:linear-gradient(130deg,#10101c,#7855e8);
-  animation:tiltCover 1s ease-in-out both;
+.transition.about{
+  background:linear-gradient(125deg,#111,#7855f4);
+  animation:aboutTransition 1s ease-in-out both;
 }
-@keyframes tiltCover {
-  0% { transform:perspective(700px) rotateY(-90deg) scale(1.5);opacity:0; }
-  45%,55% { transform:perspective(700px) rotateY(0);opacity:1; }
-  100% { transform:perspective(700px) rotateY(90deg) scale(1.5);opacity:0; }
+@keyframes aboutTransition{
+  0%{transform:perspective(900px) rotateY(-90deg) scale(1.4);opacity:0}
+  45%,55%{transform:perspective(900px) rotateY(0);opacity:1}
+  100%{transform:perspective(900px) rotateY(90deg) scale(1.4);opacity:0}
 }
-.transition.contact {
-  background:radial-gradient(circle,#dce5ff,#5263ed 30%,#060716 80%);
-  animation:zoomCover 1s ease-in-out both;
+.transition.contact{
+  background:radial-gradient(circle,#e4e9ff,#4055ec 35%,#080813 80%);
+  animation:contactTransition 1s ease-in-out both;
 }
-@keyframes zoomCover {
-  0% { transform:scale(.01);opacity:0;filter:blur(30px); }
-  45%,55% { transform:scale(1.4);opacity:1;filter:blur(0); }
-  100% { transform:scale(8);opacity:0;filter:blur(30px); }
+@keyframes contactTransition{
+  0%{transform:scale(.02);opacity:0}
+  45%,55%{transform:scale(1.5);opacity:1}
+  100%{transform:scale(7);opacity:0}
 }
-.transition.reel,
-.transition.detail {
-  background:#050509;
-  animation:cinemaCover 1s ease-in-out both;
+.transition.reel,.transition.detail{
+  background:#070711;
+  animation:reelTransition 1s ease-in-out both;
 }
-@keyframes cinemaCover {
-  0% { clip-path:inset(50% 0); }
-  45%,55% { clip-path:inset(0 0); }
-  100% { clip-path:inset(50% 0); }
+@keyframes reelTransition{
+  0%{clip-path:inset(50% 0)}
+  45%,55%{clip-path:inset(0)}
+  100%{clip-path:inset(50% 0)}
 }
 
 /* RESPONSIVE */
-
-@media(max-width:850px) {
-  .home { min-height:100svh; }
-  .home-art { object-fit:cover; object-position:38% center; }
-  .home-nav {
-    left:2%;
-    top:22%;
-    width:16%;
-    height:19%;
-  }
-  .work-layout { grid-template-columns:1fr; }
-  h1 { font-size:clamp(65px,13vw,120px); }
-  .page-body { padding:4vh 6vw 10vh; }
+@media(max-width:900px){
+  .home{height:auto;min-height:850px}
+  .hero{left:24%;top:24%;width:70%}
+  .hero-title{font-size:clamp(90px,16vw,150px)}
+  .main-nav{left:4%;top:42%;width:160px}
+  .photo-a{grid-column:6/13}
+  .work-layout{grid-template-columns:1fr}
+  .coordinates{display:none}
 }
-@media(max-width:550px) {
-  .home-art { object-position:35% center; }
-  .home-nav {
-    left:1%;
-    top:22%;
-    width:25%;
-    height:19%;
-  }
-  .topbar { padding:22px 6vw; }
-  .micro { font-size:9px; }
-  h1 { font-size:clamp(55px,14vw,90px); }
-  .preview { padding:18px; }
-  .preview-title { font-size:45px; }
+@media(max-width:600px){
+  .home{min-height:800px;height:100svh}
+  .site-header{padding:20px}
+  .top-meta{display:none}
+  .hero{left:8%;top:23%;width:90%}
+  .hero-title{font-size:clamp(78px,19vw,130px)}
+  .hero-title .line:last-child{margin-left:7%}
+  .hero-caption{top:110%;font-size:9px}
+  .main-nav{left:5%;top:54%;width:175px}
+  .photo-a{grid-column:5/13;grid-row:2/9}
+  .photo-b{grid-column:1/10;grid-row:9/12}
+  .photo-c{grid-column:8/13;grid-row:9/13}
+  .photo-d,.photo-e,.photo-f{display:none}
+  .category-list{display:none}
+  .section-title{font-size:clamp(56px,13vw,95px)}
+  .page:not(.home){padding:25px 6vw 70px}
 }
-@media(prefers-reduced-motion:reduce) {
-  *,*::before,*::after {
-    animation:none!important;
-    transition:none!important;
-  }
-  .intro,.transition { display:none!important; }
+@media(prefers-reduced-motion:reduce){
+  *,*:before,*:after{animation:none!important;transition:none!important}
+  .loader,.transition{display:none!important}
+  .hero-title,.nav-button,.photo,.photo .tile{opacity:1!important;filter:none!important;transform:none!important}
 }
 </style>
 </head>
 <body>
+<div class="paper"></div>
 
-<div class="intro" id="intro">
+<div class="loader" id="loader">
   <button class="skip" id="skip">SKIP INTRO ↗</button>
-  <div class="intro-center">
-    <div class="intro-label">VIDEO EDITOR / PORTFOLIO</div>
-    <div class="intro-name">JOACO<br><span>MANSILLA.</span></div>
-    <div class="load-track"><div class="load-progress"></div></div>
+  <div class="loader-inner">
+    <div class="loader-label">JOAQO / VIDEO EDITOR / PORTFOLIO</div>
+    <div class="loader-word" id="loader-word">JOAQO<br><span>MANSILLA.</span></div>
+    <div class="loader-progress"><div id="progress"></div></div>
   </div>
 </div>
 
-<div id="site">
+<div id="app">
 
-  <section class="page home" id="home">
-    <img
-      class="home-art"
-      src="Glitch%20City%20Video%20Editor%20Portfolio(1).png"
-      alt="Joaco portfolio artwork featuring fragmented Japanese city photography and experimental typography"
-    >
-    <div class="fragment-layer" id="fragments" aria-hidden="true"></div>
-    <nav class="home-nav" aria-label="Main navigation">
-      <button aria-label="Home" data-page="home"></button>
-      <button aria-label="Work" data-page="work"></button>
-      <button aria-label="About" data-page="about"></button>
-      <button aria-label="Contact" data-page="contact"></button>
-    </nav>
-  </section>
+<section class="page home" id="home">
+  <div class="home-grid">
+    <div class="photo photo-a" data-photo="city"></div>
+    <div class="photo photo-b" data-photo="night"></div>
+    <div class="photo photo-c" data-photo="street"></div>
+    <div class="photo photo-d" data-photo="tower"></div>
+    <div class="photo photo-e" data-photo="street"></div>
+    <div class="photo photo-f" data-photo="night"></div>
+  </div>
 
-  <section class="page inner" id="work" hidden>
-    <div class="topbar">
-      <div>
-        <div class="brand">Joaco OqaoJ</div>
-        <div class="micro">VIDEO EDITOR / MIAMI, FL</div>
-      </div>
-      <button class="back" data-page="home">← HOME</button>
+  <header class="site-header">
+    <div class="brand">
+      Joaqo OqaoJ
+      <small>VIDEO EDITOR<br>MIAMI, FL</small>
     </div>
-    <div class="page-body">
-      <div class="section-kicker">01 / SELECTED PROJECTS</div>
-      <h1>SELECTED<br><span>WORK.</span></h1>
-      <div class="work-layout">
-        <div class="project-list" id="projects"></div>
-        <div class="showcase">
-          <div class="preview" id="preview">
-            <div class="preview-top" id="preview-category"></div>
-            <div class="preview-title" id="preview-title"></div>
-          </div>
-          <button class="view-button" id="view-project">VIEW PROJECT ↗</button>
-          <p class="micro">PREVIEW FOOTAGE TO BE ADDED</p>
+    <div class="top-meta">EDIT / COLOR / SOUND / STORYTELLING<br>ES / EN</div>
+  </header>
+
+  <nav class="main-nav" aria-label="Main navigation">
+    <button class="nav-button current" data-page="home"><small>01</small>HOME<span class="arr">→</span></button>
+    <button class="nav-button" data-page="work"><small>02</small>WORK<span class="arr">→</span></button>
+    <button class="nav-button" data-page="reel"><small>03</small>REEL<span class="arr">→</span></button>
+    <button class="nav-button" data-page="about"><small>04</small>ABOUT<span class="arr">→</span></button>
+    <button class="nav-button" data-page="contact"><small>05</small>CONTACT<span class="arr">→</span></button>
+  </nav>
+
+  <div class="hero">
+    <div class="hero-title" id="hero-title">
+      <span class="line" id="name-first" data-text="Joaqo">Joaqo</span>
+      <span class="line" id="name-second" data-text="OqaoJ">OqaoJ</span>
+    </div>
+    <div class="hero-caption">
+      VIDEO EDITING<br>
+      FOR FILM, MUSIC<br>
+      AND DIGITAL MEDIA.
+    </div>
+  </div>
+
+  <div class="image-label coordinates">
+    MIAMI<br>25.7617° N<br>80.1918° W
+  </div>
+  <div class="image-label category-list">
+    1 COMMERCIAL<br>2 MUSIC<br>3 SOCIAL<br>4 NARRATIVE
+  </div>
+  <div class="home-footer">(C) 2026 — JOACO MANSILLA</div>
+</section>
+
+<section class="page" id="work" hidden>
+  <div class="section-header">
+    <div class="section-brand">Joaqo OqaoJ</div>
+    <button class="back" data-page="home">← HOME</button>
+  </div>
+  <div class="section-kicker">01 / SELECTED WORK</div>
+  <h1 class="section-title">SELECTED<br><span>WORK.</span></h1>
+  <div class="work-layout">
+    <div class="project-list" id="project-list"></div>
+    <div>
+      <div class="project-preview">
+        <div class="photo" id="project-photo" data-photo="city"></div>
+        <div class="preview-overlay">
+          <small id="preview-category"></small>
+          <strong id="preview-title"></strong>
         </div>
       </div>
+      <button class="view-project" id="view-project">VIEW PROJECT ↗</button>
     </div>
-  </section>
+  </div>
+</section>
 
-  <section class="page inner" id="detail" hidden>
-    <div class="topbar">
-      <div class="brand">Joaco OqaoJ</div>
-      <button class="back" data-page="work">← WORK</button>
-    </div>
-    <div class="page-body">
-      <div class="section-kicker" id="detail-category"></div>
-      <h1 id="detail-title"></h1>
-      <div class="video-slot">PROJECT VIDEO / COMING SOON</div>
-      <div class="detail-text">
-        <small id="detail-role"></small>
-        <p id="detail-description"></p>
-      </div>
-    </div>
-  </section>
+<section class="page" id="detail" hidden>
+  <div class="section-header">
+    <div class="section-brand">Joaqo OqaoJ</div>
+    <button class="back" data-page="work">← WORK</button>
+  </div>
+  <div class="section-kicker" id="detail-category"></div>
+  <h1 class="section-title" id="detail-title"></h1>
+  <div class="video-box">PROJECT VIDEO / COMING SOON</div>
+  <div class="detail-copy">
+    <strong id="detail-role"></strong>
+    <p id="detail-description"></p>
+  </div>
+</section>
 
-  <section class="page inner" id="about" hidden>
-    <div class="topbar">
-      <div class="brand">Joaco OqaoJ</div>
-      <button class="back" data-page="home">← HOME</button>
-    </div>
-    <div class="page-body">
-      <div class="section-kicker">02 / ABOUT</div>
-      <h1>JOACO<br><span>MANSILLA.</span></h1>
-      <div class="description">
-        <p>I'm a video editor based in Miami, Florida, working across documentary, commercial, music, and digital content.</p>
-        <p>Adobe Certified Professional in Premiere Pro.</p>
-        <p>I focus on editing, sound, rhythm, and visual storytelling.</p>
-      </div>
-    </div>
-  </section>
+<section class="page" id="reel" hidden>
+  <div class="section-header">
+    <div class="section-brand">Joaqo OqaoJ</div>
+    <button class="back" data-page="home">← HOME</button>
+  </div>
+  <div class="section-kicker">02 / VIDEO SHOWREEL</div>
+  <h1 class="section-title">DEMO<br><span>REEL.</span></h1>
+  <div class="video-box">SHOWREEL / COMING SOON</div>
+</section>
 
-  <section class="page inner" id="contact" hidden>
-    <div class="topbar">
-      <div class="brand">Joaco OqaoJ</div>
-      <button class="back" data-page="home">← HOME</button>
-    </div>
-    <div class="page-body">
-      <div class="section-kicker">03 / CONTACT</div>
-      <h1>GET IN<br><span>TOUCH.</span></h1>
-      <div class="description">
-        <p>Available for freelance video editing projects.</p>
-        <p>Contact links will be added here.</p>
-      </div>
-    </div>
-  </section>
+<section class="page" id="about" hidden>
+  <div class="section-header">
+    <div class="section-brand">Joaqo OqaoJ</div>
+    <button class="back" data-page="home">← HOME</button>
+  </div>
+  <div class="section-kicker">03 / ABOUT</div>
+  <h1 class="section-title">JOACO<br><span>MANSILLA.</span></h1>
+  <div class="section-copy">
+    <p>I'm a video editor based in Miami, Florida, working across documentary, commercial, music, and digital content.</p>
+    <p>Adobe Certified Professional in Premiere Pro.</p>
+    <p>I focus on rhythm, sound, and visual storytelling.</p>
+  </div>
+</section>
+
+<section class="page" id="contact" hidden>
+  <div class="section-header">
+    <div class="section-brand">Joaqo OqaoJ</div>
+    <button class="back" data-page="home">← HOME</button>
+  </div>
+  <div class="section-kicker">04 / CONTACT</div>
+  <h1 class="section-title">GET IN<br><span>TOUCH.</span></h1>
+  <div class="section-copy">
+    <p>Available for freelance video editing projects.</p>
+    <p>Contact links will be added here.</p>
+  </div>
+</section>
 
 </div>
 
 <div class="transition" id="transition" aria-hidden="true"></div>
 
 <script>
+/*
+  PHOTO SOURCES
+  These are independent photographs, NOT the reference image.
+  Replace the URLs later with your own photographs or video stills.
+*/
+const photos = {
+  city:"https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=1400&q=85",
+  night:"https://images.unsplash.com/photo-1519608487953-e999c86e7455?w=1400&q=85",
+  street:"https://images.unsplash.com/photo-1514565131-fce0801e5785?w=1400&q=85",
+  tower:"https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=1400&q=85"
+};
+
 const projects = [
   {
     title:"HAITI",
-    category:"01 / DOCUMENTARY",
+    category:"DOCUMENTARY",
     role:"EDITING / SOUND DESIGN / STORYTELLING",
-    description:"A nonprofit documentary-style academic project built around atmosphere, sound, and storytelling."
+    description:"A documentary-style academic project focused on atmosphere, sound design, and emotional storytelling.",
+    photo:"city"
   },
   {
     title:"JOEY CALVEIRO",
-    category:"02 / CINEMATIC",
+    category:"CINEMATIC",
     role:"RESEARCH / CONCEPT / EDITING",
-    description:"A cinematic jazz teaser connecting historical influences with a contemporary artist."
+    description:"A cinematic jazz teaser connecting historical influences with a contemporary artist.",
+    photo:"night"
   },
   {
     title:"RAW FIT",
-    category:"03 / COMMERCIAL",
+    category:"COMMERCIAL",
     role:"EDITING / COLOR / SOUND DESIGN",
-    description:"A fast-paced fitness commercial featuring music-driven editing, color grading, and visual effects."
+    description:"A music-driven fitness commercial featuring rhythmic editing, color grading, and visual effects.",
+    photo:"street"
   },
   {
     title:"SHARKCAST",
-    category:"04 / PODCAST",
+    category:"PODCAST",
     role:"EDITORIAL / VIDEO EDITING",
-    description:"Podcast reels, trailers, and longer-form episodes, with supporting footage and editorial storytelling."
+    description:"Podcast reels, trailers, and longer-form editing with supporting footage.",
+    photo:"tower"
   },
   {
     title:"3Y4 MUSIC",
-    category:"05 / MUSIC",
+    category:"MUSIC",
     role:"EDITING / POST-PRODUCTION",
-    description:"Commissioned music and event promotional videos."
+    description:"Commissioned short-form promotional videos for music and events.",
+    photo:"night"
   }
 ];
 
-let current = "home";
-let busy = false;
-let selected = 0;
-
+const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
+const app = document.getElementById("app");
+const loader = document.getElementById("loader");
 const transition = document.getElementById("transition");
-const intro = document.getElementById("intro");
-const list = document.getElementById("projects");
-const preview = document.getElementById("preview");
-const reduced = matchMedia("(prefers-reduced-motion: reduce)");
-const homeArt = document.querySelector(".home-art");
+const heroTitle = document.getElementById("hero-title");
+const firstName = document.getElementById("name-first");
+const secondName = document.getElementById("name-second");
 
-function selectProject(index) {
-  selected = index;
-  const p = projects[index];
+let currentPage = "home";
+let navigating = false;
+let selectedProject = 0;
+let introFinished = false;
+let introTimers = [];
+let imageGeneration = 0;
 
-  document.querySelectorAll(".project").forEach((b,i)=>{
-    b.classList.toggle("active",i===index);
-  });
+const wait = ms => new Promise(resolve => setTimeout(resolve,ms));
+const random = (min,max) => min+Math.random()*(max-min);
 
-  document.getElementById("preview-title").textContent=p.title;
-  document.getElementById("preview-category").textContent=p.category;
+/*
+  IMAGE RECONSTRUCTION
 
-  preview.classList.remove("glitch");
-  void preview.offsetWidth;
-  if(!reduced.matches) preview.classList.add("glitch");
+  Each image is divided into independent rectangular pieces.
+  Every piece contains the correctly aligned portion of the
+  original photograph, so the fragments ultimately form
+  one complete picture.
+*/
+function buildMosaic(element,photoKey,stagger=0) {
+  const url = photos[photoKey];
+  if(!url)return;
+
+  const generation = ++imageGeneration;
+  element.replaceChildren();
+  element.classList.add("ready");
+
+  const width = element.clientWidth;
+  const height = element.clientHeight;
+
+  if(width<1||height<1)return;
+
+  const columns = width<400 ? 6 : 9;
+  const rows = height<250 ? 5 : 8;
+  const tileW = width/columns;
+  const tileH = height/rows;
+
+  for(let row=0;row<rows;row++){
+    for(let col=0;col<columns;col++){
+      const tile=document.createElement("div");
+      tile.className="tile";
+
+      const x=col*tileW;
+      const y=row*tileH;
+
+      tile.style.left=x+"px";
+      tile.style.top=y+"px";
+      tile.style.width=(tileW+0.6)+"px";
+      tile.style.height=(tileH+0.6)+"px";
+
+      tile.style.backgroundImage=`url("${url}")`;
+      tile.style.backgroundSize=`${width}px ${height}px`;
+      tile.style.backgroundPosition=`-${x}px -${y}px`;
+
+      tile.style.setProperty("--tx",random(-130,130)+"px");
+      tile.style.setProperty("--ty",random(-110,110)+"px");
+      tile.style.setProperty("--scale",random(.65,1.35));
+      tile.style.setProperty("--duration",random(.65,1.4)+"s");
+      tile.style.setProperty("--delay",(stagger+random(0,1.2))+"s");
+
+      element.appendChild(tile);
+      tile.classList.add("in");
+    }
+  }
+
+  element.dataset.photo=photoKey;
 }
 
-function openProject() {
-  const p = projects[selected];
+function assembleHome(){
+  document.querySelectorAll(".home-grid .photo").forEach((el,i)=>{
+    buildMosaic(el,el.dataset.photo,i*.13);
+  });
+}
+
+function flickerRandomPhoto(){
+  if(currentPage!=="home"||reduced.matches)return;
+  const elements=[...document.querySelectorAll(".home-grid .photo")];
+  const element=elements[Math.floor(Math.random()*elements.length)];
+  if(!element)return;
+  element.classList.remove("flicker");
+  void element.offsetWidth;
+  element.classList.add("flicker");
+  setTimeout(()=>element.classList.remove("flicker"),350);
+}
+
+/* NAME GLITCH / MIRRORED LETTERS */
+
+let glitchBusy=false;
+
+async function glitchName(){
+  if(currentPage!=="home"||glitchBusy||reduced.matches)return;
+
+  glitchBusy=true;
+  heroTitle.classList.add("glitching");
+
+  await wait(100);
+  firstName.textContent="opɒoᒐ";
+  firstName.dataset.text="opɒoᒐ";
+  secondName.textContent="JOAQO";
+  secondName.dataset.text="JOAQO";
+
+  await wait(145);
+  firstName.textContent="JOAQO";
+  firstName.dataset.text="JOAQO";
+  secondName.textContent="opɒoᒐ";
+  secondName.dataset.text="opɒoᒐ";
+
+  await wait(180);
+  firstName.textContent="Joaqo";
+  firstName.dataset.text="Joaqo";
+  secondName.textContent="OqaoJ";
+  secondName.dataset.text="OqaoJ";
+
+  heroTitle.classList.remove("glitching");
+  glitchBusy=false;
+}
+
+function glitchNavigation(){
+  if(currentPage!=="home"||reduced.matches)return;
+  const buttons=[...document.querySelectorAll(".nav-button")];
+  const button=buttons[Math.floor(Math.random()*buttons.length)];
+  button.classList.remove("glitching");
+  void button.offsetWidth;
+  button.classList.add("glitching");
+  setTimeout(()=>button.classList.remove("glitching"),350);
+}
+
+/* INTRO */
+
+function finishIntro(){
+  if(introFinished)return;
+  introFinished=true;
+  introTimers.forEach(clearTimeout);
+  loader.classList.add("done");
+
+  heroTitle.classList.add("visible");
+
+  document.querySelectorAll(".nav-button").forEach((button,i)=>{
+    setTimeout(()=>button.classList.add("show"),i*160);
+  });
+
+  assembleHome();
+
+  setTimeout(()=>loader.hidden=true,750);
+}
+
+if(reduced.matches){
+  finishIntro();
+}else{
+  introTimers.push(setTimeout(()=>{
+    document.getElementById("loader-word").classList.add("show");
+    document.getElementById("progress").classList.add("fill");
+  },350));
+
+  introTimers.push(setTimeout(finishIntro,2600));
+}
+
+document.getElementById("skip").addEventListener("click",finishIntro);
+
+/* PROJECT SHOWCASE */
+
+const projectList=document.getElementById("project-list");
+const projectPhoto=document.getElementById("project-photo");
+
+function selectProject(index){
+  selectedProject=index;
+  const project=projects[index];
+
+  document.querySelectorAll(".project-button").forEach((button,i)=>{
+    button.classList.toggle("selected",i===index);
+  });
+
+  document.getElementById("preview-title").textContent=project.title;
+  document.getElementById("preview-category").textContent=project.category;
+
+  buildMosaic(projectPhoto,project.photo,0);
+}
+
+function openProject(){
+  const p=projects[selectedProject];
+
   document.getElementById("detail-title").textContent=p.title;
   document.getElementById("detail-category").textContent=p.category;
   document.getElementById("detail-role").textContent=p.role;
   document.getElementById("detail-description").textContent=p.description;
+
   navigate("detail");
 }
 
-projects.forEach((p,i)=>{
+projects.forEach((project,index)=>{
   const button=document.createElement("button");
-  button.className="project";
+  button.className="project-button";
 
   const number=document.createElement("small");
-  number.textContent=String(i+1).padStart(2,"0");
+  number.textContent=String(index+1).padStart(2,"0");
 
   const title=document.createElement("strong");
-  title.textContent=p.title;
+  title.textContent=project.title;
 
   button.append(number,title);
-  button.addEventListener("mouseenter",()=>selectProject(i));
-  button.addEventListener("focus",()=>selectProject(i));
+  button.addEventListener("mouseenter",()=>selectProject(index));
+  button.addEventListener("focus",()=>selectProject(index));
   button.addEventListener("click",()=>{
-    selectProject(i);
+    selectProject(index);
     openProject();
   });
 
-  list.appendChild(button);
+  projectList.appendChild(button);
 });
 
-selectProject(0);
 document.getElementById("view-project")
   .addEventListener("click",openProject);
 
-function showPage(id) {
-  document.querySelectorAll(".page").forEach(page=>{
-    page.hidden=page.id!==id;
+/* NAVIGATION / DISTINCT TRANSITIONS */
+
+function showPage(page){
+  document.querySelectorAll(".page").forEach(section=>{
+    section.hidden=section.id!==page;
   });
-  current=id;
+
+  currentPage=page;
   window.scrollTo(0,0);
+
+  if(page==="work"){
+    selectProject(selectedProject);
+  }
+  if(page==="home"){
+    assembleHome();
+  }
 }
 
-function navigate(id) {
-  if(busy||id===current)return;
+function navigate(page){
+  if(navigating||page===currentPage)return;
 
-  if(reduced.matches) {
-    showPage(id);
+  if(reduced.matches){
+    showPage(page);
     return;
   }
 
-  busy=true;
-  const effect=id==="home" ? (current==="detail"?"work":current) : id;
+  navigating=true;
+
+  const effect=page==="home"
+    ? (currentPage==="detail"?"work":currentPage)
+    : page;
 
   transition.className="transition";
   void transition.offsetWidth;
   transition.classList.add("active",effect);
 
-  setTimeout(()=>showPage(id),500);
+  setTimeout(()=>showPage(page),500);
 
   setTimeout(()=>{
     transition.className="transition";
-    busy=false;
-    if(id==="home") scatterFragments();
-  },1020);
+    navigating=false;
+  },1030);
 }
 
 document.querySelectorAll("[data-page]").forEach(button=>{
   button.addEventListener("click",()=>navigate(button.dataset.page));
 });
 
-document.addEventListener("keydown",e=>{
-  if(e.key==="Escape"&&current!=="home"){
-    navigate(current==="detail"?"work":"home");
+document.addEventListener("keydown",event=>{
+  if(event.key==="Escape"&&currentPage!=="home"){
+    navigate(currentPage==="detail"?"work":"home");
   }
 });
 
-/* FRAGMENT ANIMATION
-   Creates rectangular pieces of the original artwork
-   and animates them into their correct positions. */
+/* AMBIENT GLITCHES */
 
-function scatterFragments() {
-  if(reduced.matches || !homeArt.complete || !homeArt.naturalWidth)return;
+if(!reduced.matches){
+  setInterval(()=>{
+    if(Math.random()<.65)glitchName();
+    else glitchNavigation();
+  },6500);
 
-  const layer=document.getElementById("fragments");
-  layer.replaceChildren();
-
-  const rect=homeArt.getBoundingClientRect();
-  const naturalRatio=homeArt.naturalWidth/homeArt.naturalHeight;
-  const boxRatio=rect.width/rect.height;
-
-  let renderedW,renderedH,offsetX,offsetY;
-
-  if(naturalRatio>boxRatio){
-    renderedH=rect.height;
-    renderedW=renderedH*naturalRatio;
-    offsetX=(rect.width-renderedW)/2;
-    offsetY=0;
-  } else {
-    renderedW=rect.width;
-    renderedH=renderedW/naturalRatio;
-    offsetX=0;
-    offsetY=(rect.height-renderedH)/2;
-  }
-
-  const count=50;
-
-  for(let i=0;i<count;i++){
-    const width=30+Math.random()*130;
-    const height=15+Math.random()*90;
-    const x=Math.random()*Math.max(1,rect.width-width);
-    const y=Math.random()*Math.max(1,rect.height-height);
-
-    const tile=document.createElement("div");
-    tile.className="fragment";
-
-    tile.style.left=x+"px";
-    tile.style.top=y+"px";
-    tile.style.width=width+"px";
-    tile.style.height=height+"px";
-    tile.style.backgroundSize=renderedW+"px "+renderedH+"px";
-    tile.style.backgroundPosition=
-      (offsetX-x)+"px "+(offsetY-y)+"px";
-
-    tile.style.setProperty("--dx",(Math.random()-.5)*180+"px");
-    tile.style.setProperty("--dy",(Math.random()-.5)*150+"px");
-    tile.style.setProperty("--delay",Math.random()*.7+"s");
-
-    layer.appendChild(tile);
-  }
-
-  setTimeout(()=>layer.replaceChildren(),1900);
+  setInterval(flickerRandomPhoto,4200);
 }
 
-/* OPENING SEQUENCE */
+/* REBUILD IMAGES AFTER RESIZE */
 
-let introDone=false;
-let introTimers=[];
-
-function finishIntro() {
-  if(introDone)return;
-  introDone=true;
-  introTimers.forEach(clearTimeout);
-  intro.classList.add("finished");
-  setTimeout(()=>{
-    intro.hidden=true;
-    scatterFragments();
-  },800);
-}
-
-if(reduced.matches){
-  finishIntro();
-} else {
-  introTimers.push(setTimeout(()=>{
-    intro.classList.add("reveal");
-  },450));
-
-  introTimers.push(setTimeout(finishIntro,2700));
-}
-
-document.getElementById("skip")
-  .addEventListener("click",finishIntro);
-
-homeArt.addEventListener("load",()=>{
-  if(introDone)scatterFragments();
+let resizeTimer;
+window.addEventListener("resize",()=>{
+  clearTimeout(resizeTimer);
+  resizeTimer=setTimeout(()=>{
+    if(currentPage==="home")assembleHome();
+    if(currentPage==="work")selectProject(selectedProject);
+  },250);
 });
 </script>
 </body>
