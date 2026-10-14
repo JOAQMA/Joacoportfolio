@@ -4,46 +4,63 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#f5f4f0">
+<meta name="theme-color" content="#f4f3ef">
 <title>Joaqo — Video Editor</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Barlow+Condensed:wght@500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
 <style>
 :root{
-  --paper:#f5f4f0;
-  --ink:#111116;
-  --blue:#354aff;
-  --violet:#7652f5;
+  --paper:#f4f3ef;
+  --ink:#101014;
+  --blue:#304bff;
+  --violet:#7650ef;
 }
+
 *{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{
+
+html,body{
   margin:0;
+  min-height:100%;
+}
+
+body{
   background:var(--paper);
   color:var(--ink);
-  font-family:"IBM Plex Mono",monospace;
+  font-family:"Space Grotesk",sans-serif;
   overflow-x:hidden;
 }
+
 button,a{font:inherit}
 button{cursor:pointer}
-button:focus-visible,a:focus-visible{
+
+button:focus-visible,
+a:focus-visible{
   outline:2px solid var(--blue);
   outline-offset:4px;
 }
-[hidden]{display:none!important}
-::selection{background:var(--blue);color:white}
 
-/* ---------------------------------
+[hidden]{display:none!important}
+
+::selection{
+  background:var(--blue);
+  color:white;
+}
+
+/* ==========================
    HOMEPAGE
---------------------------------- */
+========================== */
+
+.page{
+  min-height:100svh;
+  position:relative;
+}
 
 .home{
-  position:relative;
   height:100svh;
-  min-height:690px;
-  overflow:hidden;
+  min-height:650px;
   isolation:isolate;
+  overflow:hidden;
   background:var(--paper);
 }
 
@@ -51,26 +68,27 @@ button:focus-visible,a:focus-visible{
   content:"";
   position:absolute;
   inset:0;
-  z-index:1;
+  z-index:2;
   pointer-events:none;
   background-image:
-    linear-gradient(#11111109 1px,transparent 1px),
-    linear-gradient(90deg,#11111109 1px,transparent 1px);
+    linear-gradient(#1111110a 1px,transparent 1px),
+    linear-gradient(90deg,#1111110a 1px,transparent 1px);
   background-size:23px 23px;
 }
 
 .collage-wrap{
   position:absolute;
-  inset:0 0 0 40%;
+  inset:0 0 0 39%;
   z-index:0;
+  background:#dce9f1;
   overflow:hidden;
-  background:#b9d9ef;
 }
 
 #collage-canvas{
   display:block;
   width:100%;
   height:100%;
+  pointer-events:none;
 }
 
 .collage-wrap:after{
@@ -78,22 +96,25 @@ button:focus-visible,a:focus-visible{
   position:absolute;
   inset:0;
   pointer-events:none;
-  background:
-    linear-gradient(90deg,var(--paper) 0%,transparent 12%),
-    linear-gradient(0deg,#11111110,transparent 30%);
+  background:linear-gradient(
+    90deg,
+    var(--paper) 0%,
+    #f4f3efc4 6%,
+    transparent 21%
+  );
 }
 
-/* ---------------------------------
+/* ==========================
    HEADER
---------------------------------- */
+========================== */
 
 .header{
   position:absolute;
-  z-index:10;
+  z-index:15;
   top:0;
   left:0;
   right:0;
-  padding:32px 4.5vw;
+  padding:30px 4.5vw;
   display:flex;
   justify-content:space-between;
   align-items:flex-start;
@@ -103,19 +124,22 @@ button:focus-visible,a:focus-visible{
 .brand-line{
   display:flex;
   align-items:center;
-  gap:21px;
+  gap:18px;
 }
 
 .brand{
-  font-family:"Archivo Black",sans-serif;
-  font-size:clamp(24px,2.1vw,33px);
-  letter-spacing:-.105em;
+  font-family:"Space Grotesk",sans-serif;
+  font-weight:700;
+  font-size:clamp(25px,2.2vw,35px);
+  letter-spacing:-.1em;
   line-height:1;
   position:relative;
 }
 
-.brand:before,.brand:after,
-.hero-name:before,.hero-name:after{
+.brand:before,
+.brand:after,
+.hero-name:before,
+.hero-name:after{
   content:attr(data-text);
   position:absolute;
   inset:0;
@@ -124,20 +148,21 @@ button:focus-visible,a:focus-visible{
 }
 
 .glitch:before{
-  opacity:.85;
+  opacity:.8;
   color:var(--blue);
-  clip-path:inset(7% 0 60% 0);
+  clip-path:inset(10% 0 60% 0);
   transform:translate(-8px,2px);
 }
+
 .glitch:after{
   opacity:.8;
   color:var(--violet);
-  clip-path:inset(58% 0 8% 0);
-  transform:translate(8px,-2px);
+  clip-path:inset(55% 0 10% 0);
+  transform:translate(7px,-2px);
 }
 
 .glitch{
-  animation:glitchShake .35s steps(4,end);
+  animation:glitchShake .32s steps(4,end);
 }
 
 @keyframes glitchShake{
@@ -149,21 +174,21 @@ button:focus-visible,a:focus-visible{
 
 .socials{
   display:flex;
-  gap:12px;
+  gap:13px;
 }
 
 .social{
-  width:24px;
-  height:24px;
   display:grid;
   place-items:center;
+  width:24px;
+  height:24px;
   color:var(--ink);
   transition:transform .2s,color .2s;
 }
 
 .social:hover{
-  transform:skewX(-12deg) translateY(-3px);
   color:var(--blue);
+  transform:skewX(-12deg) translateY(-3px);
 }
 
 .social svg{
@@ -173,36 +198,37 @@ button:focus-visible,a:focus-visible{
 }
 
 .role{
+  margin-top:11px;
+  font-family:"IBM Plex Mono",monospace;
   font-size:9px;
   letter-spacing:.17em;
-  line-height:1.7;
-  margin-top:12px;
 }
 
 .header-right{
   display:flex;
+  gap:12px;
   align-items:center;
-  gap:15px;
-  font-size:10px;
+  font-family:"IBM Plex Mono",monospace;
+  font-size:9px;
   font-weight:600;
-  letter-spacing:.09em;
+  letter-spacing:.08em;
 }
 
 .header-right span{
-  background:#f5f4f0d9;
+  background:#f4f3efdf;
   padding:8px 10px;
 }
 
-/* ---------------------------------
-   MAIN NAME
---------------------------------- */
+/* ==========================
+   LARGE NAME
+========================== */
 
 .hero{
   position:absolute;
   z-index:8;
-  top:27%;
+  top:28%;
   left:19%;
-  width:65%;
+  width:70%;
   pointer-events:none;
 }
 
@@ -210,17 +236,16 @@ button:focus-visible,a:focus-visible{
   position:relative;
   display:inline-block;
   font-family:"Archivo Black",sans-serif;
-  font-size:clamp(110px,17vw,270px);
+  font-size:clamp(105px,17vw,280px);
   font-weight:900;
-  letter-spacing:-.11em;
-  line-height:.9;
+  letter-spacing:-.115em;
+  line-height:.88;
   white-space:nowrap;
-  transform:scaleX(1.06);
+  transform:scaleX(1.08) skewX(-3deg);
   transform-origin:left center;
   opacity:0;
-  filter:blur(15px);
-  transition:opacity .8s,filter .8s;
-  text-shadow:2px 2px 0 #ffffff22;
+  filter:blur(14px);
+  transition:opacity .75s,filter .75s;
 }
 
 .hero-name.visible{
@@ -229,53 +254,62 @@ button:focus-visible,a:focus-visible{
 }
 
 .hero-name.glitch{
-  animation:heroGlitch .3s steps(3,end);
+  animation:heroGlitch .32s steps(4,end);
 }
 
 @keyframes heroGlitch{
-  0%,100%{transform:scaleX(1.06)}
-  33%{transform:scaleX(1.13) skewX(-8deg)}
-  66%{transform:scaleX(.99) skewX(5deg)}
+  0%,100%{
+    transform:scaleX(1.08) skewX(-3deg);
+  }
+  33%{
+    transform:scaleX(1.15) skewX(-9deg);
+  }
+  66%{
+    transform:scaleX(.99) skewX(5deg);
+  }
 }
 
 .hero-caption{
-  margin-top:34px;
-  margin-left:6px;
+  margin:32px 0 0 6px;
+  font-family:"IBM Plex Mono",monospace;
   font-size:10px;
-  letter-spacing:.14em;
+  letter-spacing:.11em;
   line-height:1.9;
-  max-width:210px;
 }
 
-/* ---------------------------------
-   NAVIGATION
---------------------------------- */
+/* ==========================
+   GYRE-INSPIRED MENU
+========================== */
 
 .nav{
   position:absolute;
-  z-index:12;
+  z-index:14;
   top:33%;
   left:4.5%;
-  width:170px;
   display:flex;
   flex-direction:column;
+  align-items:flex-start;
+  gap:5px;
 }
 
 .nav button{
+  position:relative;
   display:flex;
   align-items:center;
-  gap:12px;
-  width:100%;
+  gap:10px;
+  min-width:155px;
   border:0;
-  padding:13px 11px;
-  text-align:left;
+  padding:10px 12px;
   background:transparent;
   color:var(--ink);
-  font-size:13px;
-  font-weight:700;
-  letter-spacing:.05em;
+  font-family:"Barlow Condensed",sans-serif;
+  font-size:23px;
+  font-weight:800;
+  letter-spacing:.11em;
+  line-height:1;
+  text-align:left;
   opacity:0;
-  transform:translateX(-24px);
+  transform:translateX(-22px);
   transition:
     opacity .45s,
     transform .45s,
@@ -289,17 +323,27 @@ button:focus-visible,a:focus-visible{
 }
 
 .nav button small{
-  font-size:10px;
+  font-family:"IBM Plex Mono",monospace;
+  font-size:9px;
   font-weight:400;
+  letter-spacing:0;
 }
 
-.nav button .arrow{margin-left:auto}
+.nav button .arrow{
+  margin-left:auto;
+  font-size:20px;
+  font-weight:500;
+}
 
 .nav button:hover,
 .nav button:focus-visible,
 .nav button.active{
-  background:var(--ink);
+  background:#101014;
   color:white;
+}
+
+.nav button.show:hover{
+  transform:translateX(6px) skewX(-5deg);
 }
 
 .footer{
@@ -307,30 +351,27 @@ button:focus-visible,a:focus-visible{
   z-index:9;
   bottom:4%;
   left:4.5%;
-  font-size:10px;
+  font-family:"IBM Plex Mono",monospace;
+  font-size:9px;
   letter-spacing:.13em;
 }
 
 .collage-label{
   position:absolute;
-  z-index:5;
+  z-index:8;
   right:3%;
   bottom:4%;
   background:#111;
   color:white;
   padding:10px 13px;
+  font-family:"IBM Plex Mono",monospace;
   font-size:9px;
-  letter-spacing:.15em;
+  letter-spacing:.12em;
 }
 
-/* ---------------------------------
-   INNER PAGE SHELL
---------------------------------- */
-
-.page{
-  min-height:100svh;
-  position:relative;
-}
+/* ==========================
+   INNER PAGES
+========================== */
 
 .inner-head{
   position:relative;
@@ -343,29 +384,33 @@ button:focus-visible,a:focus-visible{
 }
 
 .inner-brand{
-  font-family:"Archivo Black",sans-serif;
-  font-size:26px;
+  font-size:27px;
+  font-weight:700;
   letter-spacing:-.1em;
 }
 
 .back{
   border:0;
+  padding:12px 18px;
   background:#111;
   color:white;
-  padding:12px 18px;
+  font-family:"IBM Plex Mono",monospace;
   font-size:11px;
-  letter-spacing:.1em;
+  letter-spacing:.08em;
 }
 
-.back:hover{background:var(--blue)}
+.back:hover{
+  background:var(--blue);
+}
 
 .inner-content{
   position:relative;
   z-index:2;
-  padding:6vh 7vw 12vh;
+  padding:7vh 7vw 12vh;
 }
 
 .kicker{
+  font-family:"IBM Plex Mono",monospace;
   font-size:10px;
   letter-spacing:.2em;
   margin-bottom:35px;
@@ -387,9 +432,9 @@ h1 span{color:var(--blue)}
   line-height:1.8;
 }
 
-/* ---------------------------------
+/* ==========================
    WORK GALLERY
---------------------------------- */
+========================== */
 
 .work{
   background:#050509;
@@ -413,7 +458,11 @@ h1 span{color:var(--blue)}
   overflow:hidden;
   pointer-events:none;
   background:
-    radial-gradient(ellipse at 50% 55%,#22275b70,transparent 65%),
+    radial-gradient(
+      ellipse at 50% 55%,
+      #22275b75,
+      transparent 65%
+    ),
     #050509;
 }
 
@@ -441,9 +490,13 @@ h1 span{color:var(--blue)}
 .work-heading h1{
   font-size:clamp(45px,7vw,95px);
   margin:0;
+  transform:skewX(-5deg);
+  transform-origin:left center;
 }
 
-.work-heading .kicker{color:#b8b6d3}
+.work-heading .kicker{
+  color:#b8b6d3;
+}
 
 .carousel-viewport{
   position:relative;
@@ -470,16 +523,16 @@ h1 span{color:var(--blue)}
   aspect-ratio:16/10;
   margin-left:calc(clamp(230px,44vw,710px)/-2);
   margin-top:calc(clamp(230px,44vw,710px)*-.3125);
-  border:1px solid #ffffff30;
-  border-radius:13px;
   padding:0;
+  overflow:hidden;
+  border:1px solid #ffffff35;
+  border-radius:13px;
   background:#171729;
   color:white;
   text-align:left;
-  overflow:hidden;
   box-shadow:0 25px 70px #0009;
   transition:
-    transform .7s cubic-bezier(.18,.75,.2,1),
+    transform .65s cubic-bezier(.18,.75,.2,1),
     opacity .6s,
     filter .6s;
 }
@@ -504,6 +557,7 @@ h1 span{color:var(--blue)}
   z-index:2;
   top:20px;
   left:22px;
+  font-family:"IBM Plex Mono",monospace;
   font-size:10px;
 }
 
@@ -512,13 +566,23 @@ h1 span{color:var(--blue)}
   z-index:2;
   left:22px;
   bottom:20px;
-  font-size:clamp(16px,2vw,26px);
-  font-weight:700;
+  font-family:"Barlow Condensed",sans-serif;
+  font-size:clamp(25px,3.5vw,53px);
+  font-weight:900;
+  letter-spacing:-.025em;
+  text-transform:uppercase;
+  transform:rotate(-2deg);
+  transform-origin:left bottom;
+  text-shadow:4px 4px 0 #111;
 }
 
 .project-card.selected{
   border-color:#ffffffa0;
   box-shadow:0 30px 100px #2936d966;
+}
+
+.project-card.selected .card-label{
+  transform:rotate(-4deg) skewX(-5deg);
 }
 
 .carousel-controls{
@@ -545,10 +609,11 @@ h1 span{color:var(--blue)}
 }
 
 .carousel-count{
-  font-size:11px;
-  letter-spacing:.15em;
   min-width:75px;
   text-align:center;
+  font-family:"IBM Plex Mono",monospace;
+  font-size:11px;
+  letter-spacing:.15em;
 }
 
 .work-instruction{
@@ -556,24 +621,25 @@ h1 span{color:var(--blue)}
   z-index:5;
   padding-bottom:25px;
   color:#bcbad3;
+  font-family:"IBM Plex Mono",monospace;
   font-size:10px;
   text-align:center;
-  letter-spacing:.13em;
+  letter-spacing:.1em;
 }
 
-/* ---------------------------------
+/* ==========================
    VIDEO PLAYER
---------------------------------- */
+========================== */
 
 .player-overlay{
   position:fixed;
   inset:0;
   z-index:80;
-  background:#050509f5;
-  color:white;
   display:grid;
   place-items:center;
   padding:60px 5vw;
+  background:#050509f5;
+  color:white;
   opacity:0;
   visibility:hidden;
   transition:opacity .35s,visibility .35s;
@@ -609,19 +675,20 @@ h1 span{color:var(--blue)}
 }
 
 .close-player{
-  background:white;
-  color:#111;
   border:0;
   padding:12px 18px;
+  background:white;
+  color:#111;
+  font-family:"IBM Plex Mono",monospace;
   font-size:11px;
 }
 
 .video-frame{
   width:100%;
   aspect-ratio:16/9;
+  overflow:hidden;
   background:#121222;
   border:1px solid #ffffff40;
-  overflow:hidden;
 }
 
 .video-frame iframe,
@@ -639,6 +706,7 @@ h1 span{color:var(--blue)}
   place-items:center;
   padding:30px;
   color:#c8c6df;
+  font-family:"IBM Plex Mono",monospace;
   font-size:12px;
   line-height:2;
   text-align:center;
@@ -652,18 +720,20 @@ h1 span{color:var(--blue)}
   line-height:1.8;
 }
 
-/* ---------------------------------
+/* ==========================
    ABOUT / CONTACT
---------------------------------- */
+========================== */
 
 .about{
-  background:
-    linear-gradient(125deg,#f5f4f0 48%,#d8cbff);
+  background:linear-gradient(
+    125deg,#f4f3ef 48%,#d8cbff
+  );
 }
 
 .contact{
-  background:
-    linear-gradient(125deg,#f5f4f0 48%,#c3d6ff);
+  background:linear-gradient(
+    125deg,#f4f3ef 48%,#c3d6ff
+  );
 }
 
 .social-links{
@@ -681,11 +751,13 @@ h1 span{color:var(--blue)}
   text-decoration:none;
 }
 
-.social-links a:hover{background:var(--blue)}
+.social-links a:hover{
+  background:var(--blue);
+}
 
-/* ---------------------------------
+/* ==========================
    LOADING SCREEN
---------------------------------- */
+========================== */
 
 .loader{
   position:fixed;
@@ -704,9 +776,12 @@ h1 span{color:var(--blue)}
   pointer-events:none;
 }
 
-.loader-inner{width:min(700px,80vw)}
+.loader-inner{
+  width:min(700px,80vw);
+}
 
 .loader-label{
+  font-family:"IBM Plex Mono",monospace;
   font-size:10px;
   letter-spacing:.2em;
   margin-bottom:35px;
@@ -727,7 +802,9 @@ h1 span{color:var(--blue)}
   transform:none;
 }
 
-.loader-name span{color:#9990ff}
+.loader-name span{
+  color:#9990ff;
+}
 
 .loader-track{
   margin-top:50px;
@@ -742,7 +819,9 @@ h1 span{color:var(--blue)}
   transition:width 2s linear;
 }
 
-.loader-fill.fill{width:100%}
+.loader-fill.fill{
+  width:100%;
+}
 
 .skip{
   position:absolute;
@@ -752,12 +831,13 @@ h1 span{color:var(--blue)}
   background:transparent;
   color:white;
   padding:11px 17px;
+  font-family:"IBM Plex Mono",monospace;
   font-size:11px;
 }
 
-/* ---------------------------------
-   TRANSITIONS
---------------------------------- */
+/* ==========================
+   PAGE TRANSITIONS
+========================== */
 
 .transition{
   position:fixed;
@@ -767,7 +847,9 @@ h1 span{color:var(--blue)}
   pointer-events:none;
 }
 
-.transition.active{visibility:visible}
+.transition.active{
+  visibility:visible;
+}
 
 .transition.work-effect{
   background:repeating-linear-gradient(
@@ -818,14 +900,16 @@ h1 span{color:var(--blue)}
   100%{transform:scale(7);opacity:0}
 }
 
-/* ---------------------------------
-   MOBILE
---------------------------------- */
+/* ==========================
+   RESPONSIVE
+========================== */
 
 @media(max-width:900px){
   .collage-wrap{left:33%}
   .hero{left:20%;top:29%}
-  .hero-name{font-size:clamp(100px,17vw,170px)}
+  .hero-name{
+    font-size:clamp(100px,17vw,170px);
+  }
   .nav{top:49%}
   .carousel-viewport{
     height:54vh;
@@ -853,7 +937,7 @@ h1 span{color:var(--blue)}
   }
   .collage-wrap:after{
     background:linear-gradient(
-      90deg,var(--paper) 0%,transparent 17%
+      90deg,var(--paper),transparent 18%
     );
   }
   .hero{
@@ -871,7 +955,10 @@ h1 span{color:var(--blue)}
   .nav{
     top:56%;
     left:5%;
-    width:175px;
+  }
+  .nav button{
+    font-size:20px;
+    min-width:130px;
   }
   .footer{left:5%}
   .collage-label{display:none}
@@ -894,7 +981,9 @@ h1 span{color:var(--blue)}
     animation:none!important;
     transition:none!important;
   }
-  .loader,.transition{display:none!important}
+  .loader,.transition{
+    display:none!important;
+  }
   .hero-name,.nav button{
     opacity:1!important;
     filter:none!important;
@@ -906,10 +995,12 @@ h1 span{color:var(--blue)}
 
 <body>
 
-<!-- LOADING SCREEN -->
+<!-- LOADER -->
 
 <div class="loader" id="loader">
-  <button class="skip" id="skip">SKIP INTRO ↗</button>
+  <button class="skip" id="skip">
+    SKIP INTRO ↗
+  </button>
 
   <div class="loader-inner">
     <div class="loader-label">
@@ -930,18 +1021,20 @@ h1 span{color:var(--blue)}
 
 <section class="page home" id="home">
 
-  <div class="collage-wrap">
+  <div class="collage-wrap" id="collage-wrap">
     <canvas id="collage-canvas" aria-hidden="true"></canvas>
   </div>
 
   <header class="header">
     <div>
       <div class="brand-line">
-        <div class="brand" id="brand" data-text="Joaqo">
-          Joaqo
-        </div>
+
+        <div class="brand"
+             id="brand"
+             data-text="Joaqo">Joaqo</div>
 
         <div class="socials">
+
           <a class="social"
              href="https://www.instagram.com/oqaoj/"
              target="_blank"
@@ -961,6 +1054,7 @@ h1 span{color:var(--blue)}
               <path d="M18.9 2H22l-6.8 7.8L23.2 22h-6.3L12 14.6 5.5 22H2.3l7.3-8.5L1.8 2h6.5l4.4 6.7L18.9 2zm-1.1 18h1.7L7.3 3.9H5.5L17.8 20z"/>
             </svg>
           </a>
+
         </div>
       </div>
 
@@ -977,12 +1071,15 @@ h1 span{color:var(--blue)}
     <button class="active" data-page="home">
       <small>01</small>HOME<span class="arrow">→</span>
     </button>
+
     <button data-page="work">
       <small>02</small>WORK<span class="arrow">→</span>
     </button>
+
     <button data-page="about">
       <small>03</small>ABOUT<span class="arrow">→</span>
     </button>
+
     <button data-page="contact">
       <small>04</small>CONTACT<span class="arrow">→</span>
     </button>
@@ -1018,7 +1115,9 @@ h1 span{color:var(--blue)}
 
   <div class="inner-head">
     <div class="inner-brand">Joaqo</div>
-    <button class="back" data-page="home">← HOME</button>
+    <button class="back" data-page="home">
+      ← HOME
+    </button>
   </div>
 
   <div class="work-heading">
@@ -1058,9 +1157,11 @@ h1 span{color:var(--blue)}
         I'm a video editor working across documentary,
         commercial, music, and digital content.
       </p>
+
       <p>
         Adobe Certified Professional in Premiere Pro.
       </p>
+
       <p>
         I focus on rhythm, sound, and visual storytelling.
       </p>
@@ -1101,7 +1202,7 @@ h1 span{color:var(--blue)}
   </div>
 </section>
 
-<!-- PLAYER -->
+<!-- VIDEO PLAYER -->
 
 <div class="player-overlay"
      id="player-overlay"
@@ -1130,10 +1231,11 @@ h1 span{color:var(--blue)}
      aria-hidden="true"></div>
 
 <script>
+"use strict";
 
-/* =========================================
-   SETTINGS
-========================================= */
+/* ======================================
+   GENERAL
+====================================== */
 
 const reducedMotion =
   window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -1142,26 +1244,33 @@ const sleep = ms =>
   new Promise(resolve => setTimeout(resolve,ms));
 
 const random = (min,max) =>
-  min + Math.random() * (max-min);
+  min + Math.random()*(max-min);
 
 const clamp = (value,min,max) =>
   Math.max(min,Math.min(max,value));
 
-let currentPage = "home";
-let navigating = false;
-let playerOpen = false;
-let selectedProject = 0;
+const lerp = (a,b,t) =>
+  a+(b-a)*t;
 
-/* =========================================
+const easeInOut = t =>
+  t<.5
+    ? 4*t*t*t
+    : 1-Math.pow(-2*t+2,3)/2;
+
+let currentPage="home";
+let navigating=false;
+let playerOpen=false;
+let selectedProject=0;
+
+/* ======================================
    PHOTOGRAPHS
 
-   Replace these URLs later with your own
-   images in an /images folder.
+   Replace these with your own image
+   paths later, such as:
+   "images/photo01.jpg"
+====================================== */
 
-   These are temporary photographic sources.
-========================================= */
-
-const imageSources = [
+const imageSources=[
   "https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=1400&q=85",
   "https://images.unsplash.com/photo-1514565131-fce0801e5785?w=1400&q=85",
   "https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=1400&q=85",
@@ -1170,94 +1279,71 @@ const imageSources = [
   "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1400&q=85"
 ];
 
-const images = imageSources.map(src => {
-  const image = new Image();
-  image.crossOrigin = "anonymous";
-  image.src = src;
-  return image;
+const images=imageSources.map(src=>{
+  const img=new Image();
+  img.crossOrigin="anonymous";
+  img.src=src;
+  return img;
 });
 
-/* =========================================
-   CANVAS COLLAGE
+/* ======================================
+   COLLAGE CANVAS
+====================================== */
 
-   A small number of overlapping layers.
-   Each layer uses a source photograph,
-   a destination rectangle, and a crop.
-
-   The whole composition changes without
-   creating hundreds of HTML elements.
-========================================= */
-
-const canvas =
+const canvas=
   document.getElementById("collage-canvas");
 
-const ctx =
+const ctx=
   canvas.getContext("2d",{alpha:false});
 
-const collageWrap =
-  document.querySelector(".collage-wrap");
+const collageWrap=
+  document.getElementById("collage-wrap");
 
-let canvasWidth = 0;
-let canvasHeight = 0;
-let collageRunning = false;
-let collageReady = false;
-let lastFrame = 0;
-let lastChange = 0;
+let canvasWidth=1;
+let canvasHeight=1;
+let collageRunning=false;
+let collageReady=false;
+let lastFrame=0;
+let lastChange=0;
 
-const layers = [];
+const FRAME_INTERVAL=1000/24;
+const TRANSITION_DURATION=1750;
+const HOLD_DURATION=1700;
 
-const layouts = [
+/*
+   Each composition has exactly one
+   rectangle per photograph.
+
+   Rectangles may overlap intentionally,
+   but each image is drawn only once.
+*/
+
+const compositions=[
   [
-    {x:-.05,y:0,w:.62,h:.55},
-    {x:.45,y:-.04,w:.62,h:.42},
-    {x:.04,y:.36,w:.55,h:.45},
-    {x:.53,y:.33,w:.5,h:.55},
-    {x:-.08,y:.76,w:.47,h:.31},
-    {x:.34,y:.78,w:.56,h:.3},
-    {x:.67,y:.63,w:.27,h:.22},
-    {x:.18,y:.19,w:.23,h:.26}
+    {x:-.10,y:-.04,w:.62,h:.53},
+    {x:.48,y:-.06,w:.57,h:.46},
+    {x:.07,y:.46,w:.48,h:.39},
+    {x:.56,y:.40,w:.48,h:.40},
+    {x:-.05,y:.82,w:.42,h:.28},
+    {x:.36,y:.78,w:.59,h:.29}
   ],
   [
-    {x:.02,y:-.08,w:.5,h:.47},
-    {x:.48,y:.03,w:.55,h:.6},
-    {x:-.06,y:.32,w:.58,h:.43},
-    {x:.26,y:.42,w:.43,h:.35},
-    {x:.02,y:.72,w:.49,h:.34},
-    {x:.52,y:.7,w:.52,h:.34},
-    {x:.7,y:.2,w:.25,h:.23},
-    {x:.12,y:.09,w:.22,h:.3}
+    {x:.43,y:.05,w:.57,h:.49},
+    {x:-.07,y:.02,w:.53,h:.43},
+    {x:.51,y:.56,w:.51,h:.40},
+    {x:.02,y:.43,w:.53,h:.42},
+    {x:.33,y:.82,w:.47,h:.25},
+    {x:-.10,y:.78,w:.40,h:.31}
   ],
   [
-    {x:-.08,y:0,w:.72,h:.37},
-    {x:.54,y:-.03,w:.52,h:.52},
-    {x:.03,y:.3,w:.44,h:.5},
-    {x:.4,y:.38,w:.63,h:.37},
-    {x:-.06,y:.75,w:.6,h:.33},
-    {x:.49,y:.68,w:.51,h:.35},
-    {x:.65,y:.13,w:.23,h:.29},
-    {x:.18,y:.46,w:.26,h:.2}
+    {x:.06,y:.44,w:.57,h:.46},
+    {x:.44,y:-.07,w:.59,h:.48},
+    {x:-.09,y:.01,w:.52,h:.43},
+    {x:.57,y:.43,w:.46,h:.42},
+    {x:.28,y:.82,w:.49,h:.26},
+    {x:-.08,y:.76,w:.36,h:.29}
   ]
 ];
-
-function makeLayer(index){
-  return {
-    index,
-    imageIndex:index % images.length,
-    rect:{...layouts[0][index]},
-    from:{...layouts[0][index]},
-    to:{...layouts[0][index]},
-    start:0,
-    duration:1300,
-    opacity:1,
-    effect:index % 3,
-    cropX:random(0,.25),
-    cropY:random(0,.2)
-  };
-}
-
-for(let i=0;i<8;i++){
-  layers.push(makeLayer(i));
-}
 
 function resizeCanvas(){
   const rect=collageWrap.getBoundingClientRect();
@@ -1265,21 +1351,16 @@ function resizeCanvas(){
   canvasWidth=Math.max(1,Math.round(rect.width));
   canvasHeight=Math.max(1,Math.round(rect.height));
 
-  const ratio=Math.min(window.devicePixelRatio||1,1.5);
+  const ratio=Math.min(
+    window.devicePixelRatio||1,
+    1.25
+  );
 
   canvas.width=Math.round(canvasWidth*ratio);
   canvas.height=Math.round(canvasHeight*ratio);
 
   ctx.setTransform(ratio,0,0,ratio,0,0);
   collageReady=true;
-}
-
-function lerp(a,b,t){
-  return a+(b-a)*t;
-}
-
-function ease(t){
-  return 1-Math.pow(1-t,3);
 }
 
 function interpolateRect(a,b,t){
@@ -1291,69 +1372,99 @@ function interpolateRect(a,b,t){
   };
 }
 
-/* Cover-crop a source image into a rectangle */
+/* ======================================
+   VARIABLE-SIZE FRAGMENTS
 
-function drawCover(image,x,y,w,h,cropX=0,cropY=0){
-  if(!image.complete || !image.naturalWidth){
-    ctx.fillStyle="#c2d8e9";
-    ctx.fillRect(x,y,w,h);
-    return;
+   Fragments fit together precisely.
+   They share the original photograph's
+   crop, so they reconstruct correctly.
+====================================== */
+
+function createFragments(){
+  const fragments=[];
+
+  const rows=8;
+  const cols=11;
+
+  const widths=[];
+  const heights=[];
+
+  let totalW=0;
+  let totalH=0;
+
+  for(let c=0;c<cols;c++){
+    const size=random(.65,1.65);
+    widths.push(size);
+    totalW+=size;
   }
 
-  const iw=image.naturalWidth;
-  const ih=image.naturalHeight;
-  const targetRatio=w/h;
-  const imageRatio=iw/ih;
-
-  let sw,sh;
-
-  if(imageRatio>targetRatio){
-    sh=ih;
-    sw=ih*targetRatio;
-  }else{
-    sw=iw;
-    sh=iw/targetRatio;
+  for(let r=0;r<rows;r++){
+    const size=random(.65,1.65);
+    heights.push(size);
+    totalH+=size;
   }
 
-  const sx=clamp(
-    (iw-sw)*(.5+cropX),
-    0,
-    Math.max(0,iw-sw)
-  );
+  let y=0;
 
-  const sy=clamp(
-    (ih-sh)*(.5+cropY),
-    0,
-    Math.max(0,ih-sh)
-  );
+  for(let r=0;r<rows;r++){
+    const h=heights[r]/totalH;
+    let x=0;
 
-  ctx.drawImage(
-    image,
-    sx,sy,sw,sh,
-    x,y,w,h
-  );
+    for(let c=0;c<cols;c++){
+      const w=widths[c]/totalW;
+
+      fragments.push({
+        x,y,w,h,
+        delay:random(0,.42),
+        scatterX:random(-.11,.11),
+        scatterY:random(-.11,.11),
+        pixelated:Math.random()<.25,
+        pixelSize:random(6,16)
+      });
+
+      x+=w;
+    }
+
+    y+=h;
+  }
+
+  return fragments;
 }
 
-/* Draw a pixelated region using a tiny
-   reusable canvas, not DOM squares. */
+const collageGroups=[];
 
-const pixelCanvas=document.createElement("canvas");
-const pixelCtx=pixelCanvas.getContext("2d");
+function createGroup(index){
+  const rect={...compositions[0][index]};
 
-function drawPixelPatch(image,x,y,w,h,pixelSize){
-  if(!image.complete || !image.naturalWidth) return;
+  return {
+    image:images[index],
+    index,
+    from:{...rect},
+    to:{...rect},
+    current:{...rect},
+    fragments:createFragments(),
+    start:0,
+    duration:TRANSITION_DURATION,
+    moving:false,
+    tone:index%3
+  };
+}
 
-  const pw=Math.max(4,Math.round(w/pixelSize));
-  const ph=Math.max(4,Math.round(h/pixelSize));
+for(let i=0;i<images.length;i++){
+  collageGroups.push(createGroup(i));
+}
 
-  pixelCanvas.width=pw;
-  pixelCanvas.height=ph;
+/* ======================================
+   IMAGE CROPPING
+====================================== */
 
-  pixelCtx.imageSmoothingEnabled=true;
-
-  const ratio=w/h;
+function sourceCrop(image,rect){
   const iw=image.naturalWidth;
   const ih=image.naturalHeight;
+
+  const ratio=
+    (rect.w*canvasWidth)/
+    (rect.h*canvasHeight);
 
   let sw,sh;
 
@@ -1365,115 +1476,314 @@ function drawPixelPatch(image,x,y,w,h,pixelSize){
     sh=iw/ratio;
   }
 
-  pixelCtx.drawImage(
-    image,
-    (iw-sw)/2,
-    (ih-sh)/2,
-    sw,sh,
-    0,0,pw,ph
-  );
-
-  ctx.save();
-  ctx.imageSmoothingEnabled=false;
-  ctx.drawImage(pixelCanvas,x,y,w,h);
-  ctx.restore();
+  return {
+    x:(iw-sw)/2,
+    y:(ih-sh)/2,
+    w:sw,
+    h:sh
+  };
 }
 
-function drawLayer(layer,time){
-  const t=clamp(
-    (time-layer.start)/layer.duration,
-    0,1
-  );
+/* ======================================
+   PIXELATION BUFFER
+====================================== */
 
-  const rect=interpolateRect(
-    layer.from,
-    layer.to,
-    ease(t)
-  );
+const pixelCanvas=document.createElement("canvas");
+const pixelCtx=pixelCanvas.getContext("2d");
 
-  layer.rect=rect;
-
-  const x=rect.x*canvasWidth;
-  const y=rect.y*canvasHeight;
-  const w=rect.w*canvasWidth;
-  const h=rect.h*canvasHeight;
-
+function drawFragment(
+  image,
+  crop,
+  fragment,
+  x,y,w,h,
+  pixelated,
+  pixelSize
+){
   if(w<=0 || h<=0) return;
 
-  const image=images[layer.imageIndex];
+  const sx=crop.x+fragment.x*crop.w;
+  const sy=crop.y+fragment.y*crop.h;
+  const sw=fragment.w*crop.w;
+  const sh=fragment.h*crop.h;
 
-  ctx.save();
+  if(pixelated){
+    const pw=Math.max(
+      1,Math.round(w/pixelSize)
+    );
 
-  ctx.beginPath();
-  ctx.rect(x,y,w,h);
-  ctx.clip();
+    const ph=Math.max(
+      1,Math.round(h/pixelSize)
+    );
 
-  /* Subtle individual movement */
+    pixelCanvas.width=pw;
+    pixelCanvas.height=ph;
 
-  const driftX=Math.sin(time*.00016+layer.index)*3;
-  const driftY=Math.cos(time*.00012+layer.index)*3;
+    pixelCtx.imageSmoothingEnabled=true;
 
-  ctx.translate(driftX,driftY);
-
-  if(layer.effect===1){
-    ctx.filter="grayscale(1) contrast(1.3)";
-  }else if(layer.effect===2){
-    ctx.filter="saturate(1.3) contrast(1.12)";
-  }
-
-  drawCover(
-    image,
-    x,y,w,h,
-    layer.cropX,
-    layer.cropY
-  );
-
-  ctx.filter="none";
-  ctx.restore();
-}
-
-/* Fixed number of pixel patches.
-   They change position and source image
-   occasionally, but don't animate every
-   pixel independently. */
-
-const patches=[
-  {x:.1,y:.14,w:.19,h:.15,size:10,img:1},
-  {x:.67,y:.23,w:.22,h:.22,size:15,img:2},
-  {x:.35,y:.57,w:.21,h:.18,size:8,img:3},
-  {x:.72,y:.72,w:.2,h:.17,size:12,img:0},
-  {x:.04,y:.79,w:.2,h:.12,size:18,img:4}
-];
-
-function drawPatches(time){
-  patches.forEach((patch,index)=>{
-    const image=images[patch.img];
-
-    const x=patch.x*canvasWidth;
-    const y=patch.y*canvasHeight;
-    const w=patch.w*canvasWidth;
-    const h=patch.h*canvasHeight;
+    pixelCtx.drawImage(
+      image,
+      sx,sy,sw,sh,
+      0,0,pw,ph
+    );
 
     ctx.save();
+    ctx.imageSmoothingEnabled=false;
 
-    /* Slight opacity variation */
-    ctx.globalAlpha=
-      .77+.14*Math.sin(time*.0005+index);
-
-    drawPixelPatch(
-      image,x,y,w,h,patch.size
+    ctx.drawImage(
+      pixelCanvas,
+      x,y,w,h
     );
 
     ctx.restore();
+  }else{
+    ctx.drawImage(
+      image,
+      sx,sy,sw,sh,
+      x,y,w,h
+    );
+  }
+}
+
+/* ======================================
+   CURSOR PIXELATION
+
+   Cursor coordinates are collected
+   from the document, because the
+   canvas sits behind the navigation.
+
+   Hover never blocks menu clicks.
+====================================== */
+
+const collagePointer={
+  x:-10000,
+  y:-10000,
+  active:false
+};
+
+const PIXEL_RADIUS=165;
+
+document.addEventListener("pointermove",event=>{
+  if(
+    currentPage!=="home" ||
+    event.pointerType==="touch"
+  ){
+    collagePointer.active=false;
+    return;
+  }
+
+  const rect=collageWrap.getBoundingClientRect();
+
+  const x=event.clientX-rect.left;
+  const y=event.clientY-rect.top;
+
+  collagePointer.x=x;
+  collagePointer.y=y;
+
+  collagePointer.active=
+    x>=0 &&
+    y>=0 &&
+    x<=rect.width &&
+    y<=rect.height;
+});
+
+document.addEventListener("pointerleave",()=>{
+  collagePointer.active=false;
+});
+
+window.addEventListener("blur",()=>{
+  collagePointer.active=false;
+});
+
+function getHoverPixelation(x,y,w,h){
+  if(!collagePointer.active) return 0;
+
+  const centerX=x+w/2;
+  const centerY=y+h/2;
+
+  const dx=centerX-collagePointer.x;
+  const dy=centerY-collagePointer.y;
+
+  const distance=Math.sqrt(dx*dx+dy*dy);
+
+  if(distance>=PIXEL_RADIUS) return 0;
+
+  return 1-distance/PIXEL_RADIUS;
+}
+
+/* ======================================
+   DRAW PHOTOGRAPH GROUP
+====================================== */
+
+function drawGroup(group,time){
+  const image=group.image;
+
+  if(!image.complete || !image.naturalWidth){
+    return;
+  }
+
+  const progress=group.moving
+    ? clamp(
+        (time-group.start)/group.duration,
+        0,1
+      )
+    : 1;
+
+  const oldRect=group.from;
+  const newRect=group.to;
+
+  const crop=sourceCrop(image,newRect);
+
+  ctx.save();
+
+  if(group.tone===1){
+    ctx.filter="grayscale(1) contrast(1.18)";
+  }else if(group.tone===2){
+    ctx.filter="saturate(1.25) contrast(1.12)";
+  }
+
+  for(const fragment of group.fragments){
+
+    const localProgress=group.moving
+      ? clamp(
+          (progress-fragment.delay)/
+          (1-fragment.delay),
+          0,1
+        )
+      : 1;
+
+    const t=easeInOut(localProgress);
+
+    const oldX=
+      (oldRect.x+fragment.x*oldRect.w)*
+      canvasWidth;
+
+    const oldY=
+      (oldRect.y+fragment.y*oldRect.h)*
+      canvasHeight;
+
+    const newX=
+      (newRect.x+fragment.x*newRect.w)*
+      canvasWidth;
+
+    const newY=
+      (newRect.y+fragment.y*newRect.h)*
+      canvasHeight;
+
+    const oldW=
+      fragment.w*oldRect.w*canvasWidth;
+
+    const oldH=
+      fragment.h*oldRect.h*canvasHeight;
+
+    const newW=
+      fragment.w*newRect.w*canvasWidth;
+
+    const newH=
+      fragment.h*newRect.h*canvasHeight;
+
+    /*
+       Fragments scatter during movement,
+       then settle exactly into place.
+    */
+
+    const scatter=
+      group.moving
+        ? Math.sin(localProgress*Math.PI)
+        : 0;
+
+    const x=
+      lerp(oldX,newX,t)+
+      fragment.scatterX*
+      canvasWidth*scatter;
+
+    const y=
+      lerp(oldY,newY,t)+
+      fragment.scatterY*
+      canvasHeight*scatter;
+
+    const w=lerp(oldW,newW,t);
+    const h=lerp(oldH,newH,t);
+
+    /*
+       Automatic fragmentation pixelation.
+    */
+
+    const transitionPixelation=
+      group.moving &&
+      localProgress>.05 &&
+      localProgress<.86 &&
+      fragment.pixelated;
+
+    /*
+       Cursor pixelation.
+       Only fragments near the cursor
+       become pixelated.
+    */
+
+    const hover=
+      getHoverPixelation(x,y,w,h);
+
+    const hoverPixelation=hover>.12;
+
+    const pixelated=
+      transitionPixelation ||
+      hoverPixelation;
+
+    const pixelSize=hoverPixelation
+      ? Math.round(5+hover*26)
+      : fragment.pixelSize;
+
+    drawFragment(
+      image,
+      crop,
+      fragment,
+      x,y,w,h,
+      pixelated,
+      pixelSize
+    );
+  }
+
+  ctx.restore();
+
+  if(group.moving && progress>=1){
+    group.moving=false;
+    group.from={...group.to};
+    group.current={...group.to};
+  }
+}
+
+/* ======================================
+   COMPOSITION CHANGES
+====================================== */
+
+let compositionIndex=0;
+
+function changeComposition(time){
+  compositionIndex=
+    (compositionIndex+1)%
+    compositions.length;
+
+  const targets=compositions[compositionIndex];
+
+  collageGroups.forEach((group,index)=>{
+    group.from={...group.current};
+    group.to={...targets[index]};
+    group.start=time;
+    group.duration=TRANSITION_DURATION;
+    group.moving=true;
+    group.fragments=createFragments();
   });
 }
 
-/* Sparse editorial grid */
+/* ======================================
+   SUBTLE GRID
+====================================== */
 
 function drawGrid(){
   ctx.save();
-  ctx.strokeStyle="rgba(10,20,35,.075)";
-  ctx.lineWidth=.6;
+
+  ctx.strokeStyle="rgba(10,20,35,.06)";
+  ctx.lineWidth=.5;
 
   const step=24;
 
@@ -1494,56 +1804,11 @@ function drawGrid(){
   ctx.restore();
 }
 
-/* Move one or two layers at a time */
+/* ======================================
+   RENDER LOOP
 
-let layoutIndex=0;
-let changeIndex=0;
-
-function changeComposition(time){
-  layoutIndex=(layoutIndex+1)%layouts.length;
-
-  const targets=layouts[layoutIndex];
-
-  const count=2;
-
-  for(let i=0;i<count;i++){
-    const index=
-      (changeIndex+i)%layers.length;
-
-    const layer=layers[index];
-
-    layer.from={...layer.rect};
-
-    const targetIndex=
-      (index+i+layoutIndex)%targets.length;
-
-    layer.to={...targets[targetIndex]};
-
-    layer.start=time;
-    layer.duration=random(1200,2100);
-
-    layer.imageIndex=
-      (layer.imageIndex+1)%images.length;
-
-    layer.effect=
-      (layer.effect+1)%3;
-  }
-
-  changeIndex=(changeIndex+count)%layers.length;
-
-  const patch=
-    patches[Math.floor(Math.random()*patches.length)];
-
-  patch.img=(patch.img+1)%images.length;
-  patch.x=clamp(patch.x+random(-.15,.15),0,.8);
-  patch.y=clamp(patch.y+random(-.12,.12),0,.8);
-  patch.size=random(7,19);
-}
-
-/* Keep canvas rendering modest:
-   20 FPS instead of 60 FPS. */
-
-const frameInterval=1000/20;
+   24 FPS to reduce CPU/GPU load.
+====================================== */
 
 function renderCollage(time){
   if(!collageRunning) return;
@@ -1556,34 +1821,31 @@ function renderCollage(time){
     !collageReady
   ) return;
 
-  if(time-lastFrame<frameInterval) return;
+  if(time-lastFrame<FRAME_INTERVAL) return;
 
   lastFrame=time;
 
-  ctx.fillStyle="#b9d9ec";
-  ctx.fillRect(0,0,canvasWidth,canvasHeight);
+  /*
+     Clear the previous frame completely.
+     This prevents ghosting.
+  */
 
-  /* Background atmosphere */
-
-  const gradient=ctx.createLinearGradient(
-    0,0,canvasWidth,canvasHeight
+  ctx.fillStyle="#d9e8f1";
+  ctx.fillRect(
+    0,0,
+    canvasWidth,canvasHeight
   );
 
-  gradient.addColorStop(0,"#cceafa");
-  gradient.addColorStop(.5,"#80bce7");
-  gradient.addColorStop(1,"#c7c7dd");
+  collageGroups.forEach(group=>{
+    drawGroup(group,time);
+  });
 
-  ctx.fillStyle=gradient;
-  ctx.fillRect(0,0,canvasWidth,canvasHeight);
-
-  layers.forEach(layer=>drawLayer(layer,time));
-
-  drawPatches(time);
   drawGrid();
 
   if(
     !reducedMotion.matches &&
-    time-lastChange>3100
+    time-lastChange>
+      TRANSITION_DURATION+HOLD_DURATION
   ){
     changeComposition(time);
     lastChange=time;
@@ -1596,7 +1858,6 @@ function startCollage(){
   resizeCanvas();
 
   collageRunning=true;
-
   requestAnimationFrame(renderCollage);
 }
 
@@ -1605,9 +1866,9 @@ window.addEventListener("resize",()=>{
   renderCarousel();
 });
 
-/* =========================================
-   JOAQO / OQAOJ GLITCH
-========================================= */
+/* ======================================
+   NAME GLITCH
+====================================== */
 
 const brand=document.getElementById("brand");
 const heroName=document.getElementById("hero-name");
@@ -1679,15 +1940,18 @@ if(!reducedMotion.matches){
   },5300);
 }
 
-/* =========================================
-   WORK PROJECTS
+/* ======================================
+   PROJECT DATA
 
-   Add youtube:"VIDEO_ID" to a project
-   to enable YouTube playback.
+   To enable a YouTube video, add:
+   youtube:"VIDEO_ID"
 
    Example:
    youtube:"xMU9RD1NlMI"
-========================================= */
+
+   Only publish footage you have the
+   rights or permission to showcase.
+====================================== */
 
 const projects=[
   {
@@ -1727,9 +1991,9 @@ const projects=[
   }
 ];
 
-/* =========================================
-   3D PROJECT GALLERY
-========================================= */
+/* ======================================
+   3D WORK CAROUSEL
+====================================== */
 
 const carouselTrack=
   document.getElementById("carousel-track");
@@ -1793,11 +2057,14 @@ function renderCarousel(){
        scale(${1-distance*.12})`;
 
     card.style.opacity=
-      distance>2 ? "0" :
-      String(Math.max(.4,1-distance*.2));
+      distance>2
+        ? "0"
+        : String(Math.max(.4,1-distance*.2));
 
     card.style.filter=
-      distance===0 ? "none" : "brightness(.55)";
+      distance===0
+        ? "none"
+        : "brightness(.55)";
 
     card.style.zIndex=String(20-distance);
 
@@ -1805,7 +2072,8 @@ function renderCarousel(){
       distance>2 ? "none" : "auto";
 
     card.classList.toggle(
-      "selected",distance===0
+      "selected",
+      distance===0
     );
 
     card.setAttribute(
@@ -1838,51 +2106,63 @@ document.getElementById("next")
 
 let wheelLocked=false;
 
-carouselViewport.addEventListener("wheel",event=>{
-  const delta=
-    Math.abs(event.deltaX)>Math.abs(event.deltaY)
-    ? event.deltaX
-    : event.deltaY;
+carouselViewport.addEventListener(
+  "wheel",
+  event=>{
+    const delta=
+      Math.abs(event.deltaX)>Math.abs(event.deltaY)
+        ? event.deltaX
+        : event.deltaY;
 
-  if(Math.abs(delta)<3) return;
+    if(Math.abs(delta)<3) return;
 
-  event.preventDefault();
+    event.preventDefault();
 
-  if(wheelLocked) return;
+    if(wheelLocked) return;
 
-  wheelLocked=true;
+    wheelLocked=true;
+    changeProject(Math.sign(delta));
 
-  changeProject(Math.sign(delta));
-
-  setTimeout(()=>{
-    wheelLocked=false;
-  },450);
-},{passive:false});
+    setTimeout(()=>{
+      wheelLocked=false;
+    },450);
+  },
+  {passive:false}
+);
 
 let touchStartX=null;
 
-carouselViewport.addEventListener("touchstart",event=>{
-  touchStartX=event.touches[0].clientX;
-},{passive:true});
+carouselViewport.addEventListener(
+  "touchstart",
+  event=>{
+    touchStartX=event.touches[0].clientX;
+  },
+  {passive:true}
+);
 
-carouselViewport.addEventListener("touchend",event=>{
-  if(touchStartX===null) return;
+carouselViewport.addEventListener(
+  "touchend",
+  event=>{
+    if(touchStartX===null) return;
 
-  const distance=
-    touchStartX-event.changedTouches[0].clientX;
+    const distance=
+      touchStartX-
+      event.changedTouches[0].clientX;
 
-  if(Math.abs(distance)>40){
-    changeProject(Math.sign(distance));
-  }
+    if(Math.abs(distance)>40){
+      changeProject(Math.sign(distance));
+    }
 
-  touchStartX=null;
-},{passive:true});
+    touchStartX=null;
+  },
+  {passive:true}
+);
 
 renderCarousel();
 
-/* =========================================
+/* ======================================
    VIDEO PLAYER
-========================================= */
+====================================== */
 
 const playerOverlay=
   document.getElementById("player-overlay");
@@ -1941,6 +2221,7 @@ function openPlayer(index){
 
   playerOverlay.classList.add("open");
   playerOverlay.setAttribute("aria-hidden","false");
+
   playerOpen=true;
 
   document.getElementById("close-player").focus();
@@ -1963,9 +2244,9 @@ playerOverlay.addEventListener("click",event=>{
   }
 });
 
-/* =========================================
-   PAGE NAVIGATION
-========================================= */
+/* ======================================
+   NAVIGATION / TRANSITIONS
+====================================== */
 
 const transition=
   document.getElementById("transition");
@@ -1978,6 +2259,8 @@ function showPage(page){
 
   currentPage=page;
   window.scrollTo(0,0);
+
+  collagePointer.active=false;
 
   if(page==="work"){
     renderCarousel();
@@ -1995,13 +2278,16 @@ function navigate(page){
   navigating=true;
 
   const effect=
-    page==="home" ? currentPage : page;
+    page==="home"
+      ? currentPage
+      : page;
 
   transition.className="transition";
   void transition.offsetWidth;
 
   transition.classList.add(
-    "active",effect+"-effect"
+    "active",
+    effect+"-effect"
   );
 
   setTimeout(()=>{
@@ -2041,9 +2327,9 @@ document.addEventListener("keydown",event=>{
   }
 });
 
-/* =========================================
+/* ======================================
    INTRO SEQUENCE
-========================================= */
+====================================== */
 
 const loader=document.getElementById("loader");
 
@@ -2054,6 +2340,7 @@ function finishIntro(){
   if(introDone) return;
 
   introDone=true;
+
   introTimers.forEach(clearTimeout);
 
   loader.classList.add("done");
