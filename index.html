@@ -118,11 +118,6 @@ a { color: inherit; }
   z-index: 2;
 }
 
-/*
-  All photograph positions are controlled by JS.
-  No permanent aspect ratios or fixed locations.
-*/
-
 .photo {
   position: absolute;
   overflow: hidden;
@@ -140,6 +135,7 @@ a { color: inherit; }
   background-position: center;
   transform: scale(1);
   transform-origin: center;
+  backface-visibility: hidden;
 }
 
 .photo-picture.zoom {
@@ -160,10 +156,21 @@ a { color: inherit; }
   opacity: 0;
 }
 
-/*
-  The moving pieces exist ONLY on this canvas.
-  They are not duplicated in the DOM.
-*/
+/* Subtle variation in photographic treatment */
+
+.photo {
+  filter: contrast(1.045) saturate(.94);
+}
+
+.photo:nth-child(3n) {
+  filter: contrast(1.12) saturate(.82);
+}
+
+.photo:nth-child(4n) {
+  filter: contrast(1.08) saturate(1.13);
+}
+
+/* Fragments only exist on this canvas */
 
 .fragment-canvas {
   position: absolute;
@@ -198,12 +205,10 @@ a { color: inherit; }
   background: rgba(243,242,239,.88);
 }
 
+/* Removed the white rectangle on the right */
+
 .decor-c {
-  top: 48%;
-  right: 0;
-  width: 15%;
-  height: 6%;
-  background: rgba(243,242,239,.85);
+  display: none;
 }
 
 /* HEADER */
@@ -276,7 +281,7 @@ a { color: inherit; }
 
 .ready .top-label { opacity: 1; }
 
-/* NAV */
+/* NAVIGATION */
 
 .nav {
   position: absolute;
@@ -336,7 +341,7 @@ a { color: inherit; }
   font-size: 20px;
 }
 
-/* CENTRAL NAME */
+/* CENTRAL JO AQO */
 
 .hero {
   position: absolute;
@@ -433,7 +438,7 @@ a { color: inherit; }
   background: #929298;
 }
 
-/* SIMPLE SECONDARY PAGES */
+/* SECONDARY PAGES - UNCHANGED */
 
 .page {
   position: fixed;
@@ -514,11 +519,13 @@ a { color: inherit; }
 @media (max-width: 850px) {
   .scene { min-height: 800px; height: 100svh; }
   .nav { top: 23%; }
+
   .hero {
     left: 10%;
     top: 41%;
     font-size: clamp(105px, 22vw, 200px);
   }
+
   .description { top: 57%; left: 12%; }
   .work-grid { grid-template-columns: 1fr; }
 }
@@ -530,11 +537,13 @@ a { color: inherit; }
   .nav { top: 19%; left: 5%; width: 145px; }
   .nav button { height: 38px; }
   .nav-text { font-size: 13px; }
+
   .hero {
     left: 4%;
     top: 43%;
     font-size: clamp(88px, 23vw, 145px);
   }
+
   .description { left: 7%; top: 56%; font-size: 9px; }
   .footer { left: 5%; font-size: 8px; }
   .page { padding: 75px 6vw 40px; }
@@ -554,9 +563,11 @@ a { color: inherit; }
 <div class="intro" id="intro">
   <div class="intro-content">
     <div class="intro-title">Joaqo</div>
+
     <div class="progress-track">
       <div class="progress-bar" id="progress-bar"></div>
     </div>
+
     <div class="progress-meta">
       <span>VIDEO EDITOR</span>
       <span id="progress-text">00%</span>
@@ -567,12 +578,10 @@ a { color: inherit; }
 <main class="scene" id="scene">
 
   <div class="collage" id="collage"></div>
-
   <canvas class="fragment-canvas" id="fragments"></canvas>
 
   <div class="decor decor-a"></div>
   <div class="decor decor-b"></div>
-  <div class="decor decor-c"></div>
 
   <header class="header">
     <div>
@@ -582,7 +591,8 @@ a { color: inherit; }
 
     <div class="socials">
       <a href="https://www.instagram.com/oqaoj/"
-         target="_blank" rel="noopener noreferrer"
+         target="_blank"
+         rel="noopener noreferrer"
          aria-label="Instagram">
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7zm5 3a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6zm5.5-3.5a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3z"/>
@@ -590,7 +600,8 @@ a { color: inherit; }
       </a>
 
       <a href="https://x.com/oqaoj6"
-         target="_blank" rel="noopener noreferrer"
+         target="_blank"
+         rel="noopener noreferrer"
          aria-label="X">
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path d="M18.9 2H22l-6.8 7.8L23.2 22h-6.3L12 14.6 5.5 22H2.3l7.3-8.5L1.8 2h6.5l4.5 6.8L18.9 2zm-1.1 18h1.7L7.4 3.9H5.6L17.8 20z"/>
@@ -607,16 +618,19 @@ a { color: inherit; }
       <span class="nav-text">HOME</span>
       <span class="nav-arrow">→</span>
     </button>
+
     <button data-page="work">
       <span class="nav-index">02</span>
       <span class="nav-text">WORK</span>
       <span class="nav-arrow">→</span>
     </button>
+
     <button data-page="about">
       <span class="nav-index">03</span>
       <span class="nav-text">ABOUT</span>
       <span class="nav-arrow">→</span>
     </button>
+
     <button data-page="contact">
       <span class="nav-index">04</span>
       <span class="nav-text">CONTACT</span>
@@ -644,7 +658,9 @@ a { color: inherit; }
     <strong>JOAQO / SELECTED WORK</strong>
     <button class="back">← BACK</button>
   </div>
+
   <h2>WORK</h2>
+
   <div class="work-grid">
     <div class="work-card"><h3>HAITI FOUNDATION</h3></div>
     <div class="work-card"><h3>RAW FIT</h3></div>
@@ -658,7 +674,9 @@ a { color: inherit; }
     <strong>JOAQO / ABOUT</strong>
     <button class="back">← BACK</button>
   </div>
+
   <h2>ABOUT</h2>
+
   <p>
     I'm Joaco Mansilla, a video editor working across
     film, music, commercial and digital projects.
@@ -672,34 +690,38 @@ a { color: inherit; }
     <strong>JOAQO / CONTACT</strong>
     <button class="back">← BACK</button>
   </div>
+
   <h2>CONTACT</h2>
+
   <p>For projects and collaborations, reach out through Instagram.</p>
+
   <a class="contact-link"
      href="https://www.instagram.com/oqaoj/"
      target="_blank"
-     rel="noopener noreferrer">INSTAGRAM ↗</a>
+     rel="noopener noreferrer">
+    INSTAGRAM ↗
+  </a>
 </section>
 
 <script>
 (() => {
   "use strict";
 
-  /* ========================================
+  /* ==========================================
      CONFIGURATION
-  ======================================== */
+     ========================================== */
 
   const CONFIG = {
     imageCount: 5,
 
-    // Pause between complete collage transformations.
-    pauseMin: 3600,
-    pauseMax: 5600,
+    // CHANGED: Each completed layout stays 2–5 seconds.
+    pauseMin: 2000,
+    pauseMax: 5000,
 
-    // Different images finish at different times.
+    // Original fragment movement speed preserved.
     animationMin: 950,
     animationMax: 2200,
 
-    // Fragment count per image, approximately.
     minFragments: 16,
     maxFragments: 34,
 
@@ -751,16 +773,9 @@ a { color: inherit; }
     });
   }
 
-  /*
-    Each layout has five rectangles:
-    [left%, top%, width%, height%]
-
-    Their aspect ratios and positions are intentionally
-    different from one layout to the next.
-
-    Rectangles do not overlap one another.
-    Text may overlap the collage intentionally.
-  */
+  /* ==========================================
+     COLLAGE LAYOUTS
+     ========================================== */
 
   const LAYOUTS = [
     [
@@ -800,11 +815,6 @@ a { color: inherit; }
     ]
   ];
 
-  /*
-    On narrow screens, use a separate set of
-    arrangements that preserve reasonable sizes.
-  */
-
   const MOBILE_LAYOUTS = [
     [
       [26, 0, 74, 48],
@@ -830,9 +840,7 @@ a { color: inherit; }
   ];
 
   function currentLayouts() {
-    return innerWidth <= 650
-      ? MOBILE_LAYOUTS
-      : LAYOUTS;
+    return innerWidth <= 650 ? MOBILE_LAYOUTS : LAYOUTS;
   }
 
   function rectFromPercent(values) {
@@ -849,10 +857,9 @@ a { color: inherit; }
     return layouts[index % layouts.length].map(rectFromPercent);
   }
 
-  /*
-    Image objects persist throughout the page.
-    We never create a duplicate photograph.
-  */
+  /* ==========================================
+     PHOTO SLOTS
+     ========================================== */
 
   const slots = [];
 
@@ -914,20 +921,17 @@ a { color: inherit; }
     void slot.picture.offsetWidth;
     slot.picture.style.animation = "";
 
-    /*
-      Some images move, some remain completely still.
-      Zoom begins only AFTER full reconstruction.
-    */
+    // Zoom starts only after an image is fully assembled.
+    // Some images remain still.
 
     if (!reducedMotion && Math.random() < .52) {
       slot.picture.classList.add("zoom");
     }
   }
 
-  /*
-    Draw an image into a rectangle using CSS-cover
-    cropping, including source tiles.
-  */
+  /* ==========================================
+     IMAGE CROPPING
+     ========================================== */
 
   function coverSource(img, boxW, boxH, tile) {
     const scale = Math.max(
@@ -949,11 +953,12 @@ a { color: inherit; }
     };
   }
 
-  /*
-    Generate variable-size rectangular fragments.
-    Different row and column boundaries produce
-    both small and large tiles.
-  */
+  /* ==========================================
+     FRAGMENT GENERATION
+
+     CHANGED:
+     Wider size variation, less uniform pieces.
+     ========================================== */
 
   function makeTiles(rect) {
     const count = Math.floor(rand(
@@ -970,14 +975,16 @@ a { color: inherit; }
     const xEdges = [0];
     const yEdges = [0];
 
+    // CHANGED: formerly .5–1.7
     const weightsX = Array.from(
       { length: cols },
-      () => rand(.5, 1.7)
+      () => rand(.35, 2.25)
     );
 
+    // CHANGED: formerly .5–1.7
     const weightsY = Array.from(
       { length: rows },
-      () => rand(.5, 1.7)
+      () => rand(.35, 2.25)
     );
 
     const sumX = weightsX.reduce((a, b) => a + b, 0);
@@ -1012,18 +1019,12 @@ a { color: inherit; }
     return tiles;
   }
 
-  /*
-    Every fragment is assigned an axis-only route.
+  /* ==========================================
+     AXIS-ONLY MOVEMENT
 
-    Route A: horizontal -> vertical
-    Route B: vertical -> horizontal
-    Route C: horizontal only
-    Route D: vertical only
-
-    For C/D, the other axis is completed by an
-    additional axis-only segment if required.
-    No segment ever changes X and Y simultaneously.
-  */
+     Horizontal then vertical, or vice versa.
+     Never interpolate both axes at once.
+     ========================================== */
 
   function createPath(startX, startY, endX, endY) {
     const dx = endX - startX;
@@ -1066,12 +1067,6 @@ a { color: inherit; }
       };
     }
 
-    /*
-      Both legs are timed separately.
-      This is essential: linear interpolation between
-      start and end would create diagonal movement.
-    */
-
     const split = .5;
 
     if (t < split) {
@@ -1091,9 +1086,9 @@ a { color: inherit; }
     };
   }
 
-  /*
-    CANVAS
-  */
+  /* ==========================================
+     CANVAS
+     ========================================== */
 
   let pixelRatio = 1;
 
@@ -1121,13 +1116,6 @@ a { color: inherit; }
     );
   }
 
-  /*
-    A permutation ensures every image leaves its
-    original slot and arrives in another.
-
-    No image remains duplicated in its old position.
-  */
-
   function shuffledDerangement(n) {
     const indices = Array.from(
       { length: n },
@@ -1139,6 +1127,7 @@ a { color: inherit; }
 
       for (let i = n - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
+
         [result[i], result[j]] = [result[j], result[i]];
       }
 
@@ -1149,6 +1138,10 @@ a { color: inherit; }
 
     return indices.map(i => (i + 1) % n);
   }
+
+  /* ==========================================
+     COLLAGE TRANSFORMATION
+     ========================================== */
 
   let layoutIndex = 0;
   let animating = false;
@@ -1166,17 +1159,15 @@ a { color: inherit; }
 
     const oldImages = slots.map(slot => slot.imageIndex);
 
-    /*
-      Destination mapping:
-      every old image goes to a different slot.
-    */
-
     const destinations = shuffledDerangement(slots.length);
 
     const pieces = [];
-    const sourceFinishTimes = [];
 
-    for (let sourceIndex = 0; sourceIndex < slots.length; sourceIndex++) {
+    for (
+      let sourceIndex = 0;
+      sourceIndex < slots.length;
+      sourceIndex++
+    ) {
       const sourceRect = oldRects[sourceIndex];
 
       const destinationIndex = destinations[sourceIndex];
@@ -1191,9 +1182,6 @@ a { color: inherit; }
       );
 
       const delay = rand(0, 280);
-
-      sourceFinishTimes.push(delay + duration);
-
       const tiles = makeTiles(sourceRect);
 
       for (const tile of tiles) {
@@ -1219,26 +1207,36 @@ a { color: inherit; }
           sourceRect,
           sourceTile: tile,
           destinationIndex,
+
           path: createPath(
             startX, startY,
             endX, endY
           ),
+
           startW: tile.w,
           startH: tile.h,
           endW,
           endH,
+
           delay: delay + rand(0, 170),
           duration: duration + rand(-150, 150),
+
+          // NEW: Slight imperfections.
+          opacity: rand(.72, 1),
+          fadeIn: Math.random() < .3,
+
+          // These offsets affect only rendering,
+          // not the actual axis-aligned path.
+          jitterX: rand(-7, 7),
+          jitterY: rand(-7, 7),
+
           done: false
         });
       }
     }
 
-    /*
-      Hide ALL old photographs immediately.
-      The canvas now owns the moving pieces.
-      Vacated regions reveal the paper background.
-    */
+    // Hide every original photograph.
+    // Only canvas fragments are visible in transit.
 
     slots.forEach(slot => {
       slot.element.style.visibility = "hidden";
@@ -1260,8 +1258,7 @@ a { color: inherit; }
       finalImages[destinations[source]] = oldImages[source];
     }
 
-    let completed = Array(slots.length).fill(false);
-
+    const completed = Array(slots.length).fill(false);
     const startTime = performance.now();
 
     await new Promise(resolve => {
@@ -1272,31 +1269,18 @@ a { color: inherit; }
 
         for (const piece of pieces) {
           if (completed[piece.destinationIndex]) continue;
+          if (!piece.image) continue;
 
           const t = clamp(
             (elapsed - piece.delay) / piece.duration,
             0, 1
           );
 
-          if (elapsed < piece.delay) {
-            /*
-              Before departure, the tile is still
-              present at its original position.
-            */
-          }
-
-          if (!piece.image) continue;
-
+          // Preserve the original motion timing.
           const pos = pointOnPath(
             piece.path,
             ease(t)
           );
-
-          /*
-            Resize fragments as they approach the
-            new image shape. The position still moves
-            exclusively along axis-aligned segments.
-          */
 
           const sizeT = ease(t);
 
@@ -1321,11 +1305,28 @@ a { color: inherit; }
 
           ctx.save();
 
-          /*
-            Keep fragments rectangular and sharp.
-          */
+          // NEW: Different fragments fade differently.
+          // All become fully opaque when reassembled.
+
+          ctx.globalAlpha = piece.fadeIn
+            ? Math.min(1, .35 + t * .65)
+            : piece.opacity + (1 - piece.opacity) * t;
 
           ctx.imageSmoothingEnabled = true;
+
+          // NEW: Temporary scattering.
+          // Offsets return to zero at t = 1.
+          //
+          // The underlying movement path is still
+          // strictly horizontal/vertical.
+
+          const scatter = Math.sin(Math.PI * t);
+
+          const drawX =
+            pos.x + piece.jitterX * scatter;
+
+          const drawY =
+            pos.y + piece.jitterY * scatter;
 
           ctx.drawImage(
             piece.image,
@@ -1333,8 +1334,8 @@ a { color: inherit; }
             source.sy,
             source.sw,
             source.sh,
-            pos.x,
-            pos.y,
+            drawX,
+            drawY,
             w,
             h
           );
@@ -1342,11 +1343,7 @@ a { color: inherit; }
           ctx.restore();
         }
 
-        /*
-          Each destination becomes a complete DOM
-          image as soon as its own pieces finish.
-          Others continue traveling independently.
-        */
+        // Images finish independently.
 
         for (let i = 0; i < slots.length; i++) {
           if (completed[i]) continue;
@@ -1381,6 +1378,10 @@ a { color: inherit; }
 
   async function collageLoop() {
     while (true) {
+
+      // CHANGED: Random pause of 2–5 seconds
+      // AFTER the previous transformation finishes.
+
       await wait(rand(
         CONFIG.pauseMin,
         CONFIG.pauseMax
@@ -1392,13 +1393,11 @@ a { color: inherit; }
     }
   }
 
-  /*
-    TEMPORARY HOVER PIXELATION
+  /* ==========================================
+     MOMENTARY CURSOR PIXELATION
 
-    It peaks, then unpixelates automatically.
-    Keeping the cursor in place does not leave
-    the image permanently pixelated.
-  */
+     Pixelates on hover, then gradually clears.
+     ========================================== */
 
   function setupHover(slot) {
     const pixelCanvas = slot.pixel;
@@ -1467,7 +1466,6 @@ a { color: inherit; }
       );
 
       const pixelStrength = pick([9, 13, 18, 25, 32]);
-
       const started = performance.now();
 
       function frame(time) {
@@ -1508,11 +1506,6 @@ a { color: inherit; }
           0, 0, w, h
         );
 
-        /*
-          Radial falloff keeps the strongest
-          pixelation around the pointer.
-        */
-
         const radius = Math.max(w, h) * .85;
 
         const gradient = pixelCtx.createRadialGradient(
@@ -1540,6 +1533,7 @@ a { color: inherit; }
         } else {
           pixelCanvas.style.opacity = "0";
           pixelCtx.clearRect(0, 0, w, h);
+          slot.pixelFrame = null;
         }
       }
 
@@ -1553,7 +1547,11 @@ a { color: inherit; }
     });
   }
 
-  /* NAME GLITCH */
+  /* ==========================================
+     CENTRAL NAME GLITCH ONLY
+
+     Top-left Joaqo remains unchanged.
+     ========================================== */
 
   async function glitchName() {
     hero.classList.add("glitch");
@@ -1591,7 +1589,9 @@ a { color: inherit; }
     }
   }
 
-  /* NAVIGATION */
+  /* ==========================================
+     NAVIGATION
+     ========================================== */
 
   const pages = {
     work: document.getElementById("page-work"),
@@ -1657,7 +1657,9 @@ a { color: inherit; }
     if (event.key === "Escape") closePages();
   });
 
-  /* RESIZE */
+  /* ==========================================
+     RESIZE
+     ========================================== */
 
   let resizeTimer;
 
@@ -1680,7 +1682,9 @@ a { color: inherit; }
     }, 200);
   });
 
-  /* INITIALIZATION */
+  /* ==========================================
+     INITIALIZATION
+     ========================================== */
 
   async function initialize() {
     makeSlots();
@@ -1697,14 +1701,10 @@ a { color: inherit; }
       progress = Math.min(92, progress + rand(2, 9));
 
       bar.style.width = progress + "%";
+
       label.textContent =
         String(Math.floor(progress)).padStart(2, "0") + "%";
     }, 100);
-
-    /*
-      Don't allow one slow image request to hold the
-      intro indefinitely.
-    */
 
     const loaded = await Promise.race([
       Promise.all(preload),
@@ -1716,11 +1716,6 @@ a { color: inherit; }
         images[i] = img;
       });
     }
-
-    /*
-      Individual image requests continue to populate
-      the cache even if the loading timeout expires.
-    */
 
     preload.forEach((promise, i) => {
       promise.then(img => {
