@@ -6,834 +6,1311 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#f4f3ef">
 <title>Joaqo — Video Editor</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
 <style>
 :root{
   --paper:#f4f3ef;
   --ink:#101014;
-  --blue:#344df1;
-  --violet:#6244ef;
+  --blue:#354cf4;
+  --purple:#6948ef;
 }
 *{box-sizing:border-box}
-html,body{margin:0;min-height:100%;background:var(--paper)}
-body{font-family:"IBM Plex Mono",monospace;color:var(--ink);overflow-x:hidden}
+html,body{margin:0;min-height:100%}
+body{
+  font-family:"IBM Plex Mono",monospace;
+  background:var(--paper);
+  color:var(--ink);
+  overflow-x:hidden;
+}
 button,a{font:inherit}
 button{cursor:pointer}
-button:focus-visible,a:focus-visible{outline:2px solid var(--blue);outline-offset:4px}
+button:focus-visible,a:focus-visible{
+  outline:2px solid var(--blue);
+  outline-offset:4px;
+}
 [hidden]{display:none!important}
-#app{position:relative;min-height:100svh;overflow:hidden}
-
-/* PAPER / TECHNICAL GRID */
+#app{min-height:100svh}
+.page{position:relative;min-height:100svh}
 .paper{
-  position:fixed;inset:0;z-index:0;pointer-events:none;
+  position:fixed;inset:0;pointer-events:none;z-index:0;
   background:
-    linear-gradient(#1010200a 1px,transparent 1px),
-    linear-gradient(90deg,#1010200a 1px,transparent 1px),
+    linear-gradient(#11111108 1px,transparent 1px),
+    linear-gradient(90deg,#11111108 1px,transparent 1px),
     var(--paper);
   background-size:24px 24px;
 }
-.paper:after{
-  content:"";position:absolute;inset:0;
-  background:radial-gradient(ellipse at center,transparent 30%,#e0e0e04a);
-}
-.page{position:relative;z-index:1;min-height:100svh}
-.page:not(.home){padding:30px 5vw 90px}
 
-/* HEADER */
-.site-header{
-  position:absolute;z-index:15;top:0;left:0;width:100%;
-  padding:30px 4.5vw;display:flex;justify-content:space-between;
-  align-items:start;gap:20px;pointer-events:none;
-}
-.site-header>*{pointer-events:auto}
-.brand{
-  font-family:"Archivo Black",Arial,sans-serif;
-  font-size:clamp(19px,2vw,31px);
-  letter-spacing:-.09em;
-  line-height:1;
-}
-.brand small{
-  display:block;font-family:"IBM Plex Mono",monospace;
-  font-size:9px;line-height:1.8;letter-spacing:.13em;
-  margin-top:14px;font-weight:500;
-}
-.top-meta{font-size:10px;letter-spacing:.15em;text-align:right;line-height:1.8}
+/* HOMEPAGE */
 
-/* HOME EDITORIAL COMPOSITION */
 .home{
-  min-height:900px;height:100svh;max-height:1300px;
-  isolation:isolate;
-}
-.home-grid{
-  position:absolute;inset:0;
-  display:grid;grid-template-columns:repeat(12,1fr);
-  grid-template-rows:repeat(12,1fr);
+  min-height:800px;
+  height:100svh;
   overflow:hidden;
-}
-.home-grid:before{
-  content:"";position:absolute;inset:0;
-  background:linear-gradient(90deg,#ffffff7a 0 48%,transparent 62%);
-  pointer-events:none;z-index:2;
-}
-.photo{
-  position:relative;overflow:hidden;
-  background:#101524;
   isolation:isolate;
-  opacity:0;
-  transition:opacity .3s;
 }
-.photo.ready{opacity:1}
-.photo:after{
-  content:"";position:absolute;inset:0;pointer-events:none;
-  background:linear-gradient(120deg,#183dc42c,#8b51ff18);
-  mix-blend-mode:screen;z-index:4;
+.collage{
+  position:absolute;inset:0;
+  overflow:hidden;
+  z-index:0;
 }
-.photo .tile{
+.collage:after{
+  content:"";position:absolute;inset:0;
+  pointer-events:none;
+  background:linear-gradient(90deg,#f4f3ef77 0%,transparent 68%);
+}
+.mosaic{
+  position:absolute;
+  overflow:visible;
+  pointer-events:none;
+}
+.mosaic-tile{
   position:absolute;
   background-repeat:no-repeat;
-  will-change:transform,opacity,filter;
-  opacity:0;
-  transform:translate(var(--tx),var(--ty)) scale(var(--scale));
-  filter:contrast(1.7) saturate(1.8);
+  will-change:transform,opacity;
+  box-shadow:0 0 1px #0002;
 }
-.photo .tile.in{
-  animation:assemble var(--duration) cubic-bezier(.16,1,.3,1) forwards;
-  animation-delay:var(--delay);
-}
-@keyframes assemble{
-  0%{opacity:0;transform:translate(var(--tx),var(--ty)) scale(var(--scale));filter:brightness(2) contrast(2) hue-rotate(55deg)}
-  32%{opacity:1}
-  75%{transform:translate(0,0) scale(1);filter:brightness(1.3) contrast(1.4)}
-  100%{opacity:1;transform:none;filter:none}
-}
-.photo.flicker .tile:nth-child(5n+2){
-  animation:microShift .3s steps(3,end);
-}
-@keyframes microShift{
-  0%{transform:translateX(0)}
-  25%{transform:translateX(13px);filter:hue-rotate(90deg)}
-  65%{transform:translateX(-8px)}
-  100%{transform:none;filter:none}
+.collage-glow{
+  position:absolute;
+  right:0;top:0;width:65%;height:100%;
+  background:radial-gradient(ellipse at 70% 40%,#6a8ed01b,transparent 70%);
+  pointer-events:none;
 }
 
-/* Independent photographic collage panels */
-.photo-a{grid-column:7/13;grid-row:1/9}
-.photo-b{grid-column:1/7;grid-row:8/11}
-.photo-c{grid-column:6/10;grid-row:9/13}
-.photo-d{grid-column:10/13;grid-row:9/12}
-.photo-e{grid-column:10/12;grid-row:2/5;z-index:1}
-.photo-f{grid-column:7/9;grid-row:5/8;z-index:1}
+/* TOP LEFT IDENTITY */
 
-/* PHOTO LABELS */
-.image-label{
-  position:absolute;z-index:7;font-size:9px;
-  letter-spacing:.16em;line-height:1.7;
+.header{
+  position:absolute;z-index:15;
+  top:0;left:0;right:0;
+  padding:30px 4.5vw;
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:20px;
 }
-.coordinates{right:5.5%;top:24%}
-.category-list{left:2.3%;bottom:15%;}
+.brand-row{display:flex;align-items:center;gap:20px}
+.brand{
+  font-family:"Archivo Black",Arial,sans-serif;
+  font-size:clamp(23px,2.1vw,34px);
+  font-weight:900;
+  letter-spacing:-.095em;
+  line-height:1;
+  position:relative;
+  min-width:115px;
+}
+.brand:before,.brand:after{
+  content:attr(data-text);
+  position:absolute;left:0;top:0;
+  opacity:0;pointer-events:none;
+}
+.brand.glitch:before{
+  opacity:.85;color:#3b54ef;
+  clip-path:inset(10% 0 60% 0);
+  transform:translate(-6px,2px);
+}
+.brand.glitch:after{
+  opacity:.8;color:#8652ff;
+  clip-path:inset(58% 0 10% 0);
+  transform:translate(7px,-2px);
+}
+.brand.glitch{animation:brandDistort .4s steps(3,end)}
+@keyframes brandDistort{
+  25%{transform:skewX(-10deg) translateX(4px)}
+  55%{transform:skewX(6deg) translateX(-5px)}
+  100%{transform:none}
+}
+.socials{display:flex;align-items:center;gap:12px}
+.social{
+  width:27px;height:27px;
+  display:grid;place-items:center;
+  color:#111;
+  transition:transform .2s,color .2s;
+}
+.social svg{width:20px;height:20px;fill:currentColor}
+.social:hover{
+  color:var(--blue);
+  transform:skewX(-12deg) translateY(-3px);
+}
+.social.glitch{animation:brandDistort .3s steps(3,end)}
+.header-sub{
+  font-size:9px;
+  letter-spacing:.16em;
+  line-height:1.7;
+  margin-top:12px;
+}
+.top-right{
+  font-size:10px;
+  letter-spacing:.17em;
+  line-height:1.8;
+  text-align:right;
+}
 
-/* MAIN TYPOGRAPHY */
+/* LARGE HOMEPAGE TYPE */
+
 .hero{
   position:absolute;z-index:8;
-  left:16%;top:18%;width:48%;
+  left:19%;top:22%;
   pointer-events:none;
 }
-.hero-title{
+.hero-name{
   font-family:"Archivo Black",Arial,sans-serif;
-  font-size:clamp(100px,15.2vw,280px);
-  font-weight:900;line-height:.69;
+  font-size:clamp(90px,15vw,245px);
+  line-height:.73;
   letter-spacing:-.105em;
-  transform:scaleX(1.09);
-  transform-origin:left center;
-  color:#08080d;
+  font-weight:900;
+  transform:scaleX(1.08);
+  transform-origin:left;
   position:relative;
   opacity:0;
-  filter:blur(15px);
-  transition:opacity .5s,filter .7s,transform .8s;
+  filter:blur(14px);
+  transition:opacity .8s,filter .8s;
 }
-.hero-title.visible{
-  opacity:1;filter:none;
-  transform:scaleX(1.09) translateY(0);
+.hero-name.visible{opacity:1;filter:none}
+.hero-name span{
+  display:block;
+  position:relative;
+  white-space:nowrap;
 }
-.hero-title .line{display:block;position:relative;white-space:nowrap}
-.hero-title .line:last-child{margin-left:11%}
-.hero-title .line:before,
-.hero-title .line:after{
+.hero-name span:nth-child(2){margin-left:9%}
+.hero-name span:before,.hero-name span:after{
   content:attr(data-text);
-  position:absolute;left:0;top:0;width:100%;
-  overflow:hidden;opacity:0;
-  pointer-events:none;
+  position:absolute;inset:0;
+  opacity:0;
 }
-.hero-title.glitching .line:before{
-  opacity:.8;color:#344bff;
-  clip-path:inset(12% 0 58% 0);
-  transform:translate(-12px,3px);
+.hero-name.glitch span:before{
+  opacity:.8;color:#455bff;
+  clip-path:inset(10% 0 60% 0);
+  transform:translate(-12px,2px);
 }
-.hero-title.glitching .line:after{
-  opacity:.8;color:#8c42fa;
-  clip-path:inset(61% 0 12% 0);
-  transform:translate(13px,-4px);
+.hero-name.glitch span:after{
+  opacity:.8;color:#8051fa;
+  clip-path:inset(60% 0 10% 0);
+  transform:translate(12px,-3px);
 }
-.hero-title.glitching{
-  animation:wordGlitch .35s steps(3,end);
-}
-@keyframes wordGlitch{
-  0%,100%{filter:none}
-  25%{filter:contrast(2);transform:scaleX(1.14) skewX(-4deg)}
-  60%{transform:scaleX(1.04) skewX(3deg)}
-}
+.hero-name.glitch{animation:brandDistort .4s steps(3,end)}
 .hero-caption{
-  position:absolute;left:0;top:115%;
-  font-size:10px;letter-spacing:.15em;line-height:1.8;
+  margin-top:50px;
+  font-size:10px;
+  letter-spacing:.16em;
+  line-height:1.8;
 }
 
 /* NAVIGATION */
-.main-nav{
+
+.nav{
   position:absolute;z-index:12;
-  left:4.5%;top:24%;width:175px;
+  left:4.5%;top:26%;
+  width:165px;
   display:flex;flex-direction:column;
 }
-.nav-button{
-  display:flex;align-items:center;gap:16px;
-  border:0;background:transparent;color:#111;
-  padding:13px 15px;
-  text-align:left;position:relative;
-  font-size:13px;font-weight:600;
-  letter-spacing:.05em;
-  opacity:0;transform:translateX(-35px);
+.nav button{
+  display:flex;align-items:center;gap:15px;
+  width:100%;
+  border:0;background:transparent;
+  color:#111;text-align:left;
+  padding:13px 12px;
+  font-size:13px;
+  font-weight:600;
+  letter-spacing:.06em;
+  opacity:0;
+  transform:translateX(-30px);
   transition:opacity .5s,transform .5s,background .2s,color .2s;
 }
-.nav-button.show{opacity:1;transform:none}
-.nav-button small{font-size:10px;font-weight:400}
-.nav-button .arr{margin-left:auto}
-.nav-button:hover,
-.nav-button:focus-visible,
-.nav-button.current{
-  background:#111;color:#fff;
+.nav button.show{opacity:1;transform:none}
+.nav button small{font-size:10px;font-weight:400}
+.nav button .arrow{margin-left:auto}
+.nav button:hover,.nav button:focus-visible,.nav button.active{
+  background:#111;color:white;
 }
-.nav-button.glitching{
-  animation:navGlitch .3s steps(3,end);
-}
-@keyframes navGlitch{
-  25%{transform:translateX(12px) skewX(-10deg)}
-  50%{transform:translateX(-5px)}
-  75%{transform:translateX(4px) skewX(5deg)}
-}
+.nav button.glitch{animation:brandDistort .3s steps(3,end)}
 .home-footer{
-  position:absolute;z-index:9;
-  left:4.5%;bottom:3%;font-size:10px;
-  letter-spacing:.15em;
+  position:absolute;z-index:10;
+  left:4.5%;bottom:4%;
+  font-size:10px;letter-spacing:.16em;
 }
 
-/* SECTION PAGES */
-.section-header{
-  display:flex;justify-content:space-between;align-items:center;
-  gap:15px;margin-bottom:9vh;
+/* INNER PAGE HEADER */
+
+.inner-head{
+  position:relative;z-index:3;
+  display:flex;justify-content:space-between;
+  align-items:center;gap:20px;
+  padding:30px 5vw;
 }
-.section-brand{
+.inner-brand{
   font-family:"Archivo Black",sans-serif;
-  font-size:24px;letter-spacing:-.08em;
+  font-size:25px;letter-spacing:-.09em;
 }
 .back{
-  border:1px solid #111;background:#111;color:#fff;
-  padding:12px 20px;font-size:11px;letter-spacing:.1em;
+  background:#111;color:white;border:0;
+  padding:12px 18px;font-size:11px;
+  letter-spacing:.1em;
 }
-.back:hover{background:#fff;color:#111}
-.section-title{
+.back:hover{background:var(--blue)}
+.inner-content{
+  position:relative;z-index:2;
+  padding:5vh 6vw 10vh;
+}
+.kicker{
+  font-size:10px;
+  letter-spacing:.2em;
+  margin-bottom:35px;
+}
+h1{
   font-family:"Archivo Black",Arial,sans-serif;
-  font-size:clamp(65px,12vw,175px);
-  line-height:.83;letter-spacing:-.09em;
+  font-size:clamp(70px,12vw,175px);
+  line-height:.82;
+  letter-spacing:-.09em;
   margin:0 0 60px;
 }
-.section-title span{color:var(--blue)}
-.section-kicker{
-  font-size:10px;letter-spacing:.2em;margin-bottom:25px;
-}
-.section-copy{
-  max-width:720px;font-size:clamp(16px,2vw,23px);
+h1 span{color:var(--blue)}
+.copy{
+  max-width:750px;
+  font-size:clamp(16px,2vw,23px);
   line-height:1.8;
 }
-#work{background:linear-gradient(125deg,#f4f3ef 40%,#c7d6fa)}
-#about{background:linear-gradient(125deg,#f4f3ef 45%,#d3c5fa)}
-#contact{background:linear-gradient(125deg,#f4f3ef 45%,#c3d7fa)}
-#reel{background:linear-gradient(125deg,#f4f3ef 45%,#b6b7f0)}
-#detail{background:#f4f3ef}
 
-/* PROJECT SHOWCASE */
-.work-layout{
-  display:grid;grid-template-columns:.85fr 1.15fr;gap:5vw;
-}
-.project-list{border-top:1px solid #111}
-.project-button{
-  width:100%;display:flex;gap:14px;align-items:center;
-  text-align:left;padding:17px 12px;
-  border:0;border-bottom:1px solid #1117;
-  background:transparent;color:#111;
-}
-.project-button small{font-size:10px}
-.project-button strong{
-  font-family:"Archivo Black",sans-serif;
-  font-size:clamp(18px,2.5vw,36px);
-  letter-spacing:-.055em;
-}
-.project-button:hover,
-.project-button:focus-visible,
-.project-button.selected{background:#111;color:#fff}
-.project-preview{
-  position:relative;aspect-ratio:16/10;overflow:hidden;
-  background:#101020;
-}
-.project-preview .photo{
-  position:absolute;inset:0;width:100%;height:100%;
-}
-.preview-overlay{
-  position:absolute;inset:0;z-index:5;
-  display:flex;flex-direction:column;
-  justify-content:space-between;padding:24px;
+/* WORK — 3D CHARACTER SELECT */
+
+.work{
+  background:#050509;
   color:white;
-  background:linear-gradient(transparent 30%,#03030bbd);
+  overflow:hidden;
+}
+.work .inner-head{color:white}
+.work .back{background:white;color:#111}
+.work .back:hover{background:#6172ff;color:white}
+.work-world{
+  position:absolute;inset:0;overflow:hidden;
+  pointer-events:none;
+  background:
+    radial-gradient(ellipse at 50% 60%,#23265a65,transparent 60%),
+    #050509;
+}
+.work-grid{
+  position:absolute;
+  left:-50%;bottom:-30%;
+  width:200%;height:75%;
+  background-image:
+    linear-gradient(#c2c7ff2a 1px,transparent 1px),
+    linear-gradient(90deg,#c2c7ff2a 1px,transparent 1px);
+  background-size:75px 75px;
+  transform:perspective(450px) rotateX(65deg);
+  transform-origin:center bottom;
+  mask-image:linear-gradient(transparent,#000 60%);
+}
+.work-top{
+  position:relative;z-index:3;
+  padding:5vh 5vw 0;
+}
+.work-top h1{
+  font-size:clamp(45px,7vw,100px);
+  margin:0;
+}
+.work-top .kicker{color:#c2c0dd}
+
+/* Perspective gallery */
+
+.carousel-viewport{
+  position:relative;
+  z-index:4;
+  width:100%;
+  height:min(65vh,620px);
+  min-height:410px;
+  overflow:hidden;
+  perspective:1100px;
+  touch-action:pan-y;
+}
+.carousel-track{
+  position:absolute;inset:0;
+  transform-style:preserve-3d;
+}
+.project-card{
+  position:absolute;
+  top:50%;left:50%;
+  width:clamp(230px,44vw,710px);
+  aspect-ratio:16/10;
+  margin-left:calc(clamp(230px,44vw,710px) / -2);
+  margin-top:calc(clamp(230px,44vw,710px) * -0.3125);
+  padding:0;
+  background:#171729;
+  border:1px solid #ffffff30;
+  border-radius:14px;
+  overflow:hidden;
+  color:white;
+  text-align:left;
+  transform-style:preserve-3d;
+  transition:transform .75s cubic-bezier(.18,.75,.2,1),
+             opacity .65s,filter .65s;
+  box-shadow:0 25px 70px #0009;
+}
+.project-card img{
+  width:100%;height:100%;
+  display:block;object-fit:cover;
+  filter:saturate(.85) contrast(1.1);
+}
+.project-card:after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(transparent 45%,#000b);
   pointer-events:none;
 }
-.preview-overlay strong{
-  font-family:"Archivo Black",sans-serif;
-  font-size:clamp(30px,4vw,65px);
-  letter-spacing:-.07em;line-height:.95;
+.project-card .card-label{
+  position:absolute;bottom:20px;left:22px;
+  z-index:2;
+  font-size:clamp(16px,2vw,26px);
+  font-weight:600;
 }
-.preview-overlay small{letter-spacing:.18em}
-.view-project{
-  border:0;background:#111;color:white;
-  padding:15px 20px;margin-top:15px;font-size:11px;
+.project-card .card-number{
+  position:absolute;top:18px;left:20px;
+  z-index:2;font-size:10px;
 }
-.view-project:hover{background:var(--blue)}
-.video-box{
-  width:min(100%,1000px);aspect-ratio:16/9;
-  background:#0b0c18;color:white;
-  display:grid;place-items:center;
-  font-size:11px;letter-spacing:.2em;
-  text-align:center;padding:20px;
+.project-card.selected{
+  border-color:#ffffffa0;
+  box-shadow:0 30px 95px #2532c855;
 }
-.detail-copy{max-width:800px;line-height:1.8;margin-top:30px}
+.project-card:hover img{filter:saturate(1.2) contrast(1.1)}
+.carousel-controls{
+  position:relative;z-index:5;
+  display:flex;align-items:center;justify-content:center;
+  gap:22px;
+  padding:10px 20px 45px;
+}
+.carousel-controls button{
+  background:transparent;color:white;
+  border:1px solid #ffffff75;
+  padding:12px 18px;
+  font-size:12px;
+}
+.carousel-controls button:hover{
+  background:white;color:black;
+}
+.carousel-count{
+  font-size:11px;letter-spacing:.15em;
+  min-width:70px;text-align:center;
+}
+.work-instruction{
+  position:relative;z-index:5;
+  text-align:center;
+  font-size:10px;letter-spacing:.18em;
+  color:#bbb9d1;
+  padding-bottom:25px;
+}
 
-/* LOADER */
+/* VIDEO PLAYER OVERLAY */
+
+.player-overlay{
+  position:fixed;inset:0;
+  z-index:70;
+  background:#050509ed;
+  color:white;
+  display:grid;
+  place-items:center;
+  padding:65px 5vw;
+  opacity:0;
+  visibility:hidden;
+  transition:opacity .4s,visibility .4s;
+}
+.player-overlay.open{
+  opacity:1;visibility:visible;
+}
+.player-inner{
+  width:min(1100px,100%);
+  transform:scale(.87) translateY(30px);
+  transition:transform .5s cubic-bezier(.16,1,.3,1);
+}
+.player-overlay.open .player-inner{
+  transform:scale(1) translateY(0);
+}
+.player-top{
+  display:flex;justify-content:space-between;
+  align-items:center;gap:20px;
+  margin-bottom:20px;
+}
+.player-title{
+  font-family:"Archivo Black",sans-serif;
+  font-size:clamp(19px,3vw,38px);
+  letter-spacing:-.07em;
+}
+.close-player{
+  background:white;color:black;
+  border:0;padding:12px 18px;
+  font-size:11px;
+}
+.video-frame{
+  aspect-ratio:16/9;
+  width:100%;
+  background:#111126;
+  border:1px solid #ffffff40;
+  overflow:hidden;
+}
+.video-frame iframe,.video-frame video{
+  display:block;width:100%;height:100%;
+  border:0;
+}
+.video-empty{
+  width:100%;height:100%;
+  display:grid;place-items:center;
+  text-align:center;padding:25px;
+  color:#d0cde8;font-size:12px;
+  line-height:2;
+}
+.player-description{
+  margin-top:20px;
+  max-width:850px;
+  font-size:12px;
+  line-height:1.8;
+  color:#c5c3d9;
+}
+
+/* ABOUT AND CONTACT */
+
+.about{
+  background:linear-gradient(125deg,#f4f3ef 48%,#d4c8ff);
+}
+.contact{
+  background:linear-gradient(125deg,#f4f3ef 48%,#c6d8ff);
+}
+.social-links{
+  display:flex;flex-wrap:wrap;gap:15px;
+  margin-top:45px;
+}
+.social-links a{
+  text-decoration:none;
+  color:white;background:#111;
+  padding:15px 22px;
+  font-size:12px;
+}
+.social-links a:hover{background:var(--blue)}
+
+/* LOADING SCREEN */
+
 .loader{
   position:fixed;inset:0;z-index:100;
-  background:#090910;color:white;
   display:grid;place-items:center;
-  transition:opacity .65s,visibility .65s;
+  background:#080811;color:white;
+  transition:opacity .7s,visibility .7s;
 }
-.loader.done{opacity:0;visibility:hidden;pointer-events:none}
+.loader.done{
+  opacity:0;visibility:hidden;
+  pointer-events:none;
+}
 .loader-inner{width:min(700px,80vw)}
-.loader-label{font-size:10px;letter-spacing:.2em;margin-bottom:35px}
-.loader-word{
+.loader-label{
+  font-size:10px;letter-spacing:.2em;
+  margin-bottom:35px;
+}
+.loader-name{
   font-family:"Archivo Black",sans-serif;
-  font-size:clamp(55px,11vw,150px);
-  letter-spacing:-.095em;line-height:.9;
-  opacity:0;transform:translateY(35px);
+  font-size:clamp(65px,12vw,165px);
+  letter-spacing:-.1em;line-height:.85;
+  opacity:0;transform:translateY(40px);
   transition:opacity .7s,transform .7s;
 }
-.loader-word.show{opacity:1;transform:none}
-.loader-word span{color:#8e83ff}
-.loader-progress{height:2px;background:#ffffff30;margin-top:45px}
-.loader-progress div{
-  width:0;height:100%;background:#8a94ff;
+.loader-name.show{opacity:1;transform:none}
+.loader-name span{color:#9890ff}
+.loader-track{
+  margin-top:50px;height:2px;
+  background:#ffffff30;
+}
+.loader-fill{
+  height:100%;width:0;
+  background:#8792ff;
   transition:width 2s linear;
 }
-.loader-progress div.fill{width:100%}
+.loader-fill.fill{width:100%}
 .skip{
-  position:absolute;top:25px;right:5vw;
-  border:1px solid #ffffff66;background:transparent;
-  color:white;padding:12px 17px;font-size:10px;
+  position:absolute;top:30px;right:5vw;
+  background:transparent;color:white;
+  border:1px solid #ffffff70;
+  padding:11px 17px;font-size:11px;
 }
 
 /* TRANSITIONS */
+
 .transition{
-  position:fixed;inset:0;z-index:50;pointer-events:none;
-  visibility:hidden;overflow:hidden;
+  position:fixed;inset:0;z-index:60;
+  pointer-events:none;visibility:hidden;
 }
 .transition.active{visibility:visible}
 .transition.work{
-  background:repeating-linear-gradient(
-    90deg,#101018 0 8%,#344df1 8% 10%,#101018 10% 16%);
-  animation:workTransition 1s steps(12,end) both;
+  background:
+    repeating-linear-gradient(90deg,
+      #080811 0 8%,#4056f2 8% 10%,#080811 10% 16%);
+  animation:pixelTransition 1s steps(12,end) both;
 }
-@keyframes workTransition{
+@keyframes pixelTransition{
   0%{clip-path:inset(0 100% 0 0)}
   48%,55%{clip-path:inset(0)}
   100%{clip-path:inset(0 0 0 100%)}
 }
 .transition.about{
-  background:linear-gradient(125deg,#111,#7855f4);
-  animation:aboutTransition 1s ease-in-out both;
+  background:linear-gradient(125deg,#111,#8054ed);
+  animation:rotateTransition 1s ease-in-out both;
 }
-@keyframes aboutTransition{
-  0%{transform:perspective(900px) rotateY(-90deg) scale(1.4);opacity:0}
-  45%,55%{transform:perspective(900px) rotateY(0);opacity:1}
-  100%{transform:perspective(900px) rotateY(90deg) scale(1.4);opacity:0}
+@keyframes rotateTransition{
+  0%{transform:perspective(800px) rotateY(-90deg) scale(1.4);opacity:0}
+  45%,55%{transform:perspective(800px) rotateY(0);opacity:1}
+  100%{transform:perspective(800px) rotateY(90deg) scale(1.4);opacity:0}
 }
 .transition.contact{
-  background:radial-gradient(circle,#e4e9ff,#4055ec 35%,#080813 80%);
-  animation:contactTransition 1s ease-in-out both;
+  background:radial-gradient(circle,#dce7ff,#445af1 35%,#080811 80%);
+  animation:zoomTransition 1s ease-in-out both;
 }
-@keyframes contactTransition{
+@keyframes zoomTransition{
   0%{transform:scale(.02);opacity:0}
   45%,55%{transform:scale(1.5);opacity:1}
   100%{transform:scale(7);opacity:0}
 }
-.transition.reel,.transition.detail{
-  background:#070711;
-  animation:reelTransition 1s ease-in-out both;
-}
-@keyframes reelTransition{
-  0%{clip-path:inset(50% 0)}
-  45%,55%{clip-path:inset(0)}
-  100%{clip-path:inset(50% 0)}
-}
 
-/* RESPONSIVE */
-@media(max-width:900px){
-  .home{height:auto;min-height:850px}
-  .hero{left:24%;top:24%;width:70%}
-  .hero-title{font-size:clamp(90px,16vw,150px)}
-  .main-nav{left:4%;top:42%;width:160px}
-  .photo-a{grid-column:6/13}
-  .work-layout{grid-template-columns:1fr}
-  .coordinates{display:none}
+/* MOBILE */
+
+@media(max-width:850px){
+  .hero{left:25%;top:26%}
+  .hero-name{font-size:clamp(85px,16vw,150px)}
+  .nav{left:4%;top:48%}
+  .carousel-viewport{height:54vh;min-height:340px}
+  .project-card{
+    width:clamp(230px,65vw,520px);
+    margin-left:calc(clamp(230px,65vw,520px) / -2);
+    margin-top:calc(clamp(230px,65vw,520px) * -0.3125);
+  }
 }
-@media(max-width:600px){
-  .home{min-height:800px;height:100svh}
-  .site-header{padding:20px}
-  .top-meta{display:none}
-  .hero{left:8%;top:23%;width:90%}
-  .hero-title{font-size:clamp(78px,19vw,130px)}
-  .hero-title .line:last-child{margin-left:7%}
-  .hero-caption{top:110%;font-size:9px}
-  .main-nav{left:5%;top:54%;width:175px}
-  .photo-a{grid-column:5/13;grid-row:2/9}
-  .photo-b{grid-column:1/10;grid-row:9/12}
-  .photo-c{grid-column:8/13;grid-row:9/13}
-  .photo-d,.photo-e,.photo-f{display:none}
-  .category-list{display:none}
-  .section-title{font-size:clamp(56px,13vw,95px)}
-  .page:not(.home){padding:25px 6vw 70px}
+@media(max-width:550px){
+  .home{min-height:760px;height:100svh}
+  .header{padding:22px}
+  .top-right{display:none}
+  .brand-row{gap:10px}
+  .brand{font-size:24px;min-width:90px}
+  .socials{gap:6px}
+  .hero{left:7%;top:26%}
+  .hero-name{font-size:clamp(75px,18vw,120px)}
+  .hero-caption{font-size:9px}
+  .nav{left:5%;top:58%;width:170px}
+  .carousel-viewport{min-height:300px;height:43vh}
+  .project-card{
+    width:76vw;
+    margin-left:-38vw;
+    margin-top:-23.75vw;
+  }
+  .work-top{padding-top:2vh}
+  .work-top h1{font-size:45px}
+  .carousel-controls{padding-bottom:25px}
+  .player-overlay{padding:65px 4vw}
+  h1{font-size:clamp(55px,13vw,90px)}
 }
 @media(prefers-reduced-motion:reduce){
-  *,*:before,*:after{animation:none!important;transition:none!important}
+  *,*:before,*:after{
+    animation:none!important;
+    transition:none!important;
+  }
   .loader,.transition{display:none!important}
-  .hero-title,.nav-button,.photo,.photo .tile{opacity:1!important;filter:none!important;transform:none!important}
+  .hero-name,.nav button{opacity:1!important;filter:none!important;transform:none!important}
 }
 </style>
 </head>
 <body>
+
 <div class="paper"></div>
 
 <div class="loader" id="loader">
   <button class="skip" id="skip">SKIP INTRO ↗</button>
   <div class="loader-inner">
     <div class="loader-label">JOAQO / VIDEO EDITOR / PORTFOLIO</div>
-    <div class="loader-word" id="loader-word">JOAQO<br><span>MANSILLA.</span></div>
-    <div class="loader-progress"><div id="progress"></div></div>
+    <div class="loader-name" id="loader-name">
+      JOAQO<br><span>MANSILLA.</span>
+    </div>
+    <div class="loader-track">
+      <div class="loader-fill" id="loader-fill"></div>
+    </div>
   </div>
 </div>
 
 <div id="app">
 
-<section class="page home" id="home">
-  <div class="home-grid">
-    <div class="photo photo-a" data-photo="city"></div>
-    <div class="photo photo-b" data-photo="night"></div>
-    <div class="photo photo-c" data-photo="street"></div>
-    <div class="photo photo-d" data-photo="tower"></div>
-    <div class="photo photo-e" data-photo="street"></div>
-    <div class="photo photo-f" data-photo="night"></div>
-  </div>
-
-  <header class="site-header">
-    <div class="brand">
-      Joaqo OqaoJ
-      <small>VIDEO EDITOR<br>MIAMI, FL</small>
+  <section class="page home" id="home">
+    <div class="collage" id="collage">
+      <div class="collage-glow"></div>
     </div>
-    <div class="top-meta">EDIT / COLOR / SOUND / STORYTELLING<br>ES / EN</div>
-  </header>
 
-  <nav class="main-nav" aria-label="Main navigation">
-    <button class="nav-button current" data-page="home"><small>01</small>HOME<span class="arr">→</span></button>
-    <button class="nav-button" data-page="work"><small>02</small>WORK<span class="arr">→</span></button>
-    <button class="nav-button" data-page="reel"><small>03</small>REEL<span class="arr">→</span></button>
-    <button class="nav-button" data-page="about"><small>04</small>ABOUT<span class="arr">→</span></button>
-    <button class="nav-button" data-page="contact"><small>05</small>CONTACT<span class="arr">→</span></button>
-  </nav>
+    <header class="header">
+      <div>
+        <div class="brand-row">
+          <div class="brand" id="brand" data-text="Joaqo">Joaqo</div>
 
-  <div class="hero">
-    <div class="hero-title" id="hero-title">
-      <span class="line" id="name-first" data-text="Joaqo">Joaqo</span>
-      <span class="line" id="name-second" data-text="OqaoJ">OqaoJ</span>
-    </div>
-    <div class="hero-caption">
-      VIDEO EDITING<br>
-      FOR FILM, MUSIC<br>
-      AND DIGITAL MEDIA.
-    </div>
-  </div>
+          <div class="socials">
+            <a class="social"
+               href="https://www.instagram.com/oqaoj/"
+               target="_blank"
+               rel="noopener noreferrer"
+               aria-label="Instagram">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7zm5 3a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6zm5.5-3a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3z"/>
+              </svg>
+            </a>
 
-  <div class="image-label coordinates">
-    MIAMI<br>25.7617° N<br>80.1918° W
-  </div>
-  <div class="image-label category-list">
-    1 COMMERCIAL<br>2 MUSIC<br>3 SOCIAL<br>4 NARRATIVE
-  </div>
-  <div class="home-footer">(C) 2026 — JOACO MANSILLA</div>
-</section>
-
-<section class="page" id="work" hidden>
-  <div class="section-header">
-    <div class="section-brand">Joaqo OqaoJ</div>
-    <button class="back" data-page="home">← HOME</button>
-  </div>
-  <div class="section-kicker">01 / SELECTED WORK</div>
-  <h1 class="section-title">SELECTED<br><span>WORK.</span></h1>
-  <div class="work-layout">
-    <div class="project-list" id="project-list"></div>
-    <div>
-      <div class="project-preview">
-        <div class="photo" id="project-photo" data-photo="city"></div>
-        <div class="preview-overlay">
-          <small id="preview-category"></small>
-          <strong id="preview-title"></strong>
+            <a class="social"
+               href="https://x.com/oqaoj6"
+               target="_blank"
+               rel="noopener noreferrer"
+               aria-label="X / Twitter">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M18.9 2H22l-6.8 7.8L23.2 22h-6.3L12 14.6 5.5 22H2.3l7.3-8.5L1.8 2h6.5l4.4 6.7L18.9 2zm-1.1 18h1.7L7.3 3.9H5.5L17.8 20z"/>
+              </svg>
+            </a>
+          </div>
         </div>
+        <div class="header-sub">VIDEO EDITOR</div>
       </div>
-      <button class="view-project" id="view-project">VIEW PROJECT ↗</button>
+
+      <div class="top-right">
+        EDIT / COLOR / SOUND / STORYTELLING<br>
+        ES / EN
+      </div>
+    </header>
+
+    <nav class="nav" aria-label="Main navigation">
+      <button class="active" data-page="home">
+        <small>01</small>HOME<span class="arrow">→</span>
+      </button>
+      <button data-page="work">
+        <small>02</small>WORK<span class="arrow">→</span>
+      </button>
+      <button data-page="about">
+        <small>03</small>ABOUT<span class="arrow">→</span>
+      </button>
+      <button data-page="contact">
+        <small>04</small>CONTACT<span class="arrow">→</span>
+      </button>
+    </nav>
+
+    <div class="hero">
+      <div class="hero-name" id="hero-name">
+        <span id="hero-first" data-text="Joaqo">Joaqo</span>
+        <span id="hero-second" data-text="OqaoJ">OqaoJ</span>
+      </div>
+      <div class="hero-caption">
+        VIDEO EDITING<br>
+        FOR FILM, MUSIC<br>
+        AND DIGITAL MEDIA.
+      </div>
     </div>
-  </div>
-</section>
 
-<section class="page" id="detail" hidden>
-  <div class="section-header">
-    <div class="section-brand">Joaqo OqaoJ</div>
-    <button class="back" data-page="work">← WORK</button>
-  </div>
-  <div class="section-kicker" id="detail-category"></div>
-  <h1 class="section-title" id="detail-title"></h1>
-  <div class="video-box">PROJECT VIDEO / COMING SOON</div>
-  <div class="detail-copy">
-    <strong id="detail-role"></strong>
-    <p id="detail-description"></p>
-  </div>
-</section>
+    <div class="home-footer">(C) 2026 — JOACO MANSILLA</div>
+  </section>
 
-<section class="page" id="reel" hidden>
-  <div class="section-header">
-    <div class="section-brand">Joaqo OqaoJ</div>
-    <button class="back" data-page="home">← HOME</button>
-  </div>
-  <div class="section-kicker">02 / VIDEO SHOWREEL</div>
-  <h1 class="section-title">DEMO<br><span>REEL.</span></h1>
-  <div class="video-box">SHOWREEL / COMING SOON</div>
-</section>
+  <section class="page work" id="work" hidden>
+    <div class="work-world">
+      <div class="work-grid"></div>
+    </div>
 
-<section class="page" id="about" hidden>
-  <div class="section-header">
-    <div class="section-brand">Joaqo OqaoJ</div>
-    <button class="back" data-page="home">← HOME</button>
-  </div>
-  <div class="section-kicker">03 / ABOUT</div>
-  <h1 class="section-title">JOACO<br><span>MANSILLA.</span></h1>
-  <div class="section-copy">
-    <p>I'm a video editor based in Miami, Florida, working across documentary, commercial, music, and digital content.</p>
-    <p>Adobe Certified Professional in Premiere Pro.</p>
-    <p>I focus on rhythm, sound, and visual storytelling.</p>
-  </div>
-</section>
+    <div class="inner-head">
+      <div class="inner-brand">Joaqo</div>
+      <button class="back" data-page="home">← HOME</button>
+    </div>
 
-<section class="page" id="contact" hidden>
-  <div class="section-header">
-    <div class="section-brand">Joaqo OqaoJ</div>
-    <button class="back" data-page="home">← HOME</button>
-  </div>
-  <div class="section-kicker">04 / CONTACT</div>
-  <h1 class="section-title">GET IN<br><span>TOUCH.</span></h1>
-  <div class="section-copy">
-    <p>Available for freelance video editing projects.</p>
-    <p>Contact links will be added here.</p>
-  </div>
-</section>
+    <div class="work-top">
+      <div class="kicker">01 / SELECTED WORK</div>
+      <h1>SELECT YOUR PROJECT.</h1>
+    </div>
 
+    <div class="carousel-viewport" id="carousel-viewport">
+      <div class="carousel-track" id="carousel-track"></div>
+    </div>
+
+    <div class="carousel-controls">
+      <button id="previous" aria-label="Previous project">←</button>
+      <div class="carousel-count" id="carousel-count">01 / 05</div>
+      <button id="next" aria-label="Next project">→</button>
+    </div>
+
+    <div class="work-instruction">
+      SCROLL TO SELECT / CLICK CENTER PROJECT TO VIEW
+    </div>
+  </section>
+
+  <section class="page about" id="about" hidden>
+    <div class="inner-head">
+      <div class="inner-brand">Joaqo</div>
+      <button class="back" data-page="home">← HOME</button>
+    </div>
+    <div class="inner-content">
+      <div class="kicker">02 / ABOUT</div>
+      <h1>JOACO<br><span>MANSILLA.</span></h1>
+      <div class="copy">
+        <p>I'm a video editor working across documentary, commercial, music, and digital content.</p>
+        <p>Adobe Certified Professional in Premiere Pro.</p>
+        <p>I focus on rhythm, sound, and visual storytelling.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="page contact" id="contact" hidden>
+    <div class="inner-head">
+      <div class="inner-brand">Joaqo</div>
+      <button class="back" data-page="home">← HOME</button>
+    </div>
+    <div class="inner-content">
+      <div class="kicker">03 / CONTACT</div>
+      <h1>GET IN<br><span>TOUCH.</span></h1>
+      <div class="copy">
+        <p>Available for freelance video editing projects.</p>
+        <p>Contact me through my social accounts.</p>
+      </div>
+      <div class="social-links">
+        <a href="https://www.instagram.com/oqaoj/"
+           target="_blank" rel="noopener noreferrer">
+          INSTAGRAM ↗
+        </a>
+        <a href="https://x.com/oqaoj6"
+           target="_blank" rel="noopener noreferrer">
+          X / TWITTER ↗
+        </a>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div class="player-overlay" id="player-overlay"
+     role="dialog" aria-modal="true"
+     aria-label="Project video" aria-hidden="true">
+  <div class="player-inner">
+    <div class="player-top">
+      <div class="player-title" id="player-title"></div>
+      <button class="close-player" id="close-player">CLOSE ✕</button>
+    </div>
+    <div class="video-frame" id="video-frame"></div>
+    <div class="player-description" id="player-description"></div>
+  </div>
 </div>
 
 <div class="transition" id="transition" aria-hidden="true"></div>
 
 <script>
 /*
-  PHOTO SOURCES
-  These are independent photographs, NOT the reference image.
-  Replace the URLs later with your own photographs or video stills.
-*/
-const photos = {
-  city:"https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=1400&q=85",
-  night:"https://images.unsplash.com/photo-1519608487953-e999c86e7455?w=1400&q=85",
-  street:"https://images.unsplash.com/photo-1514565131-fce0801e5785?w=1400&q=85",
-  tower:"https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=1400&q=85"
-};
+  IMAGE SOURCES
 
-const projects = [
+  Independent photographs, not a static website screenshot.
+  Replace these with your own licensed images or video stills
+  whenever you are ready.
+*/
+
+const imageSources = [
+  "https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=1400&q=85",
+  "https://images.unsplash.com/photo-1519608487953-e999c86e7455?w=1400&q=85",
+  "https://images.unsplash.com/photo-1514565131-fce0801e5785?w=1400&q=85",
+  "https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=1400&q=85",
+  "https://images.unsplash.com/photo-1519608487953-e999c86e7455?w=1400&q=85"
+];
+
+/*
+  MOSAIC DESTINATIONS
+
+  Percentages of the homepage.
+  Each mosaic moves between these locations,
+  replacing its photograph as it reconstructs.
+*/
+
+const positions = [
+  {x:52,y:0,w:48,h:65},
+  {x:0,y:70,w:55,h:25},
+  {x:44,y:69,w:36,h:31},
+  {x:77,y:53,w:23,h:35},
+  {x:66,y:12,w:20,h:30}
+];
+
+const mosaicCount = 4;
+const mosaics = [];
+const collage = document.getElementById("collage");
+
+const random = (min,max) =>
+  min+Math.random()*(max-min);
+
+const sleep = ms =>
+  new Promise(resolve=>setTimeout(resolve,ms));
+
+const reduced = matchMedia("(prefers-reduced-motion: reduce)");
+
+let currentPage = "home";
+let navigating = false;
+let mosaicRunning = false;
+let mosaicVersion = 0;
+let selectedProject = 0;
+let playerOpen = false;
+
+/*
+  MOSAIC SYSTEM
+
+  Each photo is made from a grid of small squares.
+  The squares scatter, travel toward another region,
+  and reconstruct a different photograph.
+*/
+
+function createMosaic(index){
+  const element=document.createElement("div");
+  element.className="mosaic";
+  element.dataset.index=index;
+  collage.appendChild(element);
+
+  const mosaic={
+    element,
+    index,
+    position:index%positions.length,
+    image:index%imageSources.length,
+    tiles:[],
+    version:0
+  };
+
+  mosaics.push(mosaic);
+  return mosaic;
+}
+
+function applyPosition(mosaic,position){
+  const p=positions[position%positions.length];
+
+  mosaic.element.style.left=p.x+"%";
+  mosaic.element.style.top=p.y+"%";
+  mosaic.element.style.width=p.w+"%";
+  mosaic.element.style.height=p.h+"%";
+}
+
+function buildTiles(mosaic){
+  mosaic.element.replaceChildren();
+  mosaic.tiles=[];
+
+  const w=mosaic.element.clientWidth;
+  const h=mosaic.element.clientHeight;
+  if(!w||!h)return;
+
+  // Many smaller squares instead of a handful of large ones.
+  // The tile count adapts to the size of each photo.
+  const size=window.innerWidth<650 ? 17 : 21;
+  const cols=Math.max(6,Math.ceil(w/size));
+  const rows=Math.max(5,Math.ceil(h/size));
+
+  const tw=w/cols;
+  const th=h/rows;
+  const image=imageSources[mosaic.image];
+
+  for(let row=0;row<rows;row++){
+    for(let col=0;col<cols;col++){
+      const tile=document.createElement("div");
+      tile.className="mosaic-tile";
+
+      const x=col*tw;
+      const y=row*th;
+
+      tile.style.left=x+"px";
+      tile.style.top=y+"px";
+      tile.style.width=(tw+.5)+"px";
+      tile.style.height=(th+.5)+"px";
+      tile.style.backgroundImage=`url("${image}")`;
+      tile.style.backgroundSize=`${w}px ${h}px`;
+      tile.style.backgroundPosition=`-${x}px -${y}px`;
+
+      tile.style.opacity="0";
+
+      mosaic.element.appendChild(tile);
+      mosaic.tiles.push(tile);
+    }
+  }
+}
+
+function scatterIn(mosaic){
+  if(reduced.matches){
+    mosaic.tiles.forEach(tile=>{
+      tile.style.opacity="1";
+      tile.style.transform="none";
+    });
+    return Promise.resolve();
+  }
+
+  const animations=mosaic.tiles.map(tile=>{
+    const dx=random(-180,180);
+    const dy=random(-150,150);
+    const delay=random(0,700);
+
+    return tile.animate([
+      {
+        opacity:0,
+        transform:`translate(${dx}px,${dy}px) scale(${random(.6,1.4)})`,
+        filter:"contrast(2) hue-rotate(50deg)"
+      },
+      {
+        opacity:1,
+        transform:"translate(0,0) scale(1)",
+        filter:"none"
+      }
+    ],{
+      duration:random(750,1350),
+      delay,
+      easing:"cubic-bezier(.16,1,.3,1)",
+      fill:"forwards"
+    });
+  });
+
+  return Promise.all(animations.map(a=>a.finished.catch(()=>{})));
+}
+
+/*
+  The tiles travel out from the old image.
+  After they scatter, the mosaic changes location
+  and image, then the new image reconstructs.
+*/
+
+async function transformMosaic(mosaic){
+  if(currentPage!=="home"||reduced.matches)return;
+
+  const version=++mosaic.version;
+  const tiles=mosaic.tiles;
+
+  const exitAnimations=tiles.map(tile=>{
+    return tile.animate([
+      {opacity:1,transform:"translate(0,0) scale(1)"},
+      {
+        opacity:0,
+        transform:`translate(${random(-220,220)}px,${random(-180,180)}px) scale(${random(.5,1.3)})`
+      }
+    ],{
+      duration:random(450,900),
+      delay:random(0,350),
+      easing:"cubic-bezier(.7,0,.3,1)",
+      fill:"forwards"
+    });
+  });
+
+  await Promise.all(exitAnimations.map(a=>a.finished.catch(()=>{})));
+
+  if(version!==mosaic.version||currentPage!=="home")return;
+
+  mosaic.position=(mosaic.position+1)%positions.length;
+  mosaic.image=(mosaic.image+1)%imageSources.length;
+
+  applyPosition(mosaic,mosaic.position);
+  buildTiles(mosaic);
+  await scatterIn(mosaic);
+}
+
+async function startMosaics(){
+  if(mosaicRunning)return;
+  mosaicRunning=true;
+  const run=++mosaicVersion;
+
+  mosaics.forEach((mosaic,i)=>{
+    applyPosition(mosaic,mosaic.position);
+    buildTiles(mosaic);
+    setTimeout(()=>scatterIn(mosaic),i*220);
+  });
+
+  if(reduced.matches)return;
+
+  while(run===mosaicVersion){
+    await sleep(2600);
+
+    if(run!==mosaicVersion)break;
+    if(currentPage!=="home")continue;
+
+    // Move different image groups at staggered intervals.
+    for(let i=0;i<mosaics.length;i++){
+      if(run!==mosaicVersion)break;
+      if(currentPage==="home"){
+        transformMosaic(mosaics[i]);
+      }
+      await sleep(550);
+    }
+  }
+}
+
+for(let i=0;i<mosaicCount;i++){
+  createMosaic(i);
+}
+
+/* GLITCHING IDENTITY */
+
+const brand=document.getElementById("brand");
+const heroName=document.getElementById("hero-name");
+const heroFirst=document.getElementById("hero-first");
+const heroSecond=document.getElementById("hero-second");
+
+let glitching=false;
+
+async function glitchIdentity(){
+  if(currentPage!=="home"||glitching||reduced.matches)return;
+  glitching=true;
+
+  brand.classList.add("glitch");
+  heroName.classList.add("glitch");
+
+  await sleep(110);
+
+  brand.textContent="OqaoJ";
+  brand.dataset.text="OqaoJ";
+
+  heroFirst.textContent="opɒoᒐ";
+  heroFirst.dataset.text="opɒoᒐ";
+
+  await sleep(160);
+
+  brand.textContent="Joaqo";
+  brand.dataset.text="Joaqo";
+
+  heroFirst.textContent="Joaqo";
+  heroFirst.dataset.text="Joaqo";
+
+  brand.classList.remove("glitch");
+  heroName.classList.remove("glitch");
+  glitching=false;
+}
+
+function glitchRandomElement(){
+  if(currentPage!=="home"||reduced.matches)return;
+
+  const elements=[
+    ...document.querySelectorAll(".nav button"),
+    ...document.querySelectorAll(".social")
+  ];
+
+  const element=elements[Math.floor(Math.random()*elements.length)];
+  element.classList.remove("glitch");
+  void element.offsetWidth;
+  element.classList.add("glitch");
+  setTimeout(()=>element.classList.remove("glitch"),350);
+}
+
+if(!reduced.matches){
+  setInterval(()=>{
+    if(Math.random()<.65)glitchIdentity();
+    else glitchRandomElement();
+  },5500);
+}
+
+/* PROJECT DATA
+
+  To connect a real video later, add either:
+  youtube: "VIDEO_ID"
+  or
+  video: "videos/filename.mp4"
+
+  No public video URLs have been supplied yet.
+*/
+
+const projects=[
   {
     title:"HAITI",
     category:"DOCUMENTARY",
-    role:"EDITING / SOUND DESIGN / STORYTELLING",
-    description:"A documentary-style academic project focused on atmosphere, sound design, and emotional storytelling.",
-    photo:"city"
+    image:imageSources[0],
+    description:"Nonprofit documentary-style film. Editing, sound design, and storytelling."
   },
   {
     title:"JOEY CALVEIRO",
     category:"CINEMATIC",
-    role:"RESEARCH / CONCEPT / EDITING",
-    description:"A cinematic jazz teaser connecting historical influences with a contemporary artist.",
-    photo:"night"
+    image:imageSources[1],
+    description:"Cinematic jazz teaser. Concept, research, and editing."
   },
   {
     title:"RAW FIT",
     category:"COMMERCIAL",
-    role:"EDITING / COLOR / SOUND DESIGN",
-    description:"A music-driven fitness commercial featuring rhythmic editing, color grading, and visual effects.",
-    photo:"street"
+    image:imageSources[2],
+    description:"Fitness commercial. Editing, color grading, and sound design."
   },
   {
     title:"SHARKCAST",
     category:"PODCAST",
-    role:"EDITORIAL / VIDEO EDITING",
-    description:"Podcast reels, trailers, and longer-form editing with supporting footage.",
-    photo:"tower"
+    image:imageSources[3],
+    description:"Podcast episodes, promotional trailers, and short-form reels."
   },
   {
     title:"3Y4 MUSIC",
     category:"MUSIC",
-    role:"EDITING / POST-PRODUCTION",
-    description:"Commissioned short-form promotional videos for music and events.",
-    photo:"night"
+    image:imageSources[4],
+    description:"Commissioned promotional videos for music and events."
   }
 ];
 
-const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
-const app = document.getElementById("app");
-const loader = document.getElementById("loader");
-const transition = document.getElementById("transition");
-const heroTitle = document.getElementById("hero-title");
-const firstName = document.getElementById("name-first");
-const secondName = document.getElementById("name-second");
+/* 3D PROJECT CAROUSEL */
 
-let currentPage = "home";
-let navigating = false;
-let selectedProject = 0;
-let introFinished = false;
-let introTimers = [];
-let imageGeneration = 0;
-
-const wait = ms => new Promise(resolve => setTimeout(resolve,ms));
-const random = (min,max) => min+Math.random()*(max-min);
-
-/*
-  IMAGE RECONSTRUCTION
-
-  Each image is divided into independent rectangular pieces.
-  Every piece contains the correctly aligned portion of the
-  original photograph, so the fragments ultimately form
-  one complete picture.
-*/
-function buildMosaic(element,photoKey,stagger=0) {
-  const url = photos[photoKey];
-  if(!url)return;
-
-  const generation = ++imageGeneration;
-  element.replaceChildren();
-  element.classList.add("ready");
-
-  const width = element.clientWidth;
-  const height = element.clientHeight;
-
-  if(width<1||height<1)return;
-
-  const columns = width<400 ? 6 : 9;
-  const rows = height<250 ? 5 : 8;
-  const tileW = width/columns;
-  const tileH = height/rows;
-
-  for(let row=0;row<rows;row++){
-    for(let col=0;col<columns;col++){
-      const tile=document.createElement("div");
-      tile.className="tile";
-
-      const x=col*tileW;
-      const y=row*tileH;
-
-      tile.style.left=x+"px";
-      tile.style.top=y+"px";
-      tile.style.width=(tileW+0.6)+"px";
-      tile.style.height=(tileH+0.6)+"px";
-
-      tile.style.backgroundImage=`url("${url}")`;
-      tile.style.backgroundSize=`${width}px ${height}px`;
-      tile.style.backgroundPosition=`-${x}px -${y}px`;
-
-      tile.style.setProperty("--tx",random(-130,130)+"px");
-      tile.style.setProperty("--ty",random(-110,110)+"px");
-      tile.style.setProperty("--scale",random(.65,1.35));
-      tile.style.setProperty("--duration",random(.65,1.4)+"s");
-      tile.style.setProperty("--delay",(stagger+random(0,1.2))+"s");
-
-      element.appendChild(tile);
-      tile.classList.add("in");
-    }
-  }
-
-  element.dataset.photo=photoKey;
-}
-
-function assembleHome(){
-  document.querySelectorAll(".home-grid .photo").forEach((el,i)=>{
-    buildMosaic(el,el.dataset.photo,i*.13);
-  });
-}
-
-function flickerRandomPhoto(){
-  if(currentPage!=="home"||reduced.matches)return;
-  const elements=[...document.querySelectorAll(".home-grid .photo")];
-  const element=elements[Math.floor(Math.random()*elements.length)];
-  if(!element)return;
-  element.classList.remove("flicker");
-  void element.offsetWidth;
-  element.classList.add("flicker");
-  setTimeout(()=>element.classList.remove("flicker"),350);
-}
-
-/* NAME GLITCH / MIRRORED LETTERS */
-
-let glitchBusy=false;
-
-async function glitchName(){
-  if(currentPage!=="home"||glitchBusy||reduced.matches)return;
-
-  glitchBusy=true;
-  heroTitle.classList.add("glitching");
-
-  await wait(100);
-  firstName.textContent="opɒoᒐ";
-  firstName.dataset.text="opɒoᒐ";
-  secondName.textContent="JOAQO";
-  secondName.dataset.text="JOAQO";
-
-  await wait(145);
-  firstName.textContent="JOAQO";
-  firstName.dataset.text="JOAQO";
-  secondName.textContent="opɒoᒐ";
-  secondName.dataset.text="opɒoᒐ";
-
-  await wait(180);
-  firstName.textContent="Joaqo";
-  firstName.dataset.text="Joaqo";
-  secondName.textContent="OqaoJ";
-  secondName.dataset.text="OqaoJ";
-
-  heroTitle.classList.remove("glitching");
-  glitchBusy=false;
-}
-
-function glitchNavigation(){
-  if(currentPage!=="home"||reduced.matches)return;
-  const buttons=[...document.querySelectorAll(".nav-button")];
-  const button=buttons[Math.floor(Math.random()*buttons.length)];
-  button.classList.remove("glitching");
-  void button.offsetWidth;
-  button.classList.add("glitching");
-  setTimeout(()=>button.classList.remove("glitching"),350);
-}
-
-/* INTRO */
-
-function finishIntro(){
-  if(introFinished)return;
-  introFinished=true;
-  introTimers.forEach(clearTimeout);
-  loader.classList.add("done");
-
-  heroTitle.classList.add("visible");
-
-  document.querySelectorAll(".nav-button").forEach((button,i)=>{
-    setTimeout(()=>button.classList.add("show"),i*160);
-  });
-
-  assembleHome();
-
-  setTimeout(()=>loader.hidden=true,750);
-}
-
-if(reduced.matches){
-  finishIntro();
-}else{
-  introTimers.push(setTimeout(()=>{
-    document.getElementById("loader-word").classList.add("show");
-    document.getElementById("progress").classList.add("fill");
-  },350));
-
-  introTimers.push(setTimeout(finishIntro,2600));
-}
-
-document.getElementById("skip").addEventListener("click",finishIntro);
-
-/* PROJECT SHOWCASE */
-
-const projectList=document.getElementById("project-list");
-const projectPhoto=document.getElementById("project-photo");
-
-function selectProject(index){
-  selectedProject=index;
-  const project=projects[index];
-
-  document.querySelectorAll(".project-button").forEach((button,i)=>{
-    button.classList.toggle("selected",i===index);
-  });
-
-  document.getElementById("preview-title").textContent=project.title;
-  document.getElementById("preview-category").textContent=project.category;
-
-  buildMosaic(projectPhoto,project.photo,0);
-}
-
-function openProject(){
-  const p=projects[selectedProject];
-
-  document.getElementById("detail-title").textContent=p.title;
-  document.getElementById("detail-category").textContent=p.category;
-  document.getElementById("detail-role").textContent=p.role;
-  document.getElementById("detail-description").textContent=p.description;
-
-  navigate("detail");
-}
+const carouselTrack=document.getElementById("carousel-track");
+const carouselCount=document.getElementById("carousel-count");
+const carouselViewport=document.getElementById("carousel-viewport");
+const cards=[];
 
 projects.forEach((project,index)=>{
-  const button=document.createElement("button");
-  button.className="project-button";
+  const card=document.createElement("button");
+  card.className="project-card";
+  card.setAttribute("aria-label","Select "+project.title);
 
-  const number=document.createElement("small");
+  const image=document.createElement("img");
+  image.src=project.image;
+  image.alt="";
+  image.loading="lazy";
+
+  const number=document.createElement("div");
+  number.className="card-number";
   number.textContent=String(index+1).padStart(2,"0");
 
-  const title=document.createElement("strong");
-  title.textContent=project.title;
+  const label=document.createElement("div");
+  label.className="card-label";
+  label.textContent=project.title;
 
-  button.append(number,title);
-  button.addEventListener("mouseenter",()=>selectProject(index));
-  button.addEventListener("focus",()=>selectProject(index));
-  button.addEventListener("click",()=>{
-    selectProject(index);
-    openProject();
+  card.append(image,number,label);
+
+  card.addEventListener("click",()=>{
+    if(selectedProject===index){
+      openPlayer(index);
+    }else{
+      selectedProject=index;
+      renderCarousel();
+    }
   });
 
-  projectList.appendChild(button);
+  carouselTrack.appendChild(card);
+  cards.push(card);
 });
 
-document.getElementById("view-project")
-  .addEventListener("click",openProject);
+function renderCarousel(){
+  const spacing=window.innerWidth<650?210:440;
 
-/* NAVIGATION / DISTINCT TRANSITIONS */
+  cards.forEach((card,index)=>{
+    const offset=index-selectedProject;
+    const abs=Math.abs(offset);
+
+    const x=offset*spacing;
+    const rotate=-offset*13;
+    const z=-abs*180;
+    const scale=1-abs*.12;
+
+    card.style.transform=
+      `translate3d(${x}px,0,${z}px) rotateY(${rotate}deg) scale(${scale})`;
+
+    card.style.opacity=abs>2?"0":String(Math.max(.4,1-abs*.2));
+    card.style.filter=abs===0?"none":"brightness(.55)";
+    card.style.zIndex=String(20-abs);
+    card.style.pointerEvents=abs>2?"none":"auto";
+    card.classList.toggle("selected",abs===0);
+    card.setAttribute("aria-pressed",abs===0?"true":"false");
+  });
+
+  carouselCount.textContent=
+    String(selectedProject+1).padStart(2,"0")+
+    " / "+
+    String(projects.length).padStart(2,"0");
+}
+
+function changeProject(direction){
+  selectedProject=Math.max(
+    0,
+    Math.min(projects.length-1,selectedProject+direction)
+  );
+  renderCarousel();
+}
+
+document.getElementById("previous")
+  .addEventListener("click",()=>changeProject(-1));
+
+document.getElementById("next")
+  .addEventListener("click",()=>changeProject(1));
+
+let wheelLocked=false;
+
+carouselViewport.addEventListener("wheel",event=>{
+  if(Math.abs(event.deltaY)<3&&Math.abs(event.deltaX)<3)return;
+
+  event.preventDefault();
+
+  if(wheelLocked)return;
+  wheelLocked=true;
+
+  changeProject(
+    Math.abs(event.deltaX)>Math.abs(event.deltaY)
+      ? Math.sign(event.deltaX)
+      : Math.sign(event.deltaY)
+  );
+
+  setTimeout(()=>wheelLocked=false,450);
+},{passive:false});
+
+let touchStartX=null;
+
+carouselViewport.addEventListener("touchstart",event=>{
+  touchStartX=event.touches[0].clientX;
+},{passive:true});
+
+carouselViewport.addEventListener("touchend",event=>{
+  if(touchStartX===null)return;
+
+  const distance=touchStartX-event.changedTouches[0].clientX;
+
+  if(Math.abs(distance)>40){
+    changeProject(Math.sign(distance));
+  }
+
+  touchStartX=null;
+},{passive:true});
+
+renderCarousel();
+
+/* VIDEO PLAYER */
+
+const playerOverlay=document.getElementById("player-overlay");
+const videoFrame=document.getElementById("video-frame");
+
+function openPlayer(index){
+  const project=projects[index];
+
+  document.getElementById("player-title").textContent=project.title;
+  document.getElementById("player-description").textContent=
+    project.category+" / "+project.description;
+
+  videoFrame.replaceChildren();
+
+  if(project.youtube){
+    const iframe=document.createElement("iframe");
+    iframe.src=
+      "https://www.youtube-nocookie.com/embed/"+
+      encodeURIComponent(project.youtube)+
+      "?autoplay=1&rel=0";
+    iframe.allow="autoplay; encrypted-media; picture-in-picture";
+    iframe.allowFullscreen=true;
+    iframe.title=project.title;
+    videoFrame.appendChild(iframe);
+  }else if(project.video){
+    const video=document.createElement("video");
+    video.src=project.video;
+    video.controls=true;
+    video.autoplay=true;
+    video.playsInline=true;
+    videoFrame.appendChild(video);
+  }else{
+    const empty=document.createElement("div");
+    empty.className="video-empty";
+    empty.textContent=
+      "VIDEO NOT CONNECTED YET — ADD YOUR PROJECT LINK TO ENABLE PLAYBACK";
+    videoFrame.appendChild(empty);
+  }
+
+  playerOverlay.classList.add("open");
+  playerOverlay.setAttribute("aria-hidden","false");
+  playerOpen=true;
+  document.getElementById("close-player").focus();
+}
+
+function closePlayer(){
+  playerOverlay.classList.remove("open");
+  playerOverlay.setAttribute("aria-hidden","true");
+  videoFrame.replaceChildren();
+  playerOpen=false;
+}
+
+document.getElementById("close-player")
+  .addEventListener("click",closePlayer);
+
+playerOverlay.addEventListener("click",event=>{
+  if(event.target===playerOverlay)closePlayer();
+});
+
+/* PAGE TRANSITIONS */
+
+const transition=document.getElementById("transition");
 
 function showPage(page){
   document.querySelectorAll(".page").forEach(section=>{
@@ -843,12 +1320,7 @@ function showPage(page){
   currentPage=page;
   window.scrollTo(0,0);
 
-  if(page==="work"){
-    selectProject(selectedProject);
-  }
-  if(page==="home"){
-    assembleHome();
-  }
+  if(page==="work")renderCarousel();
 }
 
 function navigate(page){
@@ -861,9 +1333,7 @@ function navigate(page){
 
   navigating=true;
 
-  const effect=page==="home"
-    ? (currentPage==="detail"?"work":currentPage)
-    : page;
+  const effect=page==="home"?currentPage:page;
 
   transition.className="transition";
   void transition.offsetWidth;
@@ -882,31 +1352,80 @@ document.querySelectorAll("[data-page]").forEach(button=>{
 });
 
 document.addEventListener("keydown",event=>{
-  if(event.key==="Escape"&&currentPage!=="home"){
-    navigate(currentPage==="detail"?"work":"home");
+  if(event.key==="Escape"){
+    if(playerOpen){
+      closePlayer();
+    }else if(currentPage!=="home"){
+      navigate("home");
+    }
+  }
+
+  if(currentPage==="work"&&!playerOpen){
+    if(event.key==="ArrowLeft")changeProject(-1);
+    if(event.key==="ArrowRight")changeProject(1);
+    if(event.key==="Enter"&&document.activeElement===carouselViewport){
+      openPlayer(selectedProject);
+    }
   }
 });
 
-/* AMBIENT GLITCHES */
+/* INTRO */
 
-if(!reduced.matches){
-  setInterval(()=>{
-    if(Math.random()<.65)glitchName();
-    else glitchNavigation();
-  },6500);
+const loader=document.getElementById("loader");
+let introDone=false;
+let introTimers=[];
 
-  setInterval(flickerRandomPhoto,4200);
+function finishIntro(){
+  if(introDone)return;
+  introDone=true;
+
+  introTimers.forEach(clearTimeout);
+  loader.classList.add("done");
+
+  document.getElementById("hero-name").classList.add("visible");
+
+  document.querySelectorAll(".nav button").forEach((button,index)=>{
+    setTimeout(()=>button.classList.add("show"),index*150);
+  });
+
+  startMosaics();
+
+  setTimeout(()=>loader.hidden=true,750);
 }
 
-/* REBUILD IMAGES AFTER RESIZE */
+if(reduced.matches){
+  finishIntro();
+}else{
+  introTimers.push(setTimeout(()=>{
+    document.getElementById("loader-name").classList.add("show");
+    document.getElementById("loader-fill").classList.add("fill");
+  },350));
+
+  introTimers.push(setTimeout(finishIntro,2550));
+}
+
+document.getElementById("skip")
+  .addEventListener("click",finishIntro);
+
+/* RESPONSIVE REBUILD */
 
 let resizeTimer;
+
 window.addEventListener("resize",()=>{
   clearTimeout(resizeTimer);
+
   resizeTimer=setTimeout(()=>{
-    if(currentPage==="home")assembleHome();
-    if(currentPage==="work")selectProject(selectedProject);
-  },250);
+    mosaics.forEach(mosaic=>{
+      mosaic.version++;
+      applyPosition(mosaic,mosaic.position);
+      buildTiles(mosaic);
+      mosaic.tiles.forEach(tile=>{
+        tile.style.opacity="1";
+      });
+    });
+
+    renderCarousel();
+  },350);
 });
 </script>
 </body>
