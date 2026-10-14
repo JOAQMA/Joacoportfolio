@@ -3,449 +3,700 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Joaqo — Collage Animation Test</title>
-<style>
-* { box-sizing:border-box; }
-body { margin:0; background:#f2f1ed; font-family:monospace; }
-canvas { display:block; width:100%; height:100vh; }
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JOAQO — Living Collage</title>
 
-.panel {
-  position:fixed;
-  left:20px;
-  bottom:20px;
-  z-index:10;
-  background:#111;
-  color:white;
-  padding:18px;
-  width:250px;
-  font-size:12px;
+<style>
+:root {
+  --paper: #f3f3f0;
+  --ink: #111;
+  --red: #d92027;
+  --blue: #1676c7;
 }
-.panel label {
-  display:flex;
-  justify-content:space-between;
-  margin:12px 0 5px;
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  width: 100%;
+  min-height: 100%;
+  background: var(--paper);
+  font-family: Arial, Helvetica, sans-serif;
 }
-.panel input { width:100%; accent-color:#e92832; }
-.panel button {
-  background:white;
-  color:black;
-  border:0;
-  padding:8px 12px;
-  margin-top:10px;
-  cursor:pointer;
+
+body { overflow-x: hidden; }
+
+.stage {
+  width: 100%;
+  height: 100svh;
+  min-height: 500px;
+  position: relative;
+  overflow: hidden;
+  background: var(--paper);
 }
-.note {
-  position:fixed;
-  left:20px;
-  top:20px;
-  font-size:11px;
-  background:#f2f1ed;
-  padding:10px;
-  z-index:5;
+
+/* GRID LAYOUT */
+
+.collage {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: var(--cols, 20% 18% 22% 20% 20%);
+  grid-template-rows: var(--rows, 18% 24% 20% 20% 18%);
+  gap: 0;
+  transition:
+    grid-template-columns 1800ms cubic-bezier(.45,0,.2,1),
+    grid-template-rows 1800ms cubic-bezier(.45,0,.2,1);
 }
-@media(max-width:600px) {
-  .panel { width:200px; padding:12px; }
+
+/* IMAGE TILES */
+
+.tile {
+  position: relative;
+  overflow: hidden;
+  min-width: 0;
+  min-height: 0;
+  background: var(--paper);
+  isolation: isolate;
+}
+
+.tile img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.035);
+  transition: transform 2400ms ease;
+  display: block;
+}
+
+.tile.mono img {
+  filter: grayscale(1) contrast(1.18);
+}
+
+.tile.cyan img {
+  filter: saturate(1.35) hue-rotate(8deg) contrast(1.08);
+}
+
+.tile.blue img {
+  filter: saturate(1.45) contrast(1.12);
+}
+
+.tile:hover img {
+  transform: scale(1.075);
+}
+
+/* PIXELATED TRANSITION LAYER */
+
+.pixel-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0;
+  image-rendering: pixelated;
+}
+
+.tile.glitching .pixel-layer {
+  opacity: 1;
+}
+
+/* WHITE BLOCK MASK */
+
+.block-mask {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.block {
+  position: absolute;
+  background: var(--paper);
+  opacity: 0;
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
+.tile.glitching .block {
+  animation: blockFlash var(--duration, 900ms)
+    steps(2, end) both;
+  animation-delay: var(--delay, 0ms);
+}
+
+@keyframes blockFlash {
+  0%   { opacity: 0; transform: scaleX(0); }
+  20%  { opacity: 1; transform: scaleX(1); }
+  65%  { opacity: 1; transform: scaleX(1); }
+  100% { opacity: 0; transform: scaleX(0); }
+}
+
+/* STATIC RIGHT PANEL */
+
+.fixed-panel {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: clamp(160px, 19vw, 330px);
+  height: 100%;
+  z-index: 20;
+  pointer-events: none;
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;
+}
+
+.panel-content {
+  margin-top: 9vh;
+  width: 100%;
+  padding: 28px 24px;
+  background: var(--paper);
+  border-left: 1px solid #1112;
+  pointer-events: auto;
+}
+
+.panel-eyebrow {
+  font: 11px monospace;
+  letter-spacing: 3px;
+  margin-bottom: 25px;
+}
+
+.panel-title {
+  font-size: clamp(35px, 5vw, 78px);
+  line-height: .9;
+  font-weight: 900;
+  letter-spacing: -4px;
+  margin: 0;
+}
+
+.panel-title span {
+  display: block;
+}
+
+.panel-rule {
+  height: 2px;
+  background: #111;
+  margin: 25px 0;
+}
+
+.panel-meta {
+  font: 11px/1.8 monospace;
+  letter-spacing: 1px;
+}
+
+.panel-bottom {
+  margin-top: 40px;
+  font: 10px monospace;
+  opacity: .55;
+}
+
+/* STATIC BRAND MARK */
+
+.brand {
+  position: absolute;
+  top: 5%;
+  left: 3%;
+  z-index: 30;
+  background: var(--paper);
+  padding: 12px 18px;
+  font-weight: 900;
+  font-size: 26px;
+  letter-spacing: -1.5px;
+}
+
+.brand small {
+  display: block;
+  margin-top: 5px;
+  font: 9px monospace;
+  letter-spacing: 2px;
+}
+
+/* SMALL EDITORIAL MARKERS */
+
+.corner-index {
+  position: absolute;
+  left: 3%;
+  bottom: 4%;
+  z-index: 15;
+  background: var(--paper);
+  padding: 9px 12px;
+  font: 10px monospace;
+  letter-spacing: 1px;
+}
+
+/* MOBILE */
+
+@media (max-width: 700px) {
+  .fixed-panel {
+    width: 145px;
+  }
+
+  .panel-content {
+    margin-top: 12vh;
+    padding: 15px 12px;
+  }
+
+  .panel-title {
+    font-size: 36px;
+    letter-spacing: -2px;
+  }
+
+  .panel-meta { font-size: 9px; }
+
+  .brand {
+    font-size: 21px;
+    padding: 9px 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .collage,
+  .tile img {
+    transition: none;
+  }
 }
 </style>
 </head>
+
 <body>
 
-<canvas id="stage"></canvas>
+<main class="stage">
 
-<div class="note">JOAQO / PHOTOGRAPHIC FRAGMENTATION TEST 03</div>
+  <div class="collage" id="collage"></div>
 
-<div class="panel">
-  <strong>ANIMATION CONTROLS</strong>
+  <div class="brand">
+    Joaqo®
+    <small>VIDEO EDITOR</small>
+  </div>
 
-  <label>Activity <span id="activityValue">5</span></label>
-  <input id="activity" type="range" min="1" max="10" value="5">
+  <aside class="fixed-panel">
+    <div class="panel-content">
+      <div class="panel-eyebrow">VISUAL / 001</div>
 
-  <label>Fragmentation <span id="fragmentValue">6</span></label>
-  <input id="fragment" type="range" min="1" max="10" value="6">
+      <h1 class="panel-title">
+        <span>JO</span>
+        <span>AQ</span>
+        <span>O.</span>
+      </h1>
 
-  <label>Transition speed <span id="speedValue">5</span></label>
-  <input id="speed" type="range" min="1" max="10" value="5">
+      <div class="panel-rule"></div>
 
-  <button id="pause">PAUSE</button>
-  <button id="reset">REBUILD</button>
-</div>
+      <div class="panel-meta">
+        PHOTOGRAPHIC<br>
+        RECONSTRUCTION<br>
+        EXPERIMENT<br><br>
+        AUTOMATED COLLAGE<br>
+        SYSTEM / 2026
+      </div>
+
+      <div class="panel-bottom">
+        IN CONTINUOUS MOTION
+      </div>
+    </div>
+  </aside>
+
+  <div class="corner-index">
+    JOAQO / IMAGE SYSTEM — 001
+  </div>
+
+</main>
 
 <script>
-const canvas=document.getElementById("stage");
-const ctx=canvas.getContext("2d");
+"use strict";
 
-const settings={
-  activity:5,
-  fragmentation:6,
-  speed:5
-};
+/* ========================================
+   IMAGE LIBRARY
+======================================== */
 
-for(const [id,key] of [
-  ["activity","activity"],
-  ["fragment","fragmentation"],
-  ["speed","speed"]
-]){
-  const input=document.getElementById(id);
-  const output=document.getElementById(id+"Value");
+const PHOTO_URLS = [
+  // Urban / monochrome
+  "https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=1600",
+  "https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=1600",
 
-  input.oninput=()=>{
-    settings[key]=Number(input.value);
-    output.textContent=input.value;
-  };
-}
+  // Architecture / city
+  "https://images.unsplash.com/photo-1514565131-fce0801e5785?w=1600",
+  "https://images.unsplash.com/photo-1519608487953-e999c86e7455?w=1600",
 
-const rand=(a,b)=>a+Math.random()*(b-a);
-const clamp=x=>Math.max(0,Math.min(1,x));
-const ease=x=>{
-  x=clamp(x);
-  return x*x*(3-2*x);
-};
+  // Color / atmosphere
+  "https://images.unsplash.com/photo-1494522358652-f30e61d6a23a?w=1600",
+  "https://images.unsplash.com/photo-1514905552197-0610a4d8fd73?w=1600",
 
-// Replace these image addresses with local
-// photographs for your final portfolio.
-const urls=[
-  "https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=1400",
-  "https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=1400",
-  "https://images.unsplash.com/photo-1514565131-fce0801e5785?w=1400",
-  "https://images.unsplash.com/photo-1519608487953-e999c86e7455?w=1400",
-  "https://images.unsplash.com/photo-1494522358652-f30e61d6a23a?w=1400",
-  "https://images.unsplash.com/photo-1514905552197-0610a4d8fd73?w=1400"
+  // Additional city imagery
+  "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1600",
+  "https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=1600",
+  "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=1600",
+  "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=1600"
 ];
 
-const images=urls.map(url=>{
-  const img=new Image();
-  img.src=url;
+const loadedImages = PHOTO_URLS.map(src => {
+  const img = new Image();
+  img.crossOrigin = "anonymous";
+  img.src = src;
   return img;
 });
 
-let W,H,DPR;
-let regions=[];
-let paused=false;
-let last=0;
-let clock=0;
+/* ========================================
+   CONFIGURATION
+======================================== */
 
-const paper="#f2f1ed";
+const CONFIG = {
+  tileCount: 15,
+  minSwapDelay: 450,
+  maxSwapDelay: 1900,
+  glitchDuration: 950,
+  gridChangeInterval: 4800,
+  pixelResolution: 14
+};
 
-function makeRegion(x,y,w,h,imageIndex){
-  return {
-    x,y,w,h,
-    current:imageIndex,
-    next:imageIndex,
-    cells:[],
-    elapsed:0,
-    duration:1500,
-    transitioning:false,
-    wait:rand(300,2200),
-    zoom:1,
-    zoomDirection:1
+const collage = document.getElementById("collage");
+const tiles = [];
+
+const rand = (min,max) =>
+  min + Math.random() * (max-min);
+
+const randomInt = (min,max) =>
+  Math.floor(rand(min,max+1));
+
+const choose = arr =>
+  arr[Math.floor(Math.random()*arr.length)];
+
+const sleep = ms =>
+  new Promise(resolve => setTimeout(resolve,ms));
+
+function validImages() {
+  return loadedImages.filter(
+    img => img.complete && img.naturalWidth > 0
+  );
+}
+
+/* ========================================
+   GRID DEFINITIONS
+======================================== */
+
+// Each layout uses the same 5x5 logical grid.
+// Tiles span different rows and columns.
+//
+// Changing CSS grid track sizes produces
+// smooth structural resizing without
+// moving any image outside its container.
+
+const AREAS = [
+  [1,1,3,2],
+  [1,3,2,4],
+  [1,5,2,2],
+  [3,3,2,2],
+  [3,5,2,2],
+  [3,1,2,2],
+  [5,1,1,2],
+  [5,3,1,2],
+  [5,5,1,1]
+];
+
+// Fill remaining positions with
+// small tiles if needed.
+
+const EXTRA_AREAS = [
+  [2,5,1,1],
+  [2,4,1,1],
+  [4,4,1,1],
+  [4,5,1,1],
+  [5,4,1,1],
+  [1,4,1,1]
+];
+
+/* ========================================
+   TILE CREATION
+======================================== */
+
+function makeTile(index, area) {
+  const el = document.createElement("div");
+  el.className = "tile";
+
+  const [row,col,rowSpan,colSpan] = area;
+
+  el.style.gridRow =
+    `${row} / span ${rowSpan}`;
+
+  el.style.gridColumn =
+    `${col} / span ${colSpan}`;
+
+  const img = document.createElement("img");
+  img.alt = "";
+  img.decoding = "async";
+
+  const available = validImages();
+  if(available.length) {
+    img.src = choose(available).src;
+  }
+
+  el.appendChild(img);
+
+  const pixelCanvas = document.createElement("canvas");
+  pixelCanvas.className = "pixel-layer";
+  el.appendChild(pixelCanvas);
+
+  const mask = document.createElement("div");
+  mask.className = "block-mask";
+  el.appendChild(mask);
+
+  const styles = ["mono","cyan","blue",""];
+  el.classList.add(choose(styles));
+
+  collage.appendChild(el);
+
+  const tile = {
+    el,
+    img,
+    pixelCanvas,
+    mask,
+    busy:false,
+    index
   };
+
+  createBlocks(tile);
+  tiles.push(tile);
 }
 
-function createRegions(){
-  regions=[
-    makeRegion(.53,-.03,.49,.49,0),
-    makeRegion(.79,.35,.23,.32,1),
-    makeRegion(.55,.44,.31,.35,2),
-    makeRegion(.00,.66,.43,.36,3),
-    makeRegion(.40,.70,.34,.32,4),
-    makeRegion(.73,.72,.29,.31,5)
-  ];
+/* ========================================
+   WHITE BLOCK MASK
+======================================== */
 
-  for(const r of regions) generateCells(r);
+function createBlocks(tile) {
+  tile.mask.innerHTML = "";
+
+  const count = randomInt(9,22);
+
+  for(let i=0;i<count;i++) {
+    const block = document.createElement("span");
+    block.className = "block";
+
+    const w = rand(8,42);
+    const h = rand(6,28);
+
+    block.style.left = rand(0,100-w)+"%";
+    block.style.top = rand(0,100-h)+"%";
+    block.style.width = w+"%";
+    block.style.height = h+"%";
+
+    block.style.setProperty(
+      "--delay",
+      randomInt(0,380)+"ms"
+    );
+
+    block.style.setProperty(
+      "--duration",
+      randomInt(500,950)+"ms"
+    );
+
+    tile.mask.appendChild(block);
+  }
 }
 
-function generateCells(r){
-  r.cells=[];
+/* ========================================
+   PIXELATION RENDERER
+======================================== */
 
-  const rw=r.w*W;
-  const rh=r.h*H;
+// Draws a low-resolution copy of the
+// current image, then scales it back up.
+//
+// This is real image pixelation, not
+// simply a CSS blur filter.
 
-  const base=Math.max(
-    18,
-    95-settings.fragmentation*7
+function drawPixelated(tile, resolution) {
+  const {pixelCanvas,img,el} = tile;
+
+  if(!img.complete || !img.naturalWidth) return;
+
+  const rect = el.getBoundingClientRect();
+
+  const w = Math.max(1,Math.floor(rect.width));
+  const h = Math.max(1,Math.floor(rect.height));
+
+  const smallW = Math.max(1,Math.floor(w/resolution));
+  const smallH = Math.max(1,Math.floor(h/resolution));
+
+  const temp = document.createElement("canvas");
+  temp.width = smallW;
+  temp.height = smallH;
+
+  const tctx = temp.getContext("2d");
+
+  const scale = Math.max(
+    smallW/img.naturalWidth,
+    smallH/img.naturalHeight
   );
 
-  for(let y=0;y<rh;y+=base){
-    for(let x=0;x<rw;x+=base){
-      const fine=Math.random()<.38;
-      const parts=fine
-        ? (Math.random()<.5?3:5)
-        : 1;
+  const dw = img.naturalWidth*scale;
+  const dh = img.naturalHeight*scale;
 
-      const cw=Math.min(base,rw-x);
-      const ch=Math.min(base,rh-y);
+  tctx.drawImage(
+    img,
+    (smallW-dw)/2,
+    (smallH-dh)/2,
+    dw,dh
+  );
 
-      for(let j=0;j<parts;j++){
-        for(let i=0;i<parts;i++){
-          const px=x+cw*i/parts;
-          const py=y+ch*j/parts;
+  pixelCanvas.width = w;
+  pixelCanvas.height = h;
 
-          r.cells.push({
-            x:px,
-            y:py,
-            w:cw/parts,
-            h:ch/parts,
-            delay:rand(0,.65),
-            duration:rand(.25,.5),
-            axis:Math.random()<.5?"x":"y",
-            direction:Math.random()<.5?-1:1,
-            distance:rand(4,40),
-            vanish:Math.random()<.22,
-            pixel:Math.random()<.6
-          });
-        }
-      }
-    }
-  }
+  const pctx = pixelCanvas.getContext("2d");
+  pctx.imageSmoothingEnabled = false;
+
+  pctx.clearRect(0,0,w,h);
+  pctx.drawImage(temp,0,0,w,h);
 }
 
-function resize(){
-  W=innerWidth;
-  H=innerHeight;
-  DPR=Math.min(devicePixelRatio||1,2);
+/* ========================================
+   IMAGE SWAP
+======================================== */
 
-  canvas.width=Math.round(W*DPR);
-  canvas.height=Math.round(H*DPR);
+async function swapTile(tile) {
+  if(tile.busy) return;
 
-  ctx.setTransform(DPR,0,0,DPR,0,0);
-  createRegions();
+  const available = validImages();
+  if(available.length < 2) return;
+
+  tile.busy = true;
+
+  const oldSrc = tile.img.src;
+
+  const candidates = available.filter(
+    img => img.src !== oldSrc
+  );
+
+  const nextImage = choose(candidates);
+
+  // Phase 1:
+  // Pixelate existing photograph.
+  drawPixelated(tile,CONFIG.pixelResolution);
+
+  tile.el.classList.add("glitching");
+
+  createBlocks(tile);
+
+  await sleep(280);
+
+  // Phase 2:
+  // Change the underlying photograph
+  // while the pixel layer hides the swap.
+  tile.img.src = nextImage.src;
+
+  const styles = ["mono","cyan","blue",""];
+
+  tile.el.classList.remove(
+    "mono","cyan","blue"
+  );
+
+  const style = choose(styles);
+  if(style) tile.el.classList.add(style);
+
+  await sleep(260);
+
+  // Phase 3:
+  // Pixelated new photograph.
+  drawPixelated(tile,8);
+
+  await sleep(210);
+
+  // Phase 4:
+  // Resolve into sharp photograph.
+  tile.el.classList.remove("glitching");
+
+  await sleep(200);
+
+  tile.busy = false;
 }
 
-function chooseImage(except){
-  const available=images
-    .map((img,i)=>img.complete&&img.naturalWidth?i:-1)
-    .filter(i=>i>=0&&i!==except);
+/* ========================================
+   AUTOMATIC TILE LOOP
+======================================== */
 
-  if(!available.length) return except;
-  return available[Math.floor(Math.random()*available.length)];
-}
+let running = true;
 
-function begin(r){
-  r.next=chooseImage(r.current);
-  if(r.next===r.current) {
-    r.wait=500;
-    return;
-  }
-
-  r.elapsed=0;
-  r.duration=rand(1100,2400)*
-    (1.6-settings.speed*.1);
-
-  r.transitioning=true;
-  generateCells(r);
-}
-
-function update(dt){
-  clock+=dt;
-
-  for(const r of regions){
-    if(r.transitioning){
-      r.elapsed+=dt;
-
-      if(r.elapsed>=r.duration){
-        r.current=r.next;
-        r.transitioning=false;
-        r.wait=rand(400,2600)*
-          (1.6-settings.activity*.13);
-      }
-    } else {
-      r.wait-=dt;
-      if(r.wait<=0) begin(r);
-    }
-
-    // Slow continuous breathing zoom.
-    r.zoom+=r.zoomDirection*dt*.000008;
-    if(r.zoom>1.08) r.zoomDirection=-1;
-    if(r.zoom<1.0) r.zoomDirection=1;
-  }
-}
-
-// Image drawing uses the same image coordinates
-// across all cells in a region. This preserves
-// photographic continuity.
-
-function drawImagePart(img,r,c,dx,dy,alpha,pixel){
-  if(!img.complete||!img.naturalWidth||alpha<=0) return;
-
-  const rx=r.x*W;
-  const ry=r.y*H;
-  const rw=r.w*W;
-  const rh=r.h*H;
-
-  const scale=Math.max(
-    rw/img.naturalWidth,
-    rh/img.naturalHeight
-  )*r.zoom;
-
-  const imageW=img.naturalWidth*scale;
-  const imageH=img.naturalHeight*scale;
-
-  const offsetX=(rw-imageW)/2;
-  const offsetY=(rh-imageH)/2;
-
-  const cx=rx+c.x;
-  const cy=ry+c.y;
-
-  ctx.save();
-  ctx.globalAlpha=alpha;
-
-  ctx.beginPath();
-  ctx.rect(cx+dx,cy+dy,c.w+.3,c.h+.3);
-  ctx.clip();
-
-  if(pixel){
-    // Quantized sampling gives a mosaic-like
-    // appearance without creating canvases
-    // during every animation frame.
-    const block=12;
-    const sx=Math.floor(c.x/block)*block;
-    const sy=Math.floor(c.y/block)*block;
-
-    const sourceX=(sx-offsetX)/scale;
-    const sourceY=(sy-offsetY)/scale;
-
-    const sampleX=Math.max(0,Math.min(
-      img.naturalWidth-1,sourceX
-    ));
-    const sampleY=Math.max(0,Math.min(
-      img.naturalHeight-1,sourceY
+async function tileLoop(tile) {
+  while(running) {
+    await sleep(rand(
+      CONFIG.minSwapDelay,
+      CONFIG.maxSwapDelay
     ));
 
-    const sw=Math.max(1,Math.min(
-      img.naturalWidth-sampleX,
-      block/scale
-    ));
+    if(document.hidden) continue;
 
-    const sh=Math.max(1,Math.min(
-      img.naturalHeight-sampleY,
-      block/scale
-    ));
-
-    // Enlarged source samples.
-    ctx.imageSmoothingEnabled=false;
-
-    ctx.drawImage(
-      img,
-      sampleX,sampleY,sw,sh,
-      cx+dx,cy+dy,
-      Math.max(c.w,block),
-      Math.max(c.h,block)
-    );
-  } else {
-    ctx.drawImage(
-      img,
-      rx+offsetX+dx,
-      ry+offsetY+dy,
-      imageW,imageH
-    );
-  }
-
-  ctx.restore();
-}
-
-function renderRegion(r){
-  const current=images[r.current];
-  const next=images[r.next];
-
-  const t=r.transitioning
-    ?clamp(r.elapsed/r.duration)
-    :0;
-
-  for(const c of r.cells){
-    const cx=r.x*W+c.x;
-    const cy=r.y*H+c.y;
-
-    // Protect the top-left interface area.
-    // No photography is drawn over it.
-    if(cx<W*.18&&cy<H*.47) continue;
-
-    if(!r.transitioning){
-      drawImagePart(current,r,c,0,0,1,false);
-      continue;
-    }
-
-    const local=ease(
-      (t-c.delay)/c.duration
-    );
-
-    const movement=Math.sin(local*Math.PI)*
-      c.distance*c.direction;
-
-    const dx=c.axis==="x"?movement:0;
-    const dy=c.axis==="y"?movement:0;
-
-    const middle=Math.sin(local*Math.PI);
-    const pixel=c.pixel&&middle>.45;
-
-    const gap=c.vanish
-      ?1-middle*.95
-      :1;
-
-    // White interruptions are visible because
-    // the underlying canvas is paper-colored.
-    drawImagePart(
-      current,r,c,dx,dy,
-      (1-local)*gap,pixel
-    );
-
-    drawImagePart(
-      next,r,c,dx,dy,
-      local*gap,pixel
-    );
+    await swapTile(tile);
   }
 }
 
-function drawGrain(){
-  ctx.save();
+/* ========================================
+   GRID RESIZING
+======================================== */
 
-  for(let i=0;i<75;i++){
-    ctx.fillStyle=Math.random()<.5
-      ?"rgba(0,0,0,.10)"
-      :"rgba(255,255,255,.14)";
-
-    ctx.fillRect(
-      rand(0,W),
-      rand(0,H),
-      rand(1,3),
-      rand(1,3)
-    );
+const GRID_STATES = [
+  {
+    cols:[20,18,22,20,20],
+    rows:[18,24,20,20,18]
+  },
+  {
+    cols:[14,25,17,27,17],
+    rows:[25,14,26,15,20]
+  },
+  {
+    cols:[27,12,25,16,20],
+    rows:[15,28,14,27,16]
+  },
+  {
+    cols:[18,24,14,19,25],
+    rows:[22,16,27,14,21]
+  },
+  {
+    cols:[24,16,21,23,16],
+    rows:[17,22,19,26,16]
   }
+];
 
-  ctx.restore();
+let gridState = 0;
+
+function applyGrid(state) {
+  collage.style.setProperty(
+    "--cols",
+    state.cols.map(v=>v+"fr").join(" ")
+  );
+
+  collage.style.setProperty(
+    "--rows",
+    state.rows.map(v=>v+"fr").join(" ")
+  );
 }
 
-function frame(time){
-  requestAnimationFrame(frame);
-
-  const dt=Math.min(time-last,50)||0;
-  last=time;
-
-  if(!paused) update(dt);
-
-  ctx.clearRect(0,0,W,H);
-  ctx.fillStyle=paper;
-  ctx.fillRect(0,0,W,H);
-
-  // Later regions are layered over earlier ones.
-  for(const r of regions) renderRegion(r);
-
-  if(!paused) drawGrain();
+function changeGrid() {
+  gridState = (gridState+1)%GRID_STATES.length;
+  applyGrid(GRID_STATES[gridState]);
 }
 
-document.getElementById("pause").onclick=()=>{
-  paused=!paused;
-  document.getElementById("pause").textContent=
-    paused?"PLAY":"PAUSE";
-};
+/* ========================================
+   INITIALIZATION
+======================================== */
 
-document.getElementById("reset").onclick=()=>{
-  createRegions();
-};
+function init() {
+  const areas = [...AREAS,...EXTRA_AREAS];
 
-resize();
-addEventListener("resize",resize);
-requestAnimationFrame(frame);
+  areas.slice(0,CONFIG.tileCount).forEach(
+    (area,i)=>makeTile(i,area)
+  );
+
+  applyGrid(GRID_STATES[0]);
+
+  tiles.forEach(tile => tileLoop(tile));
+
+  setInterval(()=>{
+    if(!document.hidden) changeGrid();
+  },CONFIG.gridChangeInterval);
+}
+
+window.addEventListener("load",init);
+
 </script>
 </body>
 </html>
