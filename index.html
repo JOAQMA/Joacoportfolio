@@ -4,7 +4,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#f4f3ef">
 <title>Joaqo — Video Editor</title>
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
@@ -13,14 +12,13 @@
   --paper:#f4f3ef;
   --ink:#101014;
   --blue:#354cf4;
-  --purple:#6948ef;
 }
 *{box-sizing:border-box}
 html,body{margin:0;min-height:100%}
 body{
-  font-family:"IBM Plex Mono",monospace;
   background:var(--paper);
   color:var(--ink);
+  font-family:"IBM Plex Mono",monospace;
   overflow-x:hidden;
 }
 button,a{font:inherit}
@@ -30,10 +28,10 @@ button:focus-visible,a:focus-visible{
   outline-offset:4px;
 }
 [hidden]{display:none!important}
-#app{min-height:100svh}
 .page{position:relative;min-height:100svh}
 .paper{
-  position:fixed;inset:0;pointer-events:none;z-index:0;
+  position:fixed;inset:0;z-index:0;
+  pointer-events:none;
   background:
     linear-gradient(#11111108 1px,transparent 1px),
     linear-gradient(90deg,#11111108 1px,transparent 1px),
@@ -44,43 +42,65 @@ button:focus-visible,a:focus-visible{
 /* HOMEPAGE */
 
 .home{
-  min-height:800px;
+  min-height:760px;
   height:100svh;
   overflow:hidden;
   isolation:isolate;
 }
 .collage{
-  position:absolute;inset:0;
+  position:absolute;
+  inset:0;
   overflow:hidden;
   z-index:0;
 }
 .collage:after{
-  content:"";position:absolute;inset:0;
+  content:"";
+  position:absolute;
+  inset:0;
   pointer-events:none;
-  background:linear-gradient(90deg,#f4f3ef77 0%,transparent 68%);
+  background:linear-gradient(
+    90deg,#f4f3ef77,transparent 72%
+  );
 }
+
+/* OPTIMIZED MOSAICS */
+
 .mosaic{
   position:absolute;
-  overflow:visible;
   pointer-events:none;
+  transition:
+    left 1.1s ease,
+    top 1.1s ease,
+    width 1.1s ease,
+    height 1.1s ease;
 }
 .mosaic-tile{
   position:absolute;
   background-repeat:no-repeat;
-  will-change:transform,opacity;
-  box-shadow:0 0 1px #0002;
+  opacity:0;
+  transform:
+    translate(var(--dx),var(--dy))
+    scale(.85);
+  transition:
+    transform .7s cubic-bezier(.16,1,.3,1),
+    opacity .55s ease;
 }
-.collage-glow{
-  position:absolute;
-  right:0;top:0;width:65%;height:100%;
-  background:radial-gradient(ellipse at 70% 40%,#6a8ed01b,transparent 70%);
-  pointer-events:none;
+.mosaic-tile.assembled{
+  opacity:1;
+  transform:none;
+}
+.mosaic.departing .mosaic-tile{
+  opacity:0;
+  transform:
+    translate(var(--dx),var(--dy))
+    scale(.85);
 }
 
-/* TOP LEFT IDENTITY */
+/* HEADER */
 
 .header{
-  position:absolute;z-index:15;
+  position:absolute;
+  z-index:15;
   top:0;left:0;right:0;
   padding:30px 4.5vw;
   display:flex;
@@ -88,50 +108,74 @@ button:focus-visible,a:focus-visible{
   align-items:flex-start;
   gap:20px;
 }
-.brand-row{display:flex;align-items:center;gap:20px}
+.brand-row{
+  display:flex;
+  align-items:center;
+  gap:20px;
+}
 .brand{
-  font-family:"Archivo Black",Arial,sans-serif;
+  font-family:"Archivo Black",sans-serif;
   font-size:clamp(23px,2.1vw,34px);
-  font-weight:900;
   letter-spacing:-.095em;
   line-height:1;
   position:relative;
-  min-width:115px;
+  min-width:112px;
 }
-.brand:before,.brand:after{
+.brand:before,
+.brand:after,
+.hero-name:before,
+.hero-name:after{
   content:attr(data-text);
-  position:absolute;left:0;top:0;
-  opacity:0;pointer-events:none;
+  position:absolute;
+  inset:0;
+  opacity:0;
+  pointer-events:none;
 }
-.brand.glitch:before{
-  opacity:.85;color:#3b54ef;
+.brand.glitch:before,
+.hero-name.glitch:before{
+  opacity:.85;
+  color:#3b54ef;
   clip-path:inset(10% 0 60% 0);
-  transform:translate(-6px,2px);
+  transform:translate(-7px,2px);
 }
-.brand.glitch:after{
-  opacity:.8;color:#8652ff;
+.brand.glitch:after,
+.hero-name.glitch:after{
+  opacity:.8;
+  color:#8652ff;
   clip-path:inset(58% 0 10% 0);
-  transform:translate(7px,-2px);
+  transform:translate(8px,-2px);
 }
-.brand.glitch{animation:brandDistort .4s steps(3,end)}
+.glitch{
+  animation:brandDistort .35s steps(3,end);
+}
 @keyframes brandDistort{
-  25%{transform:skewX(-10deg) translateX(4px)}
-  55%{transform:skewX(6deg) translateX(-5px)}
+  25%{transform:skewX(-9deg) translateX(4px)}
+  55%{transform:skewX(5deg) translateX(-5px)}
   100%{transform:none}
 }
-.socials{display:flex;align-items:center;gap:12px}
+.socials{
+  display:flex;
+  gap:12px;
+  align-items:center;
+}
 .social{
   width:27px;height:27px;
-  display:grid;place-items:center;
+  display:grid;
+  place-items:center;
   color:#111;
   transition:transform .2s,color .2s;
 }
-.social svg{width:20px;height:20px;fill:currentColor}
+.social svg{
+  width:20px;height:20px;
+  fill:currentColor;
+}
 .social:hover{
   color:var(--blue);
   transform:skewX(-12deg) translateY(-3px);
 }
-.social.glitch{animation:brandDistort .3s steps(3,end)}
+.social.glitch{
+  animation:brandDistort .3s steps(3,end);
+}
 .header-sub{
   font-size:9px;
   letter-spacing:.16em;
@@ -145,18 +189,20 @@ button:focus-visible,a:focus-visible{
   text-align:right;
 }
 
-/* LARGE HOMEPAGE TYPE */
+/* ONE LARGE NAME */
 
 .hero{
-  position:absolute;z-index:8;
-  left:19%;top:22%;
+  position:absolute;
+  z-index:8;
+  left:19%;
+  top:25%;
   pointer-events:none;
 }
 .hero-name{
-  font-family:"Archivo Black",Arial,sans-serif;
-  font-size:clamp(90px,15vw,245px);
-  line-height:.73;
-  letter-spacing:-.105em;
+  font-family:"Archivo Black",sans-serif;
+  font-size:clamp(105px,17vw,270px);
+  line-height:.9;
+  letter-spacing:-.11em;
   font-weight:900;
   transform:scaleX(1.08);
   transform-origin:left;
@@ -164,32 +210,14 @@ button:focus-visible,a:focus-visible{
   opacity:0;
   filter:blur(14px);
   transition:opacity .8s,filter .8s;
-}
-.hero-name.visible{opacity:1;filter:none}
-.hero-name span{
-  display:block;
-  position:relative;
   white-space:nowrap;
 }
-.hero-name span:nth-child(2){margin-left:9%}
-.hero-name span:before,.hero-name span:after{
-  content:attr(data-text);
-  position:absolute;inset:0;
-  opacity:0;
+.hero-name.visible{
+  opacity:1;
+  filter:none;
 }
-.hero-name.glitch span:before{
-  opacity:.8;color:#455bff;
-  clip-path:inset(10% 0 60% 0);
-  transform:translate(-12px,2px);
-}
-.hero-name.glitch span:after{
-  opacity:.8;color:#8051fa;
-  clip-path:inset(60% 0 10% 0);
-  transform:translate(12px,-3px);
-}
-.hero-name.glitch{animation:brandDistort .4s steps(3,end)}
 .hero-caption{
-  margin-top:50px;
+  margin-top:35px;
   font-size:10px;
   letter-spacing:.16em;
   line-height:1.8;
@@ -198,57 +226,90 @@ button:focus-visible,a:focus-visible{
 /* NAVIGATION */
 
 .nav{
-  position:absolute;z-index:12;
-  left:4.5%;top:26%;
+  position:absolute;
+  z-index:12;
+  left:4.5%;
+  top:30%;
   width:165px;
-  display:flex;flex-direction:column;
+  display:flex;
+  flex-direction:column;
 }
 .nav button{
-  display:flex;align-items:center;gap:15px;
+  display:flex;
+  align-items:center;
+  gap:15px;
   width:100%;
-  border:0;background:transparent;
-  color:#111;text-align:left;
+  border:0;
+  background:transparent;
+  color:#111;
+  text-align:left;
   padding:13px 12px;
   font-size:13px;
   font-weight:600;
   letter-spacing:.06em;
   opacity:0;
   transform:translateX(-30px);
-  transition:opacity .5s,transform .5s,background .2s,color .2s;
+  transition:
+    opacity .5s,
+    transform .5s,
+    background .2s,
+    color .2s;
 }
-.nav button.show{opacity:1;transform:none}
-.nav button small{font-size:10px;font-weight:400}
+.nav button.show{
+  opacity:1;
+  transform:none;
+}
+.nav button small{
+  font-size:10px;
+  font-weight:400;
+}
 .nav button .arrow{margin-left:auto}
-.nav button:hover,.nav button:focus-visible,.nav button.active{
-  background:#111;color:white;
+.nav button:hover,
+.nav button:focus-visible,
+.nav button.active{
+  background:#111;
+  color:white;
 }
-.nav button.glitch{animation:brandDistort .3s steps(3,end)}
+.nav button.glitch{
+  animation:brandDistort .3s steps(3,end);
+}
 .home-footer{
-  position:absolute;z-index:10;
-  left:4.5%;bottom:4%;
-  font-size:10px;letter-spacing:.16em;
+  position:absolute;
+  z-index:10;
+  left:4.5%;
+  bottom:4%;
+  font-size:10px;
+  letter-spacing:.16em;
 }
 
-/* INNER PAGE HEADER */
+/* INNER PAGES */
 
 .inner-head{
-  position:relative;z-index:3;
-  display:flex;justify-content:space-between;
-  align-items:center;gap:20px;
+  position:relative;
+  z-index:3;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:20px;
   padding:30px 5vw;
 }
 .inner-brand{
   font-family:"Archivo Black",sans-serif;
-  font-size:25px;letter-spacing:-.09em;
+  font-size:25px;
+  letter-spacing:-.09em;
 }
 .back{
-  background:#111;color:white;border:0;
-  padding:12px 18px;font-size:11px;
+  background:#111;
+  color:white;
+  border:0;
+  padding:12px 18px;
+  font-size:11px;
   letter-spacing:.1em;
 }
 .back:hover{background:var(--blue)}
 .inner-content{
-  position:relative;z-index:2;
+  position:relative;
+  z-index:2;
   padding:5vh 6vw 10vh;
 }
 .kicker{
@@ -257,7 +318,7 @@ button:focus-visible,a:focus-visible{
   margin-bottom:35px;
 }
 h1{
-  font-family:"Archivo Black",Arial,sans-serif;
+  font-family:"Archivo Black",sans-serif;
   font-size:clamp(70px,12vw,175px);
   line-height:.82;
   letter-spacing:-.09em;
@@ -270,7 +331,7 @@ h1 span{color:var(--blue)}
   line-height:1.8;
 }
 
-/* WORK — 3D CHARACTER SELECT */
+/* WORK GALLERY */
 
 .work{
   background:#050509;
@@ -278,19 +339,33 @@ h1 span{color:var(--blue)}
   overflow:hidden;
 }
 .work .inner-head{color:white}
-.work .back{background:white;color:#111}
-.work .back:hover{background:#6172ff;color:white}
+.work .back{
+  background:white;
+  color:#111;
+}
+.work .back:hover{
+  background:#6172ff;
+  color:white;
+}
 .work-world{
-  position:absolute;inset:0;overflow:hidden;
+  position:absolute;
+  inset:0;
+  overflow:hidden;
   pointer-events:none;
   background:
-    radial-gradient(ellipse at 50% 60%,#23265a65,transparent 60%),
+    radial-gradient(
+      ellipse at 50% 60%,
+      #23265a65,
+      transparent 60%
+    ),
     #050509;
 }
 .work-grid{
   position:absolute;
-  left:-50%;bottom:-30%;
-  width:200%;height:75%;
+  left:-50%;
+  bottom:-30%;
+  width:200%;
+  height:75%;
   background-image:
     linear-gradient(#c2c7ff2a 1px,transparent 1px),
     linear-gradient(90deg,#c2c7ff2a 1px,transparent 1px);
@@ -300,7 +375,8 @@ h1 span{color:var(--blue)}
   mask-image:linear-gradient(transparent,#000 60%);
 }
 .work-top{
-  position:relative;z-index:3;
+  position:relative;
+  z-index:3;
   padding:5vh 5vw 0;
 }
 .work-top h1{
@@ -308,8 +384,6 @@ h1 span{color:var(--blue)}
   margin:0;
 }
 .work-top .kicker{color:#c2c0dd}
-
-/* Perspective gallery */
 
 .carousel-viewport{
   position:relative;
@@ -322,16 +396,18 @@ h1 span{color:var(--blue)}
   touch-action:pan-y;
 }
 .carousel-track{
-  position:absolute;inset:0;
+  position:absolute;
+  inset:0;
   transform-style:preserve-3d;
 }
 .project-card{
   position:absolute;
-  top:50%;left:50%;
+  top:50%;
+  left:50%;
   width:clamp(230px,44vw,710px);
   aspect-ratio:16/10;
-  margin-left:calc(clamp(230px,44vw,710px) / -2);
-  margin-top:calc(clamp(230px,44vw,710px) * -0.3125);
+  margin-left:calc(clamp(230px,44vw,710px)/-2);
+  margin-top:calc(clamp(230px,44vw,710px)*-.3125);
   padding:0;
   background:#171729;
   border:1px solid #ffffff30;
@@ -340,66 +416,89 @@ h1 span{color:var(--blue)}
   color:white;
   text-align:left;
   transform-style:preserve-3d;
-  transition:transform .75s cubic-bezier(.18,.75,.2,1),
-             opacity .65s,filter .65s;
+  transition:
+    transform .75s cubic-bezier(.18,.75,.2,1),
+    opacity .65s,
+    filter .65s;
   box-shadow:0 25px 70px #0009;
 }
 .project-card img{
-  width:100%;height:100%;
-  display:block;object-fit:cover;
+  width:100%;
+  height:100%;
+  display:block;
+  object-fit:cover;
   filter:saturate(.85) contrast(1.1);
 }
 .project-card:after{
-  content:"";position:absolute;inset:0;
+  content:"";
+  position:absolute;
+  inset:0;
   background:linear-gradient(transparent 45%,#000b);
   pointer-events:none;
 }
-.project-card .card-label{
-  position:absolute;bottom:20px;left:22px;
+.card-label{
+  position:absolute;
+  bottom:20px;
+  left:22px;
   z-index:2;
   font-size:clamp(16px,2vw,26px);
   font-weight:600;
 }
-.project-card .card-number{
-  position:absolute;top:18px;left:20px;
-  z-index:2;font-size:10px;
+.card-number{
+  position:absolute;
+  top:18px;
+  left:20px;
+  z-index:2;
+  font-size:10px;
 }
 .project-card.selected{
   border-color:#ffffffa0;
   box-shadow:0 30px 95px #2532c855;
 }
-.project-card:hover img{filter:saturate(1.2) contrast(1.1)}
+.project-card:hover img{
+  filter:saturate(1.2) contrast(1.1);
+}
 .carousel-controls{
-  position:relative;z-index:5;
-  display:flex;align-items:center;justify-content:center;
+  position:relative;
+  z-index:5;
+  display:flex;
+  align-items:center;
+  justify-content:center;
   gap:22px;
   padding:10px 20px 45px;
 }
 .carousel-controls button{
-  background:transparent;color:white;
+  background:transparent;
+  color:white;
   border:1px solid #ffffff75;
   padding:12px 18px;
   font-size:12px;
 }
 .carousel-controls button:hover{
-  background:white;color:black;
+  background:white;
+  color:black;
 }
 .carousel-count{
-  font-size:11px;letter-spacing:.15em;
-  min-width:70px;text-align:center;
+  font-size:11px;
+  letter-spacing:.15em;
+  min-width:70px;
+  text-align:center;
 }
 .work-instruction{
-  position:relative;z-index:5;
+  position:relative;
+  z-index:5;
   text-align:center;
-  font-size:10px;letter-spacing:.18em;
+  font-size:10px;
+  letter-spacing:.18em;
   color:#bbb9d1;
   padding-bottom:25px;
 }
 
-/* VIDEO PLAYER OVERLAY */
+/* VIDEO PLAYER */
 
 .player-overlay{
-  position:fixed;inset:0;
+  position:fixed;
+  inset:0;
   z-index:70;
   background:#050509ed;
   color:white;
@@ -411,7 +510,8 @@ h1 span{color:var(--blue)}
   transition:opacity .4s,visibility .4s;
 }
 .player-overlay.open{
-  opacity:1;visibility:visible;
+  opacity:1;
+  visibility:visible;
 }
 .player-inner{
   width:min(1100px,100%);
@@ -422,8 +522,10 @@ h1 span{color:var(--blue)}
   transform:scale(1) translateY(0);
 }
 .player-top{
-  display:flex;justify-content:space-between;
-  align-items:center;gap:20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:20px;
   margin-bottom:20px;
 }
 .player-title{
@@ -432,8 +534,10 @@ h1 span{color:var(--blue)}
   letter-spacing:-.07em;
 }
 .close-player{
-  background:white;color:black;
-  border:0;padding:12px 18px;
+  background:white;
+  color:black;
+  border:0;
+  padding:12px 18px;
   font-size:11px;
 }
 .video-frame{
@@ -443,15 +547,22 @@ h1 span{color:var(--blue)}
   border:1px solid #ffffff40;
   overflow:hidden;
 }
-.video-frame iframe,.video-frame video{
-  display:block;width:100%;height:100%;
+.video-frame iframe,
+.video-frame video{
+  display:block;
+  width:100%;
+  height:100%;
   border:0;
 }
 .video-empty{
-  width:100%;height:100%;
-  display:grid;place-items:center;
-  text-align:center;padding:25px;
-  color:#d0cde8;font-size:12px;
+  width:100%;
+  height:100%;
+  display:grid;
+  place-items:center;
+  text-align:center;
+  padding:25px;
+  color:#d0cde8;
+  font-size:12px;
   line-height:2;
 }
 .player-description{
@@ -465,77 +576,107 @@ h1 span{color:var(--blue)}
 /* ABOUT AND CONTACT */
 
 .about{
-  background:linear-gradient(125deg,#f4f3ef 48%,#d4c8ff);
+  background:linear-gradient(
+    125deg,#f4f3ef 48%,#d4c8ff
+  );
 }
 .contact{
-  background:linear-gradient(125deg,#f4f3ef 48%,#c6d8ff);
+  background:linear-gradient(
+    125deg,#f4f3ef 48%,#c6d8ff
+  );
 }
 .social-links{
-  display:flex;flex-wrap:wrap;gap:15px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:15px;
   margin-top:45px;
 }
 .social-links a{
   text-decoration:none;
-  color:white;background:#111;
+  color:white;
+  background:#111;
   padding:15px 22px;
   font-size:12px;
 }
 .social-links a:hover{background:var(--blue)}
 
-/* LOADING SCREEN */
+/* LOADER */
 
 .loader{
-  position:fixed;inset:0;z-index:100;
-  display:grid;place-items:center;
-  background:#080811;color:white;
+  position:fixed;
+  inset:0;
+  z-index:100;
+  display:grid;
+  place-items:center;
+  background:#080811;
+  color:white;
   transition:opacity .7s,visibility .7s;
 }
 .loader.done{
-  opacity:0;visibility:hidden;
+  opacity:0;
+  visibility:hidden;
   pointer-events:none;
 }
 .loader-inner{width:min(700px,80vw)}
 .loader-label{
-  font-size:10px;letter-spacing:.2em;
+  font-size:10px;
+  letter-spacing:.2em;
   margin-bottom:35px;
 }
 .loader-name{
   font-family:"Archivo Black",sans-serif;
   font-size:clamp(65px,12vw,165px);
-  letter-spacing:-.1em;line-height:.85;
-  opacity:0;transform:translateY(40px);
+  letter-spacing:-.1em;
+  line-height:.85;
+  opacity:0;
+  transform:translateY(40px);
   transition:opacity .7s,transform .7s;
 }
-.loader-name.show{opacity:1;transform:none}
+.loader-name.show{
+  opacity:1;
+  transform:none;
+}
 .loader-name span{color:#9890ff}
 .loader-track{
-  margin-top:50px;height:2px;
+  margin-top:50px;
+  height:2px;
   background:#ffffff30;
 }
 .loader-fill{
-  height:100%;width:0;
+  height:100%;
+  width:0;
   background:#8792ff;
   transition:width 2s linear;
 }
 .loader-fill.fill{width:100%}
 .skip{
-  position:absolute;top:30px;right:5vw;
-  background:transparent;color:white;
+  position:absolute;
+  top:30px;
+  right:5vw;
+  background:transparent;
+  color:white;
   border:1px solid #ffffff70;
-  padding:11px 17px;font-size:11px;
+  padding:11px 17px;
+  font-size:11px;
 }
 
-/* TRANSITIONS */
+/* PAGE TRANSITIONS */
 
 .transition{
-  position:fixed;inset:0;z-index:60;
-  pointer-events:none;visibility:hidden;
+  position:fixed;
+  inset:0;
+  z-index:60;
+  pointer-events:none;
+  visibility:hidden;
 }
 .transition.active{visibility:visible}
 .transition.work{
-  background:
-    repeating-linear-gradient(90deg,
-      #080811 0 8%,#4056f2 8% 10%,#080811 10% 16%);
+  background:repeating-linear-gradient(
+    90deg,
+    #080811 0 8%,
+    #4056f2 8% 10%,
+    #080811 10% 16%
+  );
   animation:pixelTransition 1s steps(12,end) both;
 }
 @keyframes pixelTransition{
@@ -548,12 +689,23 @@ h1 span{color:var(--blue)}
   animation:rotateTransition 1s ease-in-out both;
 }
 @keyframes rotateTransition{
-  0%{transform:perspective(800px) rotateY(-90deg) scale(1.4);opacity:0}
-  45%,55%{transform:perspective(800px) rotateY(0);opacity:1}
-  100%{transform:perspective(800px) rotateY(90deg) scale(1.4);opacity:0}
+  0%{
+    transform:perspective(800px) rotateY(-90deg) scale(1.4);
+    opacity:0;
+  }
+  45%,55%{
+    transform:perspective(800px) rotateY(0);
+    opacity:1;
+  }
+  100%{
+    transform:perspective(800px) rotateY(90deg) scale(1.4);
+    opacity:0;
+  }
 }
 .transition.contact{
-  background:radial-gradient(circle,#dce7ff,#445af1 35%,#080811 80%);
+  background:radial-gradient(
+    circle,#dce7ff,#445af1 35%,#080811 80%
+  );
   animation:zoomTransition 1s ease-in-out both;
 }
 @keyframes zoomTransition{
@@ -562,17 +714,22 @@ h1 span{color:var(--blue)}
   100%{transform:scale(7);opacity:0}
 }
 
-/* MOBILE */
+/* RESPONSIVE */
 
 @media(max-width:850px){
-  .hero{left:25%;top:26%}
-  .hero-name{font-size:clamp(85px,16vw,150px)}
+  .hero{left:24%;top:29%}
+  .hero-name{
+    font-size:clamp(85px,16vw,150px);
+  }
   .nav{left:4%;top:48%}
-  .carousel-viewport{height:54vh;min-height:340px}
+  .carousel-viewport{
+    height:54vh;
+    min-height:340px;
+  }
   .project-card{
     width:clamp(230px,65vw,520px);
-    margin-left:calc(clamp(230px,65vw,520px) / -2);
-    margin-top:calc(clamp(230px,65vw,520px) * -0.3125);
+    margin-left:calc(clamp(230px,65vw,520px)/-2);
+    margin-top:calc(clamp(230px,65vw,520px)*-.3125);
   }
 }
 @media(max-width:550px){
@@ -582,11 +739,16 @@ h1 span{color:var(--blue)}
   .brand-row{gap:10px}
   .brand{font-size:24px;min-width:90px}
   .socials{gap:6px}
-  .hero{left:7%;top:26%}
-  .hero-name{font-size:clamp(75px,18vw,120px)}
+  .hero{left:7%;top:28%}
+  .hero-name{
+    font-size:clamp(75px,18vw,120px);
+  }
   .hero-caption{font-size:9px}
   .nav{left:5%;top:58%;width:170px}
-  .carousel-viewport{min-height:300px;height:43vh}
+  .carousel-viewport{
+    min-height:300px;
+    height:43vh;
+  }
   .project-card{
     width:76vw;
     margin-left:-38vw;
@@ -604,18 +766,24 @@ h1 span{color:var(--blue)}
     transition:none!important;
   }
   .loader,.transition{display:none!important}
-  .hero-name,.nav button{opacity:1!important;filter:none!important;transform:none!important}
+  .hero-name,.nav button{
+    opacity:1!important;
+    filter:none!important;
+    transform:none!important;
+  }
 }
 </style>
 </head>
-<body>
 
+<body>
 <div class="paper"></div>
 
 <div class="loader" id="loader">
   <button class="skip" id="skip">SKIP INTRO ↗</button>
   <div class="loader-inner">
-    <div class="loader-label">JOAQO / VIDEO EDITOR / PORTFOLIO</div>
+    <div class="loader-label">
+      JOAQO / VIDEO EDITOR / PORTFOLIO
+    </div>
     <div class="loader-name" id="loader-name">
       JOAQO<br><span>MANSILLA.</span>
     </div>
@@ -627,189 +795,196 @@ h1 span{color:var(--blue)}
 
 <div id="app">
 
-  <section class="page home" id="home">
-    <div class="collage" id="collage">
-      <div class="collage-glow"></div>
-    </div>
+<section class="page home" id="home">
+  <div class="collage" id="collage"></div>
 
-    <header class="header">
-      <div>
-        <div class="brand-row">
-          <div class="brand" id="brand" data-text="Joaqo">Joaqo</div>
-
-          <div class="socials">
-            <a class="social"
-               href="https://www.instagram.com/oqaoj/"
-               target="_blank"
-               rel="noopener noreferrer"
-               aria-label="Instagram">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7zm5 3a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6zm5.5-3a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3z"/>
-              </svg>
-            </a>
-
-            <a class="social"
-               href="https://x.com/oqaoj6"
-               target="_blank"
-               rel="noopener noreferrer"
-               aria-label="X / Twitter">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M18.9 2H22l-6.8 7.8L23.2 22h-6.3L12 14.6 5.5 22H2.3l7.3-8.5L1.8 2h6.5l4.4 6.7L18.9 2zm-1.1 18h1.7L7.3 3.9H5.5L17.8 20z"/>
-              </svg>
-            </a>
-          </div>
+  <header class="header">
+    <div>
+      <div class="brand-row">
+        <div class="brand" id="brand" data-text="Joaqo">
+          Joaqo
         </div>
-        <div class="header-sub">VIDEO EDITOR</div>
+
+        <div class="socials">
+          <a class="social"
+             href="https://www.instagram.com/oqaoj/"
+             target="_blank"
+             rel="noopener noreferrer"
+             aria-label="Instagram">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7zm5 3a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6zm5.5-3a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3z"/>
+            </svg>
+          </a>
+
+          <a class="social"
+             href="https://x.com/oqaoj6"
+             target="_blank"
+             rel="noopener noreferrer"
+             aria-label="X / Twitter">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M18.9 2H22l-6.8 7.8L23.2 22h-6.3L12 14.6 5.5 22H2.3l7.3-8.5L1.8 2h6.5l4.4 6.7L18.9 2zm-1.1 18h1.7L7.3 3.9H5.5L17.8 20z"/>
+            </svg>
+          </a>
+        </div>
       </div>
 
-      <div class="top-right">
-        EDIT / COLOR / SOUND / STORYTELLING<br>
-        ES / EN
-      </div>
-    </header>
-
-    <nav class="nav" aria-label="Main navigation">
-      <button class="active" data-page="home">
-        <small>01</small>HOME<span class="arrow">→</span>
-      </button>
-      <button data-page="work">
-        <small>02</small>WORK<span class="arrow">→</span>
-      </button>
-      <button data-page="about">
-        <small>03</small>ABOUT<span class="arrow">→</span>
-      </button>
-      <button data-page="contact">
-        <small>04</small>CONTACT<span class="arrow">→</span>
-      </button>
-    </nav>
-
-    <div class="hero">
-      <div class="hero-name" id="hero-name">
-        <span id="hero-first" data-text="Joaqo">Joaqo</span>
-        <span id="hero-second" data-text="OqaoJ">OqaoJ</span>
-      </div>
-      <div class="hero-caption">
-        VIDEO EDITING<br>
-        FOR FILM, MUSIC<br>
-        AND DIGITAL MEDIA.
-      </div>
+      <div class="header-sub">VIDEO EDITOR</div>
     </div>
 
-    <div class="home-footer">(C) 2026 — JOACO MANSILLA</div>
-  </section>
+    <div class="top-right">
+      EDIT / COLOR / SOUND / STORYTELLING<br>
+      ES / EN
+    </div>
+  </header>
 
-  <section class="page work" id="work" hidden>
-    <div class="work-world">
-      <div class="work-grid"></div>
+  <nav class="nav" aria-label="Main navigation">
+    <button class="active" data-page="home">
+      <small>01</small>HOME<span class="arrow">→</span>
+    </button>
+    <button data-page="work">
+      <small>02</small>WORK<span class="arrow">→</span>
+    </button>
+    <button data-page="about">
+      <small>03</small>ABOUT<span class="arrow">→</span>
+    </button>
+    <button data-page="contact">
+      <small>04</small>CONTACT<span class="arrow">→</span>
+    </button>
+  </nav>
+
+  <div class="hero">
+    <div class="hero-name"
+         id="hero-name"
+         data-text="Joaqo">Joaqo</div>
+
+    <div class="hero-caption">
+      VIDEO EDITING<br>
+      FOR FILM, MUSIC<br>
+      AND DIGITAL MEDIA.
+    </div>
+  </div>
+
+  <div class="home-footer">
+    (C) 2026 — JOACO MANSILLA
+  </div>
+</section>
+
+<section class="page work" id="work" hidden>
+  <div class="work-world">
+    <div class="work-grid"></div>
+  </div>
+
+  <div class="inner-head">
+    <div class="inner-brand">Joaqo</div>
+    <button class="back" data-page="home">← HOME</button>
+  </div>
+
+  <div class="work-top">
+    <div class="kicker">01 / SELECTED WORK</div>
+    <h1>SELECT YOUR PROJECT.</h1>
+  </div>
+
+  <div class="carousel-viewport" id="carousel-viewport">
+    <div class="carousel-track" id="carousel-track"></div>
+  </div>
+
+  <div class="carousel-controls">
+    <button id="previous" aria-label="Previous project">←</button>
+    <div class="carousel-count" id="carousel-count">01 / 05</div>
+    <button id="next" aria-label="Next project">→</button>
+  </div>
+
+  <div class="work-instruction">
+    SCROLL TO SELECT / CLICK CENTER PROJECT TO VIEW
+  </div>
+</section>
+
+<section class="page about" id="about" hidden>
+  <div class="inner-head">
+    <div class="inner-brand">Joaqo</div>
+    <button class="back" data-page="home">← HOME</button>
+  </div>
+
+  <div class="inner-content">
+    <div class="kicker">02 / ABOUT</div>
+    <h1>JOACO<br><span>MANSILLA.</span></h1>
+    <div class="copy">
+      <p>I'm a video editor working across documentary, commercial, music, and digital content.</p>
+      <p>Adobe Certified Professional in Premiere Pro.</p>
+      <p>I focus on rhythm, sound, and visual storytelling.</p>
+    </div>
+  </div>
+</section>
+
+<section class="page contact" id="contact" hidden>
+  <div class="inner-head">
+    <div class="inner-brand">Joaqo</div>
+    <button class="back" data-page="home">← HOME</button>
+  </div>
+
+  <div class="inner-content">
+    <div class="kicker">03 / CONTACT</div>
+    <h1>GET IN<br><span>TOUCH.</span></h1>
+
+    <div class="copy">
+      <p>Available for freelance video editing projects.</p>
+      <p>Contact me through my social accounts.</p>
     </div>
 
-    <div class="inner-head">
-      <div class="inner-brand">Joaqo</div>
-      <button class="back" data-page="home">← HOME</button>
-    </div>
+    <div class="social-links">
+      <a href="https://www.instagram.com/oqaoj/"
+         target="_blank"
+         rel="noopener noreferrer">
+        INSTAGRAM ↗
+      </a>
 
-    <div class="work-top">
-      <div class="kicker">01 / SELECTED WORK</div>
-      <h1>SELECT YOUR PROJECT.</h1>
+      <a href="https://x.com/oqaoj6"
+         target="_blank"
+         rel="noopener noreferrer">
+        X / TWITTER ↗
+      </a>
     </div>
-
-    <div class="carousel-viewport" id="carousel-viewport">
-      <div class="carousel-track" id="carousel-track"></div>
-    </div>
-
-    <div class="carousel-controls">
-      <button id="previous" aria-label="Previous project">←</button>
-      <div class="carousel-count" id="carousel-count">01 / 05</div>
-      <button id="next" aria-label="Next project">→</button>
-    </div>
-
-    <div class="work-instruction">
-      SCROLL TO SELECT / CLICK CENTER PROJECT TO VIEW
-    </div>
-  </section>
-
-  <section class="page about" id="about" hidden>
-    <div class="inner-head">
-      <div class="inner-brand">Joaqo</div>
-      <button class="back" data-page="home">← HOME</button>
-    </div>
-    <div class="inner-content">
-      <div class="kicker">02 / ABOUT</div>
-      <h1>JOACO<br><span>MANSILLA.</span></h1>
-      <div class="copy">
-        <p>I'm a video editor working across documentary, commercial, music, and digital content.</p>
-        <p>Adobe Certified Professional in Premiere Pro.</p>
-        <p>I focus on rhythm, sound, and visual storytelling.</p>
-      </div>
-    </div>
-  </section>
-
-  <section class="page contact" id="contact" hidden>
-    <div class="inner-head">
-      <div class="inner-brand">Joaqo</div>
-      <button class="back" data-page="home">← HOME</button>
-    </div>
-    <div class="inner-content">
-      <div class="kicker">03 / CONTACT</div>
-      <h1>GET IN<br><span>TOUCH.</span></h1>
-      <div class="copy">
-        <p>Available for freelance video editing projects.</p>
-        <p>Contact me through my social accounts.</p>
-      </div>
-      <div class="social-links">
-        <a href="https://www.instagram.com/oqaoj/"
-           target="_blank" rel="noopener noreferrer">
-          INSTAGRAM ↗
-        </a>
-        <a href="https://x.com/oqaoj6"
-           target="_blank" rel="noopener noreferrer">
-          X / TWITTER ↗
-        </a>
-      </div>
-    </div>
-  </section>
+  </div>
+</section>
 
 </div>
 
-<div class="player-overlay" id="player-overlay"
-     role="dialog" aria-modal="true"
-     aria-label="Project video" aria-hidden="true">
+<div class="player-overlay"
+     id="player-overlay"
+     role="dialog"
+     aria-modal="true"
+     aria-label="Project video"
+     aria-hidden="true">
   <div class="player-inner">
     <div class="player-top">
       <div class="player-title" id="player-title"></div>
-      <button class="close-player" id="close-player">CLOSE ✕</button>
+      <button class="close-player" id="close-player">
+        CLOSE ✕
+      </button>
     </div>
+
     <div class="video-frame" id="video-frame"></div>
-    <div class="player-description" id="player-description"></div>
+    <div class="player-description"
+         id="player-description"></div>
   </div>
 </div>
 
-<div class="transition" id="transition" aria-hidden="true"></div>
+<div class="transition"
+     id="transition"
+     aria-hidden="true"></div>
 
 <script>
-/*
-  IMAGE SOURCES
 
-  Independent photographs, not a static website screenshot.
-  Replace these with your own licensed images or video stills
-  whenever you are ready.
-*/
+/* ===================================
+   IMAGE SOURCES
+   =================================== */
 
 const imageSources = [
-  "https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=1400&q=85",
-  "https://images.unsplash.com/photo-1519608487953-e999c86e7455?w=1400&q=85",
-  "https://images.unsplash.com/photo-1514565131-fce0801e5785?w=1400&q=85",
-  "https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=1400&q=85",
-  "https://images.unsplash.com/photo-1519608487953-e999c86e7455?w=1400&q=85"
+  "https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=1200&q=80",
+  "https://images.unsplash.com/photo-1519608487953-e999c86e7455?w=1200&q=80",
+  "https://images.unsplash.com/photo-1514565131-fce0801e5785?w=1200&q=80",
+  "https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=1200&q=80"
 ];
-
-/*
-  MOSAIC DESTINATIONS
-
-  Percentages of the homepage.
-  Each mosaic moves between these locations,
-  replacing its photograph as it reconstructs.
-*/
 
 const positions = [
   {x:52,y:0,w:48,h:65},
@@ -819,345 +994,415 @@ const positions = [
   {x:66,y:12,w:20,h:30}
 ];
 
-const mosaicCount = 4;
-const mosaics = [];
-const collage = document.getElementById("collage");
-
 const random = (min,max) =>
-  min+Math.random()*(max-min);
+  min + Math.random() * (max-min);
 
 const sleep = ms =>
   new Promise(resolve=>setTimeout(resolve,ms));
 
-const reduced = matchMedia("(prefers-reduced-motion: reduce)");
+const reduced =
+  matchMedia("(prefers-reduced-motion: reduce)");
 
 let currentPage = "home";
 let navigating = false;
-let mosaicRunning = false;
-let mosaicVersion = 0;
 let selectedProject = 0;
 let playerOpen = false;
+let glitching = false;
+
+const collage = document.getElementById("collage");
+
+const mosaics = [];
 
 /*
-  MOSAIC SYSTEM
-
-  Each photo is made from a grid of small squares.
-  The squares scatter, travel toward another region,
-  and reconstruct a different photograph.
+  PERFORMANCE:
+  Only 3 mosaic groups, rather than 4.
 */
 
-function createMosaic(index){
-  const element=document.createElement("div");
-  element.className="mosaic";
-  element.dataset.index=index;
+const mosaicCount = 3;
+
+/* ===================================
+   CREATE MOSAIC GROUPS
+   =================================== */
+
+function createMosaic(index) {
+  const element = document.createElement("div");
+  element.className = "mosaic";
+
   collage.appendChild(element);
 
-  const mosaic={
+  const mosaic = {
     element,
-    index,
-    position:index%positions.length,
-    image:index%imageSources.length,
+    position:index,
+    image:index % imageSources.length,
     tiles:[],
-    version:0
+    busy:false
   };
 
   mosaics.push(mosaic);
   return mosaic;
 }
 
-function applyPosition(mosaic,position){
-  const p=positions[position%positions.length];
+function applyPosition(mosaic) {
+  const p =
+    positions[mosaic.position % positions.length];
 
-  mosaic.element.style.left=p.x+"%";
-  mosaic.element.style.top=p.y+"%";
-  mosaic.element.style.width=p.w+"%";
-  mosaic.element.style.height=p.h+"%";
+  mosaic.element.style.left = p.x + "%";
+  mosaic.element.style.top = p.y + "%";
+  mosaic.element.style.width = p.w + "%";
+  mosaic.element.style.height = p.h + "%";
 }
 
-function buildTiles(mosaic){
-  mosaic.element.replaceChildren();
-  mosaic.tiles=[];
+/* ===================================
+   IRREGULAR IMAGE FRAGMENTS
+   =================================== */
 
-  const w=mosaic.element.clientWidth;
-  const h=mosaic.element.clientHeight;
-  if(!w||!h)return;
+function buildTiles(mosaic) {
+  const el = mosaic.element;
 
-  // Many smaller squares instead of a handful of large ones.
-  // The tile count adapts to the size of each photo.
-  const size=window.innerWidth<650 ? 17 : 21;
-  const cols=Math.max(6,Math.ceil(w/size));
-  const rows=Math.max(5,Math.ceil(h/size));
+  el.replaceChildren();
+  mosaic.tiles = [];
 
-  const tw=w/cols;
-  const th=h/rows;
-  const image=imageSources[mosaic.image];
+  const w = el.clientWidth;
+  const h = el.clientHeight;
 
-  for(let row=0;row<rows;row++){
-    for(let col=0;col<cols;col++){
-      const tile=document.createElement("div");
-      tile.className="mosaic-tile";
+  if (!w || !h) return;
 
-      const x=col*tw;
-      const y=row*th;
+  /*
+    Larger average size means fewer elements.
+    Each row and column has different dimensions.
+  */
 
-      tile.style.left=x+"px";
-      tile.style.top=y+"px";
-      tile.style.width=(tw+.5)+"px";
-      tile.style.height=(th+.5)+"px";
-      tile.style.backgroundImage=`url("${image}")`;
-      tile.style.backgroundSize=`${w}px ${h}px`;
-      tile.style.backgroundPosition=`-${x}px -${y}px`;
+  const base =
+    window.innerWidth < 650 ? 45 : 62;
 
-      tile.style.opacity="0";
+  const image = imageSources[mosaic.image];
+  const fragment = document.createDocumentFragment();
 
-      mosaic.element.appendChild(tile);
+  let y = 0;
+
+  while (y < h) {
+    const th = Math.min(
+      h-y,
+      random(base*.65,base*1.45)
+    );
+
+    let x = 0;
+
+    while (x < w) {
+      const tw = Math.min(
+        w-x,
+        random(base*.6,base*1.65)
+      );
+
+      const tile = document.createElement("div");
+      tile.className = "mosaic-tile";
+
+      tile.style.left = x+"px";
+      tile.style.top = y+"px";
+      tile.style.width = (tw+.5)+"px";
+      tile.style.height = (th+.5)+"px";
+
+      tile.style.backgroundImage =
+        `url("${image}")`;
+
+      tile.style.backgroundSize =
+        `${w}px ${h}px`;
+
+      tile.style.backgroundPosition =
+        `-${x}px -${y}px`;
+
+      tile.style.setProperty(
+        "--dx",random(-85,85)+"px"
+      );
+
+      tile.style.setProperty(
+        "--dy",random(-85,85)+"px"
+      );
+
+      fragment.appendChild(tile);
       mosaic.tiles.push(tile);
+
+      x += tw;
     }
-  }
-}
 
-function scatterIn(mosaic){
-  if(reduced.matches){
-    mosaic.tiles.forEach(tile=>{
-      tile.style.opacity="1";
-      tile.style.transform="none";
-    });
-    return Promise.resolve();
+    y += th;
   }
 
-  const animations=mosaic.tiles.map(tile=>{
-    const dx=random(-180,180);
-    const dy=random(-150,150);
-    const delay=random(0,700);
-
-    return tile.animate([
-      {
-        opacity:0,
-        transform:`translate(${dx}px,${dy}px) scale(${random(.6,1.4)})`,
-        filter:"contrast(2) hue-rotate(50deg)"
-      },
-      {
-        opacity:1,
-        transform:"translate(0,0) scale(1)",
-        filter:"none"
-      }
-    ],{
-      duration:random(750,1350),
-      delay,
-      easing:"cubic-bezier(.16,1,.3,1)",
-      fill:"forwards"
-    });
-  });
-
-  return Promise.all(animations.map(a=>a.finished.catch(()=>{})));
+  el.appendChild(fragment);
 }
 
-/*
-  The tiles travel out from the old image.
-  After they scatter, the mosaic changes location
-  and image, then the new image reconstructs.
-*/
+/* ===================================
+   RECONSTRUCT IMAGE
+   =================================== */
 
-async function transformMosaic(mosaic){
-  if(currentPage!=="home"||reduced.matches)return;
+function assemble(mosaic) {
+  mosaic.element.classList.remove("departing");
 
-  const version=++mosaic.version;
-  const tiles=mosaic.tiles;
+  mosaic.tiles.forEach((tile,i)=>{
+    const delay =
+      (i%7)*32 + Math.floor(i/7)*12;
 
-  const exitAnimations=tiles.map(tile=>{
-    return tile.animate([
-      {opacity:1,transform:"translate(0,0) scale(1)"},
-      {
-        opacity:0,
-        transform:`translate(${random(-220,220)}px,${random(-180,180)}px) scale(${random(.5,1.3)})`
-      }
-    ],{
-      duration:random(450,900),
-      delay:random(0,350),
-      easing:"cubic-bezier(.7,0,.3,1)",
-      fill:"forwards"
-    });
+    tile.style.transitionDelay = delay+"ms";
   });
 
-  await Promise.all(exitAnimations.map(a=>a.finished.catch(()=>{})));
-
-  if(version!==mosaic.version||currentPage!=="home")return;
-
-  mosaic.position=(mosaic.position+1)%positions.length;
-  mosaic.image=(mosaic.image+1)%imageSources.length;
-
-  applyPosition(mosaic,mosaic.position);
-  buildTiles(mosaic);
-  await scatterIn(mosaic);
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{
+      mosaic.tiles.forEach(tile=>{
+        tile.classList.add("assembled");
+      });
+    });
+  });
 }
 
-async function startMosaics(){
-  if(mosaicRunning)return;
-  mosaicRunning=true;
-  const run=++mosaicVersion;
+/* ===================================
+   MOVE AND RECONSTRUCT
+   =================================== */
 
-  mosaics.forEach((mosaic,i)=>{
-    applyPosition(mosaic,mosaic.position);
+async function moveMosaic(mosaic) {
+  if (
+    mosaic.busy ||
+    currentPage !== "home" ||
+    reduced.matches
+  ) return;
+
+  mosaic.busy = true;
+
+  mosaic.tiles.forEach(tile=>{
+    tile.style.transitionDelay =
+      random(0,220)+"ms";
+  });
+
+  mosaic.element.classList.add("departing");
+
+  mosaic.tiles.forEach(tile=>{
+    tile.classList.remove("assembled");
+  });
+
+  await sleep(850);
+
+  mosaic.position =
+    (mosaic.position+1) % positions.length;
+
+  mosaic.image =
+    (mosaic.image+1) % imageSources.length;
+
+  applyPosition(mosaic);
+
+  await sleep(1200);
+
+  if (currentPage === "home") {
     buildTiles(mosaic);
-    setTimeout(()=>scatterIn(mosaic),i*220);
-  });
-
-  if(reduced.matches)return;
-
-  while(run===mosaicVersion){
-    await sleep(2600);
-
-    if(run!==mosaicVersion)break;
-    if(currentPage!=="home")continue;
-
-    // Move different image groups at staggered intervals.
-    for(let i=0;i<mosaics.length;i++){
-      if(run!==mosaicVersion)break;
-      if(currentPage==="home"){
-        transformMosaic(mosaics[i]);
-      }
-      await sleep(550);
-    }
+    assemble(mosaic);
   }
+
+  mosaic.busy = false;
 }
 
-for(let i=0;i<mosaicCount;i++){
+for (let i=0;i<mosaicCount;i++) {
   createMosaic(i);
 }
 
-/* GLITCHING IDENTITY */
+let mosaicsStarted = false;
 
-const brand=document.getElementById("brand");
-const heroName=document.getElementById("hero-name");
-const heroFirst=document.getElementById("hero-first");
-const heroSecond=document.getElementById("hero-second");
+function startMosaics() {
+  if (mosaicsStarted) return;
 
-let glitching=false;
+  mosaicsStarted = true;
 
-async function glitchIdentity(){
-  if(currentPage!=="home"||glitching||reduced.matches)return;
-  glitching=true;
+  mosaics.forEach((m,i)=>{
+    applyPosition(m);
+    buildTiles(m);
+
+    setTimeout(()=>{
+      assemble(m);
+    },i*260);
+  });
+
+  if (reduced.matches) return;
+
+  /*
+    Only one mosaic moves at a time.
+    This reduces animation overlap.
+  */
+
+  let index = 0;
+
+  setInterval(()=>{
+    if (currentPage !== "home") return;
+
+    const mosaic =
+      mosaics[index % mosaics.length];
+
+    index++;
+
+    moveMosaic(mosaic);
+  },3400);
+}
+
+/* ===================================
+   JOAQO → OQAOJ GLITCH
+   =================================== */
+
+const brand = document.getElementById("brand");
+const heroName = document.getElementById("hero-name");
+
+async function glitchIdentity() {
+  if (
+    currentPage !== "home" ||
+    glitching ||
+    reduced.matches
+  ) return;
+
+  glitching = true;
 
   brand.classList.add("glitch");
   heroName.classList.add("glitch");
 
-  await sleep(110);
+  brand.textContent = "OqaoJ";
+  brand.dataset.text = "OqaoJ";
 
-  brand.textContent="OqaoJ";
-  brand.dataset.text="OqaoJ";
+  heroName.textContent = "OqaoJ";
+  heroName.dataset.text = "OqaoJ";
 
-  heroFirst.textContent="opɒoᒐ";
-  heroFirst.dataset.text="opɒoᒐ";
+  await sleep(270);
 
-  await sleep(160);
+  brand.textContent = "Joaqo";
+  brand.dataset.text = "Joaqo";
 
-  brand.textContent="Joaqo";
-  brand.dataset.text="Joaqo";
-
-  heroFirst.textContent="Joaqo";
-  heroFirst.dataset.text="Joaqo";
+  heroName.textContent = "Joaqo";
+  heroName.dataset.text = "Joaqo";
 
   brand.classList.remove("glitch");
   heroName.classList.remove("glitch");
-  glitching=false;
+
+  glitching = false;
 }
 
-function glitchRandomElement(){
-  if(currentPage!=="home"||reduced.matches)return;
+function glitchRandomElement() {
+  if (
+    currentPage !== "home" ||
+    reduced.matches
+  ) return;
 
-  const elements=[
+  const elements = [
     ...document.querySelectorAll(".nav button"),
     ...document.querySelectorAll(".social")
   ];
 
-  const element=elements[Math.floor(Math.random()*elements.length)];
+  const element =
+    elements[Math.floor(Math.random()*elements.length)];
+
   element.classList.remove("glitch");
   void element.offsetWidth;
+
   element.classList.add("glitch");
-  setTimeout(()=>element.classList.remove("glitch"),350);
+
+  setTimeout(()=>{
+    element.classList.remove("glitch");
+  },350);
 }
 
-if(!reduced.matches){
+if (!reduced.matches) {
   setInterval(()=>{
-    if(Math.random()<.65)glitchIdentity();
-    else glitchRandomElement();
-  },5500);
+    if (Math.random()<.7) {
+      glitchIdentity();
+    } else {
+      glitchRandomElement();
+    }
+  },5600);
 }
 
-/* PROJECT DATA
+/* ===================================
+   PORTFOLIO PROJECTS
+   =================================== */
 
-  To connect a real video later, add either:
-  youtube: "VIDEO_ID"
-  or
-  video: "videos/filename.mp4"
-
-  No public video URLs have been supplied yet.
+/*
+  Add youtube:"VIDEO_ID" or
+  video:"videos/filename.mp4"
+  to connect a project video.
 */
 
-const projects=[
+const projects = [
   {
     title:"HAITI",
     category:"DOCUMENTARY",
     image:imageSources[0],
-    description:"Nonprofit documentary-style film. Editing, sound design, and storytelling."
+    description:
+      "Nonprofit documentary-style film. Editing, sound design, and storytelling."
   },
   {
     title:"JOEY CALVEIRO",
     category:"CINEMATIC",
     image:imageSources[1],
-    description:"Cinematic jazz teaser. Concept, research, and editing."
+    description:
+      "Cinematic jazz teaser. Concept, research, and editing."
   },
   {
     title:"RAW FIT",
     category:"COMMERCIAL",
     image:imageSources[2],
-    description:"Fitness commercial. Editing, color grading, and sound design."
+    description:
+      "Fitness commercial. Editing, color grading, and sound design."
   },
   {
     title:"SHARKCAST",
     category:"PODCAST",
     image:imageSources[3],
-    description:"Podcast episodes, promotional trailers, and short-form reels."
+    description:
+      "Podcast episodes, promotional trailers, and short-form reels."
   },
   {
     title:"3Y4 MUSIC",
     category:"MUSIC",
-    image:imageSources[4],
-    description:"Commissioned promotional videos for music and events."
+    image:imageSources[1],
+    description:
+      "Commissioned promotional videos for music and events."
   }
 ];
 
-/* 3D PROJECT CAROUSEL */
+/* ===================================
+   3D WORK CAROUSEL
+   =================================== */
 
-const carouselTrack=document.getElementById("carousel-track");
-const carouselCount=document.getElementById("carousel-count");
-const carouselViewport=document.getElementById("carousel-viewport");
-const cards=[];
+const carouselTrack =
+  document.getElementById("carousel-track");
+
+const carouselCount =
+  document.getElementById("carousel-count");
+
+const carouselViewport =
+  document.getElementById("carousel-viewport");
+
+const cards = [];
 
 projects.forEach((project,index)=>{
-  const card=document.createElement("button");
-  card.className="project-card";
-  card.setAttribute("aria-label","Select "+project.title);
+  const card = document.createElement("button");
+  card.className = "project-card";
 
-  const image=document.createElement("img");
-  image.src=project.image;
-  image.alt="";
-  image.loading="lazy";
+  card.setAttribute(
+    "aria-label","Select "+project.title
+  );
 
-  const number=document.createElement("div");
-  number.className="card-number";
-  number.textContent=String(index+1).padStart(2,"0");
+  const img = document.createElement("img");
+  img.src = project.image;
+  img.alt = "";
+  img.loading = "lazy";
 
-  const label=document.createElement("div");
-  label.className="card-label";
-  label.textContent=project.title;
+  const number = document.createElement("div");
+  number.className = "card-number";
+  number.textContent =
+    String(index+1).padStart(2,"0");
 
-  card.append(image,number,label);
+  const label = document.createElement("div");
+  label.className = "card-label";
+  label.textContent = project.title;
+
+  card.append(img,number,label);
 
   card.addEventListener("click",()=>{
-    if(selectedProject===index){
+    if (selectedProject===index) {
       openPlayer(index);
-    }else{
+    } else {
       selectedProject=index;
       renderCarousel();
     }
@@ -1167,80 +1412,106 @@ projects.forEach((project,index)=>{
   cards.push(card);
 });
 
-function renderCarousel(){
-  const spacing=window.innerWidth<650?210:440;
+function renderCarousel() {
+  const spacing =
+    window.innerWidth<650 ? 210 : 440;
 
   cards.forEach((card,index)=>{
-    const offset=index-selectedProject;
-    const abs=Math.abs(offset);
+    const offset = index-selectedProject;
+    const abs = Math.abs(offset);
 
-    const x=offset*spacing;
-    const rotate=-offset*13;
-    const z=-abs*180;
-    const scale=1-abs*.12;
+    card.style.transform =
+      `translate3d(${offset*spacing}px,0,${-abs*180}px)
+       rotateY(${-offset*13}deg)
+       scale(${1-abs*.12})`;
 
-    card.style.transform=
-      `translate3d(${x}px,0,${z}px) rotateY(${rotate}deg) scale(${scale})`;
+    card.style.opacity =
+      abs>2 ? "0" :
+      String(Math.max(.4,1-abs*.2));
 
-    card.style.opacity=abs>2?"0":String(Math.max(.4,1-abs*.2));
-    card.style.filter=abs===0?"none":"brightness(.55)";
-    card.style.zIndex=String(20-abs);
-    card.style.pointerEvents=abs>2?"none":"auto";
-    card.classList.toggle("selected",abs===0);
-    card.setAttribute("aria-pressed",abs===0?"true":"false");
+    card.style.filter =
+      abs===0 ? "none" : "brightness(.55)";
+
+    card.style.zIndex = String(20-abs);
+    card.style.pointerEvents =
+      abs>2 ? "none" : "auto";
+
+    card.classList.toggle(
+      "selected",abs===0
+    );
+
+    card.setAttribute(
+      "aria-pressed",
+      abs===0 ? "true" : "false"
+    );
   });
 
-  carouselCount.textContent=
+  carouselCount.textContent =
     String(selectedProject+1).padStart(2,"0")+
     " / "+
     String(projects.length).padStart(2,"0");
 }
 
-function changeProject(direction){
-  selectedProject=Math.max(
+function changeProject(direction) {
+  selectedProject = Math.max(
     0,
-    Math.min(projects.length-1,selectedProject+direction)
+    Math.min(
+      projects.length-1,
+      selectedProject+direction
+    )
   );
+
   renderCarousel();
 }
 
 document.getElementById("previous")
-  .addEventListener("click",()=>changeProject(-1));
+  .addEventListener("click",()=>{
+    changeProject(-1);
+  });
 
 document.getElementById("next")
-  .addEventListener("click",()=>changeProject(1));
+  .addEventListener("click",()=>{
+    changeProject(1);
+  });
 
-let wheelLocked=false;
+let wheelLocked = false;
 
 carouselViewport.addEventListener("wheel",event=>{
-  if(Math.abs(event.deltaY)<3&&Math.abs(event.deltaX)<3)return;
+  if (
+    Math.abs(event.deltaY)<3 &&
+    Math.abs(event.deltaX)<3
+  ) return;
 
   event.preventDefault();
 
-  if(wheelLocked)return;
+  if (wheelLocked) return;
   wheelLocked=true;
 
-  changeProject(
+  const delta =
     Math.abs(event.deltaX)>Math.abs(event.deltaY)
-      ? Math.sign(event.deltaX)
-      : Math.sign(event.deltaY)
-  );
+    ? event.deltaX
+    : event.deltaY;
 
-  setTimeout(()=>wheelLocked=false,450);
+  changeProject(Math.sign(delta));
+
+  setTimeout(()=>{
+    wheelLocked=false;
+  },450);
 },{passive:false});
 
-let touchStartX=null;
+let touchStartX = null;
 
 carouselViewport.addEventListener("touchstart",event=>{
   touchStartX=event.touches[0].clientX;
 },{passive:true});
 
 carouselViewport.addEventListener("touchend",event=>{
-  if(touchStartX===null)return;
+  if (touchStartX===null) return;
 
-  const distance=touchStartX-event.changedTouches[0].clientX;
+  const distance =
+    touchStartX-event.changedTouches[0].clientX;
 
-  if(Math.abs(distance)>40){
+  if (Math.abs(distance)>40) {
     changeProject(Math.sign(distance));
   }
 
@@ -1249,52 +1520,72 @@ carouselViewport.addEventListener("touchend",event=>{
 
 renderCarousel();
 
-/* VIDEO PLAYER */
+/* ===================================
+   VIDEO PLAYER
+   =================================== */
 
-const playerOverlay=document.getElementById("player-overlay");
-const videoFrame=document.getElementById("video-frame");
+const playerOverlay =
+  document.getElementById("player-overlay");
 
-function openPlayer(index){
+const videoFrame =
+  document.getElementById("video-frame");
+
+function openPlayer(index) {
   const project=projects[index];
 
-  document.getElementById("player-title").textContent=project.title;
-  document.getElementById("player-description").textContent=
-    project.category+" / "+project.description;
+  document.getElementById("player-title")
+    .textContent=project.title;
+
+  document.getElementById("player-description")
+    .textContent=
+      project.category+" / "+project.description;
 
   videoFrame.replaceChildren();
 
-  if(project.youtube){
+  if (project.youtube) {
     const iframe=document.createElement("iframe");
-    iframe.src=
+
+    iframe.src =
       "https://www.youtube-nocookie.com/embed/"+
       encodeURIComponent(project.youtube)+
       "?autoplay=1&rel=0";
-    iframe.allow="autoplay; encrypted-media; picture-in-picture";
+
+    iframe.allow =
+      "autoplay; encrypted-media; picture-in-picture";
+
     iframe.allowFullscreen=true;
     iframe.title=project.title;
+
     videoFrame.appendChild(iframe);
-  }else if(project.video){
+
+  } else if (project.video) {
     const video=document.createElement("video");
+
     video.src=project.video;
     video.controls=true;
     video.autoplay=true;
     video.playsInline=true;
+
     videoFrame.appendChild(video);
-  }else{
+
+  } else {
     const empty=document.createElement("div");
+
     empty.className="video-empty";
-    empty.textContent=
+    empty.textContent =
       "VIDEO NOT CONNECTED YET — ADD YOUR PROJECT LINK TO ENABLE PLAYBACK";
+
     videoFrame.appendChild(empty);
   }
 
   playerOverlay.classList.add("open");
   playerOverlay.setAttribute("aria-hidden","false");
   playerOpen=true;
+
   document.getElementById("close-player").focus();
 }
 
-function closePlayer(){
+function closePlayer() {
   playerOverlay.classList.remove("open");
   playerOverlay.setAttribute("aria-hidden","true");
   videoFrame.replaceChildren();
@@ -1305,41 +1596,51 @@ document.getElementById("close-player")
   .addEventListener("click",closePlayer);
 
 playerOverlay.addEventListener("click",event=>{
-  if(event.target===playerOverlay)closePlayer();
+  if (event.target===playerOverlay) {
+    closePlayer();
+  }
 });
 
-/* PAGE TRANSITIONS */
+/* ===================================
+   PAGE TRANSITIONS
+   =================================== */
 
-const transition=document.getElementById("transition");
+const transition =
+  document.getElementById("transition");
 
-function showPage(page){
-  document.querySelectorAll(".page").forEach(section=>{
-    section.hidden=section.id!==page;
-  });
+function showPage(page) {
+  document.querySelectorAll(".page")
+    .forEach(section=>{
+      section.hidden=section.id!==page;
+    });
 
   currentPage=page;
   window.scrollTo(0,0);
 
-  if(page==="work")renderCarousel();
+  if (page==="work") renderCarousel();
 }
 
-function navigate(page){
-  if(navigating||page===currentPage)return;
+function navigate(page) {
+  if (navigating || page===currentPage) return;
 
-  if(reduced.matches){
+  if (reduced.matches) {
     showPage(page);
     return;
   }
 
   navigating=true;
 
-  const effect=page==="home"?currentPage:page;
+  const effect =
+    page==="home" ? currentPage : page;
 
   transition.className="transition";
   void transition.offsetWidth;
+
   transition.classList.add("active",effect);
 
-  setTimeout(()=>showPage(page),500);
+  setTimeout(()=>{
+    showPage(page);
+  },500);
 
   setTimeout(()=>{
     transition.className="transition";
@@ -1347,67 +1648,82 @@ function navigate(page){
   },1030);
 }
 
-document.querySelectorAll("[data-page]").forEach(button=>{
-  button.addEventListener("click",()=>navigate(button.dataset.page));
-});
+document.querySelectorAll("[data-page]")
+  .forEach(button=>{
+    button.addEventListener("click",()=>{
+      navigate(button.dataset.page);
+    });
+  });
 
 document.addEventListener("keydown",event=>{
-  if(event.key==="Escape"){
-    if(playerOpen){
+  if (event.key==="Escape") {
+    if (playerOpen) {
       closePlayer();
-    }else if(currentPage!=="home"){
+    } else if (currentPage!=="home") {
       navigate("home");
     }
   }
 
-  if(currentPage==="work"&&!playerOpen){
-    if(event.key==="ArrowLeft")changeProject(-1);
-    if(event.key==="ArrowRight")changeProject(1);
-    if(event.key==="Enter"&&document.activeElement===carouselViewport){
-      openPlayer(selectedProject);
-    }
+  if (currentPage==="work" && !playerOpen) {
+    if (event.key==="ArrowLeft") changeProject(-1);
+    if (event.key==="ArrowRight") changeProject(1);
   }
 });
 
-/* INTRO */
+/* ===================================
+   LOADING SCREEN
+   =================================== */
 
 const loader=document.getElementById("loader");
+
 let introDone=false;
-let introTimers=[];
+const introTimers=[];
 
-function finishIntro(){
-  if(introDone)return;
+function finishIntro() {
+  if (introDone) return;
+
   introDone=true;
-
   introTimers.forEach(clearTimeout);
+
   loader.classList.add("done");
+  heroName.classList.add("visible");
 
-  document.getElementById("hero-name").classList.add("visible");
-
-  document.querySelectorAll(".nav button").forEach((button,index)=>{
-    setTimeout(()=>button.classList.add("show"),index*150);
-  });
+  document.querySelectorAll(".nav button")
+    .forEach((button,index)=>{
+      setTimeout(()=>{
+        button.classList.add("show");
+      },index*150);
+    });
 
   startMosaics();
 
-  setTimeout(()=>loader.hidden=true,750);
+  setTimeout(()=>{
+    loader.hidden=true;
+  },750);
 }
 
-if(reduced.matches){
+if (reduced.matches) {
   finishIntro();
-}else{
+} else {
   introTimers.push(setTimeout(()=>{
-    document.getElementById("loader-name").classList.add("show");
-    document.getElementById("loader-fill").classList.add("fill");
+    document.getElementById("loader-name")
+      .classList.add("show");
+
+    document.getElementById("loader-fill")
+      .classList.add("fill");
   },350));
 
-  introTimers.push(setTimeout(finishIntro,2550));
+  introTimers.push(
+    setTimeout(finishIntro,2550)
+  );
 }
 
 document.getElementById("skip")
   .addEventListener("click",finishIntro);
 
-/* RESPONSIVE REBUILD */
+/* ===================================
+   RESIZE HANDLING
+   =================================== */
 
 let resizeTimer;
 
@@ -1416,17 +1732,21 @@ window.addEventListener("resize",()=>{
 
   resizeTimer=setTimeout(()=>{
     mosaics.forEach(mosaic=>{
-      mosaic.version++;
-      applyPosition(mosaic,mosaic.position);
+      if (mosaic.busy) return;
+
+      applyPosition(mosaic);
       buildTiles(mosaic);
+
       mosaic.tiles.forEach(tile=>{
-        tile.style.opacity="1";
+        tile.style.transitionDelay="0ms";
+        tile.classList.add("assembled");
       });
     });
 
     renderCarousel();
-  },350);
+  },400);
 });
+
 </script>
 </body>
 </html>
