@@ -4,20 +4,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#efeee9">
+<meta name="theme-color" content="#f3f2ef">
 <title>Joaqo — Video Editor</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Barlow+Condensed:wght@400;600;700;800;900&family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&family=Unbounded:wght@500;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
 :root {
-  --paper: #efeee9;
-  --ink: #111116;
-  --blue: #253be8;
-  --violet: #6a3df5;
-  --line: rgba(0,0,0,.14);
+  --paper: #f3f2ef;
+  --ink: #101015;
+  --blue: #3039d7;
+  --purple: #6639d9;
+  --grid: rgba(25,30,40,.055);
 }
 
 * { box-sizing: border-box; }
@@ -25,851 +25,835 @@
 html, body {
   margin: 0;
   min-height: 100%;
-  background: var(--paper);
-  color: var(--ink);
 }
 
 body {
-  font-family: "Space Grotesk", sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: "Space Grotesk", Arial, sans-serif;
   overflow-x: hidden;
 }
 
 button, a { -webkit-tap-highlight-color: transparent; }
+
 button { font: inherit; }
+
 a { color: inherit; }
-button:focus-visible, a:focus-visible {
-  outline: 3px solid var(--blue);
-  outline-offset: 4px;
-}
 
 ::selection {
   background: var(--blue);
   color: white;
 }
 
-/* LOADING */
+/* BACKGROUND */
 
-#loader {
+.grid {
   position: fixed;
   inset: 0;
-  z-index: 1000;
-  background: #101017;
-  color: white;
-  display: grid;
-  place-items: center;
-  overflow: hidden;
-  transition: opacity .6s, visibility .6s;
+  pointer-events: none;
+  z-index: 8;
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 24px 24px;
+  opacity: .75;
+  mix-blend-mode: multiply;
 }
 
-#loader.done {
+.noise {
+  position: fixed;
+  inset: 0;
+  z-index: 9;
+  pointer-events: none;
+  opacity: .065;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
+}
+
+/* INTRO */
+
+.intro {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  background: var(--ink);
+  color: white;
+  transition:
+    opacity .65s ease,
+    visibility .65s ease;
+}
+
+.intro.hide {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
 }
 
-.loader-center {
-  width: min(76vw, 700px);
+.intro-inner {
+  width: min(320px, 70vw);
 }
 
-.loader-word {
+.intro-name {
   font-family: "Archivo Black", sans-serif;
-  font-size: clamp(64px, 15vw, 220px);
-  letter-spacing: -.12em;
-  line-height: .9;
-  transform: scaleX(1.12);
-  transform-origin: left;
-}
-
-.loader-word span {
-  display: inline-block;
-  opacity: 0;
-  animation: loaderLetter .7s cubic-bezier(.16,1,.3,1) forwards;
-}
-
-.loader-word span:nth-child(1) { animation-delay: .12s; }
-.loader-word span:nth-child(2) { animation-delay: .19s; }
-.loader-word span:nth-child(3) { animation-delay: .26s; }
-.loader-word span:nth-child(4) { animation-delay: .33s; }
-.loader-word span:nth-child(5) { animation-delay: .4s; }
-
-@keyframes loaderLetter {
-  from {
-    opacity: 0;
-    transform: translate(var(--lx,30px),var(--ly,-70px))
-               scale(.4) rotate(-12deg);
-    filter: blur(12px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-    filter: blur(0);
-  }
-}
-
-.loader-bottom {
-  margin-top: 30px;
-  display: flex;
-  justify-content: space-between;
-  font: 11px "DM Mono", monospace;
-  letter-spacing: .15em;
-}
-
-.loader-track {
-  margin-top: 12px;
-  height: 2px;
-  background: #42424a;
-  overflow: hidden;
-}
-
-.loader-fill {
-  width: 0;
-  height: 100%;
-  background: white;
-  transition: width .2s linear;
-}
-
-/* SHARED */
-
-#app {
-  opacity: 0;
-  transition: opacity .6s;
-}
-
-#app.ready { opacity: 1; }
-
-.grid-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 20;
-  pointer-events: none;
-  opacity: .33;
-  background-image:
-    linear-gradient(rgba(0,0,0,.075) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,0,0,.075) 1px, transparent 1px);
-  background-size: 24px 24px;
-}
-
-.noise-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 21;
-  pointer-events: none;
-  opacity: .13;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.3'/%3E%3C/svg%3E");
-}
-
-header {
-  position: fixed;
-  z-index: 100;
-  left: 4.5vw;
-  right: 4.5vw;
-  top: 28px;
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  pointer-events: none;
-}
-
-header > * { pointer-events: auto; }
-
-.brand-row {
-  display: flex;
-  align-items: center;
-  gap: 17px;
-}
-
-.brand {
-  font-family: "Archivo Black", sans-serif;
-  font-size: 25px;
-  letter-spacing: -.095em;
-  text-decoration: none;
+  font-size: clamp(45px, 8vw, 76px);
+  letter-spacing: -.1em;
   line-height: 1;
 }
 
-.brand.glitch {
-  animation: brandShake .2s steps(2,end);
+.intro-line {
+  margin-top: 24px;
+  height: 2px;
+  background: #34343c;
+  overflow: hidden;
 }
 
-@keyframes brandShake {
-  0% { transform: translateX(0); }
-  30% { transform: translateX(-4px) skewX(12deg); }
-  65% { transform: translateX(4px) skewX(-9deg); }
-  100% { transform: none; }
+.intro-line span {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: #7a79ff;
+  animation: load 1.55s ease forwards;
 }
 
-.social {
+.intro-meta {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+  font: 10px "DM Mono", monospace;
+  letter-spacing: .15em;
+}
+
+@keyframes load {
+  to { width: 100%; }
+}
+
+/* MAIN SCENE */
+
+.site {
+  position: relative;
+  min-height: 100vh;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.scene {
+  position: relative;
+  min-height: 900px;
+  height: max(900px, 100vh);
+  max-height: 1250px;
+  overflow: hidden;
+}
+
+/* HEADER */
+
+.header {
+  position: absolute;
+  top: 5.2%;
+  left: 4.4%;
+  z-index: 35;
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+  opacity: 0;
+  transform: translateY(-12px);
+  transition: opacity .65s, transform .65s;
+}
+
+.ready .header {
+  opacity: 1;
+  transform: none;
+}
+
+.brand-name {
+  display: inline-block;
+  font-family: "Archivo Black", sans-serif;
+  font-size: 26px;
+  line-height: 1;
+  letter-spacing: -.09em;
+  text-decoration: none;
+}
+
+.brand-role {
+  display: block;
+  margin-top: 12px;
+  font: 9px "DM Mono", monospace;
+  letter-spacing: .18em;
+}
+
+.socials {
+  display: flex;
+  gap: 13px;
+  padding-top: 3px;
+}
+
+.socials a {
   display: inline-flex;
+  width: 19px;
+  height: 19px;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
-  transition: transform .2s;
+  transition: transform .18s, color .18s;
 }
 
-.social:hover { transform: skew(-12deg) scale(1.25); }
+.socials a:hover {
+  transform: skew(-10deg) scale(1.2);
+  color: var(--blue);
+}
 
-.social svg {
+.socials svg {
   width: 17px;
   height: 17px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.9;
-}
-
-.social.x svg {
   fill: currentColor;
-  stroke: none;
 }
 
-.brand-caption {
-  margin-top: 11px;
-  font: 9px "DM Mono", monospace;
-  letter-spacing: .19em;
-}
+/* TOP RIGHT */
 
 .top-right {
+  position: absolute;
+  right: 4.4%;
+  top: 6%;
+  z-index: 35;
   font: 10px "DM Mono", monospace;
-  letter-spacing: .1em;
-  text-align: right;
-  background: rgba(239,238,233,.84);
-  padding: 6px 8px;
-}
-
-main { position: relative; }
-
-.page {
-  display: none;
-  min-height: 100svh;
-}
-
-.page.active { display: block; }
-
-/* HOME */
-
-#home {
-  height: 100svh;
-  min-height: 610px;
-  position: relative;
-  overflow: hidden;
-  background: var(--paper);
-}
-
-#collage {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-
-.home-wash {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    linear-gradient(90deg,
-      rgba(239,238,233,.97) 0%,
-      rgba(239,238,233,.82) 12%,
-      rgba(239,238,233,.26) 33%,
-      transparent 55%);
-}
-
-.home-title {
-  position: absolute;
-  z-index: 4;
-  left: 19%;
-  top: 29%;
-  font-size: clamp(100px, 16.5vw, 310px);
-  line-height: .72;
-  white-space: nowrap;
-  letter-spacing: -.115em;
-  font-weight: 900;
-  pointer-events: none;
-  color: #101015;
-  mix-blend-mode: multiply;
-}
-
-.home-title .letter {
-  display: inline-block;
-  position: relative;
+  letter-spacing: .14em;
   opacity: 0;
-  will-change: transform, opacity;
+  transition: opacity .7s .4s;
 }
 
-.home-title .letter:nth-child(1) {
-  font-family: "Archivo Black", sans-serif;
-}
-.home-title .letter:nth-child(2) {
-  font-family: "Unbounded", sans-serif;
-  font-size: .88em;
-  letter-spacing: -.16em;
-}
-.home-title .letter:nth-child(3) {
-  font-family: "Barlow Condensed", sans-serif;
-  font-weight: 900;
-  font-size: 1.2em;
-  letter-spacing: -.1em;
-}
-.home-title .letter:nth-child(4) {
-  font-family: "Archivo Black", sans-serif;
-}
-.home-title .letter:nth-child(5) {
-  font-family: "Unbounded", sans-serif;
-  font-size: .9em;
+.ready .top-right { opacity: 1; }
+
+.top-right span {
+  padding: 0 8px;
+  opacity: .5;
 }
 
-.home-title.assembled .letter {
-  animation: typeAssemble .85s cubic-bezier(.18,1,.25,1) forwards;
-  animation-delay: var(--delay);
-}
+/* NAVIGATION */
 
-@keyframes typeAssemble {
-  0% {
-    opacity: 0;
-    transform:
-      translate(var(--dx),var(--dy))
-      rotate(var(--rot))
-      scale(var(--scale));
-    filter: blur(14px);
-  }
-  75% { filter: blur(0); }
-  100% {
-    opacity: 1;
-    transform: none;
-    filter: blur(0);
-  }
-}
-
-.home-title.flash {
-  filter: contrast(2);
-  text-shadow: 6px 0 rgba(49,69,255,.65),
-              -5px 0 rgba(132,44,213,.5);
-}
-
-.home-nav {
+.navigation {
   position: absolute;
-  z-index: 10;
-  top: 43%;
-  left: 4.5vw;
-  width: 170px;
+  z-index: 35;
+  left: 4.4%;
+  top: 29%;
+  width: 172px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
 }
 
-.nav-link {
+.nav-item {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 13px;
   width: 100%;
-  padding: 9px 12px;
-  margin: 3px 0;
+  height: 43px;
+  padding: 0 10px;
   border: 0;
   background: transparent;
   color: var(--ink);
-  cursor: pointer;
+  text-decoration: none;
   text-align: left;
-  text-transform: uppercase;
-  font: 700 15px "Barlow Condensed", sans-serif;
-  letter-spacing: .11em;
-  opacity: 0;
-  transition: background .18s, color .18s, transform .18s;
-}
-
-.nav-link span:last-child {
-  font: 12px "DM Mono", monospace;
-}
-
-.nav-link.active,
-.nav-link:hover,
-.nav-link:focus-visible {
-  background: #111116;
-  color: white;
-  transform: skewX(-5deg) translateX(5px);
-}
-
-.nav-link.assembled {
-  animation: navAssemble .55s steps(7,end) forwards;
-  animation-delay: var(--delay);
-}
-
-@keyframes navAssemble {
-  0% { opacity: 0; transform: translate(-28px,20px) skew(20deg); }
-  35% { opacity: 1; transform: translate(7px,-4px) skew(-10deg); }
-  100% { opacity: 1; transform: none; }
-}
-
-.home-note {
-  position: absolute;
-  z-index: 5;
-  left: 20%;
-  top: 55%;
-  font: 10px/1.7 "DM Mono", monospace;
-  letter-spacing: .09em;
-  text-transform: uppercase;
-  max-width: 180px;
-}
-
-.home-footer {
-  position: absolute;
-  z-index: 5;
-  bottom: 25px;
-  left: 4.5vw;
-  right: 4.5vw;
-  display: flex;
-  justify-content: space-between;
-  font: 9px "DM Mono", monospace;
-  letter-spacing: .12em;
-}
-
-.home-footer span:last-child {
-  background: #111116;
-  color: white;
-  padding: 6px 10px;
-}
-
-/* INNER PAGES */
-
-.inner {
-  min-height: 100svh;
-  padding: 145px 5vw 80px;
-  position: relative;
-}
-
-.inner-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: end;
-  gap: 30px;
-  border-bottom: 2px solid currentColor;
-  padding-bottom: 18px;
-  margin-bottom: 35px;
-}
-
-.inner-head h1 {
-  font: 900 clamp(65px, 12vw, 180px)/.85 "Barlow Condensed", sans-serif;
-  letter-spacing: -.055em;
-  text-transform: uppercase;
-  margin: 0;
-  transform: skewX(-5deg);
-}
-
-.eyebrow {
-  font: 11px "DM Mono", monospace;
-  text-transform: uppercase;
-  letter-spacing: .14em;
-}
-
-.back {
-  display: inline-flex;
-  gap: 12px;
-  align-items: center;
-  border: 1px solid currentColor;
-  padding: 10px 16px;
-  background: transparent;
-  color: inherit;
   cursor: pointer;
-  text-transform: uppercase;
-  font: 11px "DM Mono", monospace;
-  transition: background .2s, color .2s;
+  opacity: 0;
+  transform: translateX(-25px);
+  transition:
+    opacity .45s,
+    transform .45s,
+    background .2s,
+    color .2s;
 }
 
-.back:hover {
+.ready .nav-item {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.ready .nav-item:nth-child(2) { transition-delay: .09s; }
+.ready .nav-item:nth-child(3) { transition-delay: .18s; }
+.ready .nav-item:nth-child(4) { transition-delay: .27s; }
+
+.nav-number {
+  width: 19px;
+  flex: none;
+  font: 10px "DM Mono", monospace;
+}
+
+.nav-label {
+  font-family: "DM Mono", monospace;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: .02em;
+}
+
+.nav-arrow {
+  margin-left: auto;
+  font-size: 20px;
+  font-weight: 400;
+}
+
+.nav-item.active,
+.nav-item:hover,
+.nav-item:focus-visible {
   background: var(--ink);
   color: white;
+  outline: none;
 }
 
-/* WORK */
-
-#work {
-  background: #0d0e17;
-  color: #f6f5f0;
-  overflow: hidden;
+.nav-item:hover .nav-label {
+  transform: skewX(-7deg);
 }
 
-#work .inner { min-height: 100svh; }
+/* IMAGE COLLAGE */
 
-.work-instructions {
-  margin: 20px 0 30px;
-  font: 11px "DM Mono", monospace;
-  color: #a6a6b8;
-}
-
-.gallery {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  overflow-x: auto;
-  overscroll-behavior-x: contain;
-  scroll-snap-type: x mandatory;
-  padding: 20px 8vw 35px;
-  margin: 0 -5vw;
-  scrollbar-width: thin;
-  scrollbar-color: #777 #181823;
-}
-
-.project-card {
-  position: relative;
-  flex: 0 0 min(60vw, 750px);
-  aspect-ratio: 16/9;
-  border: 1px solid #454556;
-  border-radius: 3px;
-  overflow: hidden;
-  scroll-snap-align: center;
-  background: #202031;
-  color: white;
-  text-align: left;
-  cursor: pointer;
-  padding: 0;
-  transition: transform .45s cubic-bezier(.2,.8,.2,1),
-              border-color .3s;
-}
-
-.project-card:hover,
-.project-card:focus-visible {
-  transform: scale(1.035) perspective(900px) rotateY(-2deg);
-  border-color: white;
-  z-index: 2;
-}
-
-.project-card img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  filter: saturate(.78) contrast(1.12);
-  transition: transform .8s, filter .4s;
-}
-
-.project-card:hover img {
-  transform: scale(1.07);
-  filter: saturate(1.2) contrast(1.1);
-}
-
-.project-card::after {
-  content: "";
-  position: absolute;
-  inset: 35% 0 0;
-  background: linear-gradient(transparent,rgba(0,0,0,.88));
-}
-
-.project-meta {
-  position: absolute;
-  z-index: 2;
-  bottom: 24px;
-  left: 28px;
-  right: 28px;
-}
-
-.project-meta small {
-  font: 10px "DM Mono", monospace;
-  letter-spacing: .1em;
-}
-
-.project-meta strong {
-  display: block;
-  margin-top: 9px;
-  font: 800 clamp(28px,4vw,60px)/.95 "Barlow Condensed", sans-serif;
-  text-transform: uppercase;
-}
-
-.project-arrow {
-  position: absolute;
-  z-index: 2;
-  right: 28px;
-  top: 24px;
-  font-size: 27px;
-}
-
-.gallery-controls {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 12px;
-}
-
-.gallery-controls button {
-  background: transparent;
-  border: 1px solid #6c6c7a;
-  color: white;
-  width: 48px;
-  height: 42px;
-  cursor: pointer;
-}
-
-.gallery-controls button:hover { background: #333347; }
-
-/* VIDEO VIEWER */
-
-#viewer {
-  position: fixed;
-  z-index: 500;
-  inset: 0;
-  background: rgba(7,7,12,.97);
-  color: white;
-  display: none;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 80px 5vw 40px;
-}
-
-#viewer.open { display: flex; }
-
-.viewer-top {
-  position: absolute;
-  top: 25px;
-  left: 5vw;
-  right: 5vw;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.viewer-frame {
-  width: min(100%,1100px);
-  aspect-ratio: 16/9;
-  background: #191925;
-  display: grid;
-  place-items: center;
-}
-
-.viewer-frame iframe {
-  width: 100%;
-  height: 100%;
-  border: 0;
-}
-
-.viewer-placeholder {
-  padding: 40px;
-  text-align: center;
-  max-width: 520px;
-}
-
-.viewer-placeholder h2 {
-  font: 800 48px/.95 "Barlow Condensed", sans-serif;
-  text-transform: uppercase;
-}
-
-.viewer-placeholder p {
-  font: 13px/1.8 "DM Mono", monospace;
-  color: #bbb;
-}
-
-.viewer-caption {
-  width: min(100%,1100px);
-  padding-top: 18px;
-  display: flex;
-  justify-content: space-between;
-  gap: 20px;
-  font: 11px "DM Mono", monospace;
-}
-
-/* ABOUT */
-
-#about {
-  background: #d8d5ed;
-}
-
-.about-layout {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 7vw;
-  align-items: start;
-}
-
-.about-graphic {
-  min-height: 440px;
-  background:
-    radial-gradient(ellipse at 65% 40%, #8297ff, transparent 40%),
-    radial-gradient(ellipse at 25% 75%, #4a35b0, transparent 55%),
-    #101026;
-  position: relative;
-  overflow: hidden;
-}
-
-.about-graphic::before {
-  content: "J";
-  position: absolute;
-  font: 900 540px/.9 "Archivo Black", sans-serif;
-  color: rgba(255,255,255,.85);
-  left: 10%;
-  top: -4%;
-  transform: skewX(-15deg);
-  mix-blend-mode: difference;
-}
-
-.about-graphic::after {
-  content: "";
+.collage {
   position: absolute;
   inset: 0;
-  background: repeating-linear-gradient(
-    0deg, transparent 0 13px,
-    rgba(255,255,255,.1) 14px 15px
-  );
-}
-
-.about-copy h2 {
-  font: 900 clamp(36px,5vw,76px)/.98 "Barlow Condensed", sans-serif;
-  text-transform: uppercase;
-  margin: 0 0 25px;
-}
-
-.about-copy p {
-  font-size: clamp(15px,1.5vw,19px);
-  line-height: 1.7;
-  max-width: 610px;
-}
-
-.about-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 30px;
-}
-
-.about-tags span {
-  border: 1px solid currentColor;
-  padding: 9px 12px;
-  font: 11px "DM Mono", monospace;
-}
-
-/* CONTACT */
-
-#contact {
-  background: #2636c8;
-  color: white;
-}
-
-.contact-display {
-  margin-top: 10vh;
-  max-width: 1200px;
-}
-
-.contact-display h2 {
-  font: 900 clamp(75px,14vw,230px)/.8 "Barlow Condensed", sans-serif;
-  text-transform: uppercase;
-  letter-spacing: -.065em;
-  margin: 0 0 60px;
-  transform: skewX(-6deg);
-}
-
-.contact-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
-}
-
-.contact-links a {
-  display: inline-flex;
-  align-items: center;
-  gap: 24px;
-  border: 1px solid white;
-  padding: 15px 22px;
-  text-decoration: none;
-  font: 12px "DM Mono", monospace;
-  transition: background .2s, color .2s;
-}
-
-.contact-links a:hover {
-  background: white;
-  color: #2636c8;
-}
-
-/* PAGE TRANSITIONS */
-
-#transition {
-  position: fixed;
-  inset: 0;
-  z-index: 400;
+  z-index: 2;
+  overflow: hidden;
   pointer-events: none;
+}
+
+.photo {
+  position: absolute;
+  overflow: hidden;
+  background: #11121b;
   opacity: 0;
+  transition: opacity .5s ease;
+  pointer-events: auto;
+  cursor: crosshair;
+  isolation: isolate;
+}
+
+.ready .photo { opacity: 1; }
+
+.photo .photo-image {
+  position: absolute;
+  inset: -3%;
+  width: 106%;
+  height: 106%;
+  background-image: var(--img);
+  background-position: center;
+  background-size: cover;
+  transform: scale(1.02);
+  animation: slowZoom 16s ease-in-out infinite alternate;
+  filter: var(--filter, none);
+}
+
+.photo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  background: linear-gradient(145deg, transparent 55%, rgba(20,17,80,.2));
+  pointer-events: none;
+}
+
+@keyframes slowZoom {
+  from { transform: scale(1.02); }
+  to { transform: scale(1.14); }
+}
+
+/* Main city photograph */
+.photo-a {
+  left: 45%;
+  top: 0;
+  width: 55%;
+  height: 64%;
+  --filter: saturate(.8) contrast(1.1);
+}
+
+/* Purple train / night street */
+.photo-b {
+  left: 0;
+  top: 62%;
+  width: 42%;
+  height: 26%;
+  --filter: saturate(1.4) contrast(1.15) hue-rotate(8deg);
+}
+
+/* Blue skyline */
+.photo-c {
+  left: 41%;
+  top: 58%;
+  width: 22%;
+  height: 38%;
+  --filter: saturate(.8) contrast(1.15);
+}
+
+/* Dark neon */
+.photo-d {
+  left: 60%;
+  top: 62%;
+  width: 40%;
+  height: 26%;
+  --filter: saturate(1.3) contrast(1.12);
+}
+
+/* Bottom fragments */
+.photo-e {
+  left: 71%;
+  top: 83%;
+  width: 29%;
+  height: 17%;
+  --filter: grayscale(1) contrast(1.2);
+}
+
+.photo-f {
+  left: 0;
+  top: 0;
+  width: 5%;
+  height: 7%;
+  --filter: saturate(1.3);
+}
+
+/* Pixel fragments are drawn over the real image,
+   then disappear once reconstruction is complete. */
+
+.fragment-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.fragment {
+  position: absolute;
+  background-image: var(--img);
+  background-repeat: no-repeat;
+  will-change: transform, opacity;
+}
+
+/* Pixelated hover overlay */
+
+.pixel-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .18s ease;
+}
+
+.photo:hover .pixel-overlay {
+  opacity: 1;
+}
+
+/* ABSTRACT BLOCKS */
+
+.block {
+  position: absolute;
+  z-index: 6;
+  pointer-events: none;
+  mix-blend-mode: multiply;
+}
+
+.block-one {
+  left: 0;
+  top: 0;
+  width: 3%;
+  height: 6%;
+  background: #17172c;
+}
+
+.block-two {
+  left: 44%;
+  top: 5%;
+  width: 9%;
+  height: 8%;
+  background: rgba(242,241,238,.9);
+}
+
+.block-three {
+  left: 55%;
+  top: 35%;
+  width: 4%;
+  height: 17%;
+  background: rgba(243,242,239,.85);
+}
+
+.block-four {
+  left: 82%;
+  top: 48%;
+  width: 18%;
+  height: 6%;
+  background: rgba(245,244,241,.92);
+}
+
+.block-five {
+  left: 0;
+  top: 52%;
+  width: 11%;
+  height: 10%;
+  background: rgba(244,243,240,.92);
+}
+
+.block-six {
+  left: 60%;
+  top: 86%;
+  width: 12%;
+  height: 10%;
+  background: rgba(243,242,239,.85);
+}
+
+/* BIG TYPOGRAPHY */
+
+.hero-name {
+  position: absolute;
+  z-index: 20;
+  left: 17.5%;
+  top: 21%;
+  margin: 0;
+  font-family: "Archivo Black", "Arial Black", sans-serif;
+  font-size: clamp(130px, 18vw, 340px);
+  line-height: .82;
+  letter-spacing: -.105em;
+  font-weight: 900;
+  white-space: nowrap;
+  color: var(--ink);
+  mix-blend-mode: multiply;
+  user-select: none;
+  opacity: 0;
+  transform: translateY(35px) skewX(-3deg);
+  transition: opacity .7s .25s, transform .8s .25s;
+}
+
+.ready .hero-name {
+  opacity: 1;
+  transform: none;
+}
+
+.hero-name .name-text {
+  display: block;
+  position: relative;
+  transform-origin: left center;
+}
+
+.hero-name.glitch .name-text {
+  animation: nameJolt .32s steps(2,end);
+}
+
+.hero-name.glitch .name-text::before,
+.hero-name.glitch .name-text::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.hero-name.glitch .name-text::before {
+  color: #384fff;
+  clip-path: inset(18% 0 51% 0);
+  transform: translate(-8px, -3px);
+}
+
+.hero-name.glitch .name-text::after {
+  color: #9d36e7;
+  clip-path: inset(61% 0 12% 0);
+  transform: translate(10px, 4px);
+}
+
+@keyframes nameJolt {
+  0% { transform: translateX(0) skewX(0); }
+  25% { transform: translateX(7px) skewX(-5deg); }
+  50% { transform: translateX(-6px) skewX(4deg); }
+  75% { transform: translateX(4px); }
+  100% { transform: none; }
+}
+
+/* SMALL TEXT */
+
+.description {
+  position: absolute;
+  z-index: 22;
+  left: 18%;
+  top: 49%;
+  font: 11px/1.8 "DM Mono", monospace;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  opacity: 0;
+  transition: opacity .7s .7s;
+}
+
+.ready .description { opacity: 1; }
+
+.description::after {
+  content: "";
+  display: block;
+  width: 14px;
+  height: 1px;
+  background: currentColor;
+  margin-top: 16px;
+}
+
+.footer {
+  position: absolute;
+  bottom: 4.5%;
+  left: 4.4%;
+  z-index: 25;
+  font: 9px "DM Mono", monospace;
+  letter-spacing: .11em;
+}
+
+.footer-line {
+  display: inline-block;
+  width: 20vw;
+  height: 1px;
+  margin-left: 15px;
+  background: #8b8b90;
+  vertical-align: middle;
+}
+
+/* PAGE OVERLAYS */
+
+.page {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: var(--paper);
+  color: var(--ink);
+  padding: 100px 7vw 60px;
+  overflow-y: auto;
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(25px);
+  transition:
+    visibility .4s,
+    opacity .4s,
+    transform .4s;
+}
+
+.page.open {
+  visibility: visible;
+  opacity: 1;
+  transform: none;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #bbb;
+  padding-bottom: 20px;
+}
+
+.page-header strong {
+  font: 12px "DM Mono", monospace;
+  letter-spacing: .15em;
+}
+
+.close-page {
+  background: var(--ink);
+  color: white;
+  border: 0;
+  padding: 12px 20px;
+  cursor: pointer;
+  font: 12px "DM Mono", monospace;
+}
+
+.page h2 {
+  font-family: "Archivo Black", sans-serif;
+  font-size: clamp(65px, 12vw, 190px);
+  line-height: 1;
+  letter-spacing: -.09em;
+  margin: 50px 0;
+}
+
+.page p {
+  max-width: 680px;
+  font-size: clamp(18px, 2vw, 26px);
+  line-height: 1.55;
+}
+
+.work-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.work-card {
+  min-height: 270px;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  padding: 25px;
+  background: #171827;
+  color: white;
   overflow: hidden;
 }
 
-#transition.running { opacity: 1; }
+.work-card:nth-child(2) { background: #3038a1; }
+.work-card:nth-child(3) { background: #4230a0; }
+.work-card:nth-child(4) { background: #15151a; }
 
-.transition-piece {
+.work-card h3 {
+  margin: 0;
+  position: relative;
+  z-index: 2;
+  font-family: "Archivo Black", sans-serif;
+  font-size: clamp(22px, 3vw, 43px);
+  letter-spacing: -.06em;
+}
+
+.work-card::before {
+  content: "";
   position: absolute;
-  background: var(--paper);
-  will-change: transform;
+  width: 75%;
+  height: 160%;
+  right: -20%;
+  top: -30%;
+  background: linear-gradient(120deg, transparent, rgba(255,255,255,.2), transparent);
+  transform: rotate(25deg);
 }
 
-#transition.work .transition-piece {
-  background: #0d0e17;
-}
-
-#transition.about .transition-piece {
-  background: #d8d5ed;
-}
-
-#transition.contact .transition-piece {
-  background: #2636c8;
-}
-
-#transition.home .transition-piece {
-  background: var(--paper);
+.contact-link {
+  display: inline-block;
+  margin-top: 30px;
+  font-family: "Archivo Black", sans-serif;
+  font-size: clamp(28px, 5vw, 72px);
+  letter-spacing: -.06em;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 10px;
 }
 
 /* RESPONSIVE */
 
-@media (max-width: 760px) {
-  header {
-    top: 20px;
-    left: 6vw;
-    right: 6vw;
+@media (max-width: 900px) {
+  .scene {
+    min-height: 780px;
+    height: 100svh;
   }
 
-  .top-right { display: none; }
+  .header { top: 4%; left: 5%; }
 
-  .home-title {
-    top: 31%;
-    left: 8%;
-    font-size: 25vw;
-  }
-
-  .home-nav {
-    left: 6vw;
-    top: 52%;
-    width: 180px;
-  }
-
-  .home-note {
-    left: 7%;
-    top: 77%;
-  }
-
-  .home-footer {
-    left: 6vw;
-    right: 6vw;
+  .top-right {
+    top: 5%;
+    right: 5%;
     font-size: 8px;
   }
 
-  .home-wash {
-    background: linear-gradient(
-      90deg,
-      rgba(239,238,233,.87),
-      rgba(239,238,233,.1)
-    );
+  .navigation {
+    left: 5%;
+    top: 23%;
+    width: 150px;
   }
 
-  .inner { padding: 120px 6vw 55px; }
+  .nav-item { height: 38px; }
+  .nav-label { font-size: 13px; }
 
-  .inner-head { align-items: start; }
-
-  .inner-head h1 { font-size: 20vw; }
-
-  .project-card {
-    flex-basis: 82vw;
+  .hero-name {
+    left: 12%;
+    top: 39%;
+    font-size: clamp(105px, 21vw, 210px);
   }
 
-  .about-layout {
-    grid-template-columns: 1fr;
+  .description {
+    left: 14%;
+    top: 56%;
   }
 
-  .about-graphic { min-height: 260px; }
+  .photo-a {
+    left: 31%;
+    width: 69%;
+    height: 54%;
+  }
 
-  .contact-display h2 { font-size: 22vw; }
+  .photo-b {
+    top: 62%;
+    width: 52%;
+    height: 28%;
+  }
+
+  .photo-c {
+    left: 46%;
+    top: 54%;
+    width: 31%;
+    height: 40%;
+  }
+
+  .photo-d {
+    left: 70%;
+    top: 65%;
+    width: 30%;
+    height: 25%;
+  }
+
+  .footer { left: 5%; }
+}
+
+@media (max-width: 600px) {
+  .scene {
+    min-height: 740px;
+  }
+
+  .brand-name { font-size: 23px; }
+
+  .brand-role { font-size: 8px; }
+
+  .top-right { display: none; }
+
+  .navigation {
+    top: 18%;
+    width: 145px;
+  }
+
+  .nav-item { height: 37px; }
+
+  .hero-name {
+    left: 4%;
+    top: 41%;
+    font-size: clamp(90px, 23vw, 145px);
+  }
+
+  .description {
+    left: 7%;
+    top: 55%;
+    font-size: 9px;
+  }
+
+  .photo-a {
+    left: 26%;
+    width: 74%;
+    height: 49%;
+  }
+
+  .photo-b {
+    left: 0;
+    top: 65%;
+    width: 65%;
+    height: 22%;
+  }
+
+  .photo-c {
+    left: 47%;
+    top: 57%;
+    width: 34%;
+    height: 37%;
+  }
+
+  .photo-d {
+    left: 70%;
+    top: 71%;
+    width: 30%;
+    height: 20%;
+  }
+
+  .photo-e { display: none; }
+
+  .footer {
+    bottom: 3%;
+    font-size: 8px;
+  }
+
+  .work-grid { grid-template-columns: 1fr; }
+
+  .page { padding: 80px 6vw 40px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     animation-duration: .01ms !important;
     transition-duration: .01ms !important;
   }
@@ -879,1452 +863,639 @@ main { position: relative; }
 
 <body>
 
-<div id="loader">
-  <div class="loader-center">
-    <div class="loader-word" aria-label="Joaqo">
-      <span>J</span><span>o</span><span>a</span><span>q</span><span>o</span>
-    </div>
-    <div class="loader-bottom">
-      <span>INITIALIZING VISUALS</span>
-      <span id="loadPercent">00%</span>
-    </div>
-    <div class="loader-track">
-      <div class="loader-fill" id="loadFill"></div>
+<div class="intro" id="intro" aria-hidden="true">
+  <div class="intro-inner">
+    <div class="intro-name">Joaqo</div>
+    <div class="intro-line"><span></span></div>
+    <div class="intro-meta">
+      <span>VIDEO EDITOR</span>
+      <span id="load-percent">00%</span>
     </div>
   </div>
 </div>
 
-<div id="app">
-  <div class="grid-overlay"></div>
-  <div class="noise-overlay"></div>
+<div class="site" id="site">
+  <div class="scene">
 
-  <header>
-    <div>
-      <div class="brand-row">
-        <a href="#home" class="brand" id="brand">Joaqo</a>
+    <div class="collage" id="collage">
 
-        <a class="social" href="https://www.instagram.com/oqaoj/"
-           target="_blank" rel="noopener noreferrer"
+      <div class="photo photo-a" data-pixel="13"
+        style="--img:url('https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?auto=format&fit=crop&w=1800&q=85')">
+        <div class="photo-image"></div>
+        <div class="fragment-layer"></div>
+        <canvas class="pixel-overlay"></canvas>
+      </div>
+
+      <div class="photo photo-b" data-pixel="22"
+        style="--img:url('https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=1400&q=85')">
+        <div class="photo-image"></div>
+        <div class="fragment-layer"></div>
+        <canvas class="pixel-overlay"></canvas>
+      </div>
+
+      <div class="photo photo-c" data-pixel="10"
+        style="--img:url('https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=1100&q=85')">
+        <div class="photo-image"></div>
+        <div class="fragment-layer"></div>
+        <canvas class="pixel-overlay"></canvas>
+      </div>
+
+      <div class="photo photo-d" data-pixel="17"
+        style="--img:url('https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=1300&q=85')">
+        <div class="photo-image"></div>
+        <div class="fragment-layer"></div>
+        <canvas class="pixel-overlay"></canvas>
+      </div>
+
+      <div class="photo photo-e" data-pixel="8"
+        style="--img:url('https://images.unsplash.com/photo-1518391846015-55a9cc003b25?auto=format&fit=crop&w=1100&q=85')">
+        <div class="photo-image"></div>
+        <div class="fragment-layer"></div>
+        <canvas class="pixel-overlay"></canvas>
+      </div>
+
+      <div class="photo photo-f" data-pixel="6"
+        style="--img:url('https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=600&q=85')">
+        <div class="photo-image"></div>
+        <div class="fragment-layer"></div>
+        <canvas class="pixel-overlay"></canvas>
+      </div>
+
+    </div>
+
+    <div class="block block-one"></div>
+    <div class="block block-two"></div>
+    <div class="block block-three"></div>
+    <div class="block block-four"></div>
+    <div class="block block-five"></div>
+    <div class="block block-six"></div>
+
+    <header class="header">
+      <div>
+        <a class="brand-name" href="#" id="home-logo">Joaqo</a>
+        <span class="brand-role">VIDEO EDITOR</span>
+      </div>
+
+      <div class="socials">
+        <a href="https://www.instagram.com/oqaoj/"
+           target="_blank"
+           rel="noopener noreferrer"
            aria-label="Instagram">
           <svg viewBox="0 0 24 24" aria-hidden="true">
-            <rect x="3" y="3" width="18" height="18" rx="5"/>
-            <circle cx="12" cy="12" r="4"/>
-            <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/>
+            <path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7zm5 3a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6zm5.5-3.5a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3z"/>
           </svg>
         </a>
 
-        <a class="social x" href="https://x.com/oqaoj6"
-           target="_blank" rel="noopener noreferrer"
+        <a href="https://x.com/oqaoj6"
+           target="_blank"
+           rel="noopener noreferrer"
            aria-label="X">
           <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M18.9 2H22l-6.8 7.8L23.2 22h-6.3L12 14.6 5.5 22H2.3l7.3-8.5L1.9 2h6.5l4.5 6.8L18.9 2zm-1.1 18h1.7L7.4 3.9H5.6z"/>
+            <path d="M18.9 2H22l-6.8 7.8L23.2 22h-6.3L12 14.6 5.5 22H2.3l7.3-8.5L1.8 2h6.5l4.5 6.8L18.9 2zm-1.1 18h1.7L7.4 3.9H5.6L17.8 20z"/>
           </svg>
         </a>
       </div>
-      <div class="brand-caption">VIDEO EDITOR</div>
+    </header>
+
+    <div class="top-right">
+      EDIT <span>/</span> COLOR <span>/</span> SOUND
     </div>
 
-    <div class="top-right">EDIT / COLOR / SOUND / STORYTELLING</div>
-  </header>
+    <nav class="navigation" aria-label="Main navigation">
+      <button class="nav-item active" data-page="home">
+        <span class="nav-number">01</span>
+        <span class="nav-label">HOME</span>
+        <span class="nav-arrow">→</span>
+      </button>
 
-  <main>
+      <button class="nav-item" data-page="work">
+        <span class="nav-number">02</span>
+        <span class="nav-label">WORK</span>
+        <span class="nav-arrow">→</span>
+      </button>
 
-    <section id="home" class="page active" aria-label="Home">
-      <canvas id="collage"></canvas>
-      <div class="home-wash"></div>
+      <button class="nav-item" data-page="about">
+        <span class="nav-number">03</span>
+        <span class="nav-label">ABOUT</span>
+        <span class="nav-arrow">→</span>
+      </button>
 
-      <div class="home-title" id="homeTitle" aria-label="Joaqo">
-        <span class="letter" style="--dx:-140px;--dy:-90px;--rot:-24deg;--scale:1.6;--delay:.05s">J</span><span class="letter" style="--dx:110px;--dy:160px;--rot:20deg;--scale:.3;--delay:.16s">o</span><span class="letter" style="--dx:-90px;--dy:120px;--rot:-15deg;--scale:1.8;--delay:.09s">a</span><span class="letter" style="--dx:140px;--dy:-150px;--rot:30deg;--scale:.4;--delay:.25s">q</span><span class="letter" style="--dx:90px;--dy:100px;--rot:-30deg;--scale:1.5;--delay:.19s">o</span>
-      </div>
+      <button class="nav-item" data-page="contact">
+        <span class="nav-number">04</span>
+        <span class="nav-label">CONTACT</span>
+        <span class="nav-arrow">→</span>
+      </button>
+    </nav>
 
-      <nav class="home-nav" aria-label="Main navigation">
-        <button class="nav-link active" data-page="home" style="--delay:.2s">
-          <span>01 &nbsp; Home</span><span>→</span>
-        </button>
-        <button class="nav-link" data-page="work" style="--delay:.32s">
-          <span>02 &nbsp; Work</span><span>→</span>
-        </button>
-        <button class="nav-link" data-page="about" style="--delay:.44s">
-          <span>03 &nbsp; About</span><span>→</span>
-        </button>
-        <button class="nav-link" data-page="contact" style="--delay:.56s">
-          <span>04 &nbsp; Contact</span><span>→</span>
-        </button>
-      </nav>
+    <h1 class="hero-name" id="hero-name">
+      <span class="name-text" id="name-text" data-text="Joaqo">Joaqo</span>
+    </h1>
 
-      <div class="home-note">
-        VIDEO EDITING<br>
-        FOR FILM, MUSIC<br>
-        AND DIGITAL MEDIA.
-      </div>
+    <div class="description">
+      VIDEO EDITING<br>
+      FOR FILM, MUSIC<br>
+      AND DIGITAL MEDIA.
+    </div>
 
-      <div class="home-footer">
-        <span>© 2026 — JOACO MANSILLA</span>
-        <span>IMAGE / MOTION / MEMORY</span>
-      </div>
-    </section>
+    <div class="footer">
+      (C) 2026 — JOACO MANSILLA
+      <span class="footer-line"></span>
+    </div>
 
-    <section id="work" class="page">
-      <div class="inner">
-        <div class="inner-head">
-          <h1>Selected<br>Work</h1>
-          <button class="back" data-page="home">← Back</button>
-        </div>
-
-        <div class="eyebrow">Editing / Selected projects</div>
-        <div class="work-instructions">
-          SCROLL HORIZONTALLY TO EXPLORE — SELECT A PROJECT TO VIEW
-        </div>
-
-        <div class="gallery" id="gallery"></div>
-
-        <div class="gallery-controls">
-          <span class="eyebrow" id="galleryCount">01 / 06</span>
-          <div>
-            <button id="galleryPrev" aria-label="Previous project">←</button>
-            <button id="galleryNext" aria-label="Next project">→</button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section id="about" class="page">
-      <div class="inner">
-        <div class="inner-head">
-          <h1>About</h1>
-          <button class="back" data-page="home">← Back</button>
-        </div>
-
-        <div class="about-layout">
-          <div class="about-graphic" aria-hidden="true"></div>
-          <div class="about-copy">
-            <div class="eyebrow">Joaco Mansilla / Video Editor</div>
-            <h2>Editing is where everything comes together.</h2>
-            <p>
-              I'm Joaco Mansilla, a video editor working across
-              documentaries, music, commercials and digital content.
-            </p>
-            <p>
-              I'm particularly interested in pacing, sound design,
-              atmosphere and the relationship between images and music.
-              My work ranges from short-form promotional videos to
-              longer narrative projects.
-            </p>
-            <p>
-              I work primarily in Adobe Premiere Pro and hold an
-              Adobe Certified Professional certification.
-            </p>
-            <div class="about-tags">
-              <span>EDITING</span>
-              <span>SOUND DESIGN</span>
-              <span>COLOR</span>
-              <span>STORYTELLING</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section id="contact" class="page">
-      <div class="inner">
-        <div class="inner-head">
-          <h1>Contact</h1>
-          <button class="back" data-page="home">← Back</button>
-        </div>
-
-        <div class="contact-display">
-          <div class="eyebrow">Available for freelance projects</div>
-          <h2>Let's<br>talk.</h2>
-
-          <div class="contact-links">
-            <a href="https://www.instagram.com/oqaoj/"
-               target="_blank" rel="noopener noreferrer">
-              INSTAGRAM <span>↗</span>
-            </a>
-            <a href="https://x.com/oqaoj6"
-               target="_blank" rel="noopener noreferrer">
-              X / TWITTER <span>↗</span>
-            </a>
-          </div>
-        </div>
-      </div>
-    </section>
-
-  </main>
-</div>
-
-<div id="transition" aria-hidden="true"></div>
-
-<div id="viewer" role="dialog" aria-modal="true"
-     aria-label="Project viewer">
-  <div class="viewer-top">
-    <span class="eyebrow">JOAQO / SELECTED WORK</span>
-    <button class="back" id="closeViewer">✕ Close</button>
-  </div>
-  <div class="viewer-frame" id="viewerFrame"></div>
-  <div class="viewer-caption">
-    <span id="viewerName"></span>
-    <span id="viewerCategory"></span>
   </div>
 </div>
+
+<div class="grid"></div>
+<div class="noise"></div>
+
+<!-- Temporary secondary pages.
+     Homepage is the main focus of this version. -->
+
+<section class="page" id="page-work" aria-hidden="true">
+  <div class="page-header">
+    <strong>JOAQO / SELECTED WORK</strong>
+    <button class="close-page">← BACK</button>
+  </div>
+
+  <h2>WORK</h2>
+
+  <div class="work-grid">
+    <div class="work-card"><h3>HAITI FOUNDATION</h3></div>
+    <div class="work-card"><h3>RAW FIT</h3></div>
+    <div class="work-card"><h3>SHARKCAST</h3></div>
+    <div class="work-card"><h3>3Y4</h3></div>
+  </div>
+</section>
+
+<section class="page" id="page-about" aria-hidden="true">
+  <div class="page-header">
+    <strong>JOAQO / ABOUT</strong>
+    <button class="close-page">← BACK</button>
+  </div>
+
+  <h2>ABOUT</h2>
+  <p>
+    I'm Joaco Mansilla, a video editor working across
+    film, music, commercial and digital projects.
+    My work focuses on rhythm, atmosphere, storytelling
+    and sound.
+  </p>
+</section>
+
+<section class="page" id="page-contact" aria-hidden="true">
+  <div class="page-header">
+    <strong>JOAQO / CONTACT</strong>
+    <button class="close-page">← BACK</button>
+  </div>
+
+  <h2>CONTACT</h2>
+
+  <p>For projects and collaborations, reach out through Instagram.</p>
+
+  <a class="contact-link"
+     href="https://www.instagram.com/oqaoj/"
+     target="_blank"
+     rel="noopener noreferrer">
+    INSTAGRAM ↗
+  </a>
+</section>
 
 <script>
-"use strict";
-
-/* =========================================================
-   CONFIGURATION
-   ========================================================= */
-
-const CONFIG = {
-  // Duration of the geometric reassembly.
-  assembleDuration: 950,
-
-  // How long an image stays assembled.
-  holdDuration: 3600,
-
-  // Number of independently animated collage regions.
-  // This is intentionally limited for performance.
-  regionCount: 9,
-
-  // Maximum frames per second.
-  fps: 30,
-
-  // Limit internal rendering resolution.
-  maxDpr: 1.5,
-
-  // Image zoom while held.
-  zoomAmount: 0.045
-};
-
-/*
-  Replace these with your own images later.
-
-  All image URLs below are remote placeholders.
-  The layout works even if one fails to load.
-*/
-
-const PHOTO_URLS = [
-  "https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=1400&q=85",
-  "https://images.unsplash.com/photo-1519608487953-e999c86e7455?w=1400&q=85",
-  "https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=1400&q=85",
-  "https://images.unsplash.com/photo-1519608487953-e999c86e7455?w=1200&q=85",
-  "https://images.unsplash.com/photo-1494526585095-c41746248156?w=1200&q=85",
-  "https://images.unsplash.com/photo-1514565131-fce0801e5785?w=1400&q=85",
-  "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1400&q=85",
-  "https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=1000&q=85",
-  "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1200&q=85"
-];
-
-/*
-  Each collage region is defined as a percentage of the screen.
-
-  Regions intentionally overlap in the overall composition,
-  but each region is drawn only once per frame.
-
-  The "future" position is a DIFFERENT region.
-  No duplicate old image is left behind.
-*/
-
-const LAYOUTS = [
-  [
-    [0,0,38,35],
-    [38,0,30,28],
-    [68,0,32,39],
-    [0,35,24,37],
-    [24,35,28,28],
-    [52,28,26,42],
-    [78,39,22,35],
-    [0,72,36,28],
-    [36,70,64,30]
-  ],
-  [
-    [0,0,24,48],
-    [24,0,39,29],
-    [63,0,37,34],
-    [0,48,34,52],
-    [34,29,26,39],
-    [60,34,40,38],
-    [34,68,28,32],
-    [62,72,38,28],
-    [0,0,0,0]
-  ],
-  [
-    [0,0,42,31],
-    [42,0,23,48],
-    [65,0,35,28],
-    [0,31,23,44],
-    [23,31,19,44],
-    [65,28,35,47],
-    [42,48,23,27],
-    [0,75,50,25],
-    [50,75,50,25]
-  ]
-];
-
-/*
-  Work projects.
-
-  Add a YouTube video ID to the "youtube" field
-  when you're ready to show that project.
-
-  Example:
-  youtube: "xMU9RD1NlMI"
-
-  Leave it blank to show the project placeholder.
-*/
-
-const PROJECTS = [
-  {
-    name: "Haiti Foundation",
-    category: "Documentary / Nonprofit",
-    image: PHOTO_URLS[0],
-    youtube: ""
-  },
-  {
-    name: "Joey Calveiro",
-    category: "Music / Cinematic Teaser",
-    image: PHOTO_URLS[1],
-    youtube: ""
-  },
-  {
-    name: "RAW FIT",
-    category: "Commercial / Fitness",
-    image: PHOTO_URLS[2],
-    youtube: ""
-  },
-  {
-    name: "SharkCast",
-    category: "Podcast / Social Media",
-    image: PHOTO_URLS[5],
-    youtube: ""
-  },
-  {
-    name: "3y4",
-    category: "Music / Promotional",
-    image: PHOTO_URLS[6],
-    youtube: ""
-  },
-  {
-    name: "WE DA BEST FISHERS",
-    category: "Gaming / Long-form",
-    image: PHOTO_URLS[7],
-    youtube: ""
-  }
-];
-
-/* =========================================================
-   UTILITIES
-   ========================================================= */
-
-const $ = selector => document.querySelector(selector);
-const $$ = selector => [...document.querySelectorAll(selector)];
-
-const clamp = (v,a,b) => Math.max(a,Math.min(b,v));
-const lerp = (a,b,t) => a+(b-a)*t;
-
-function ease(t) {
-  t = clamp(t,0,1);
-  return 1-Math.pow(1-t,4);
-}
-
-function rand(a,b) {
-  return a+Math.random()*(b-a);
-}
-
-function shuffle(array) {
-  const result = [...array];
-  for(let i=result.length-1;i>0;i--) {
-    const j=Math.floor(Math.random()*(i+1));
-    [result[i],result[j]]=[result[j],result[i]];
-  }
-  return result;
-}
-
-/* =========================================================
-   IMAGE LOADING
-   ========================================================= */
-
-const images = [];
-
-function loadImage(url) {
-  return new Promise(resolve => {
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-
-    img.onload = () => resolve(img);
-    img.onerror = () => resolve(null);
-    img.src = url;
-  });
-}
-
-async function preload() {
-  let completed=0;
-
-  const promises = PHOTO_URLS.map(async url => {
-    const img=await loadImage(url);
-    completed++;
-
-    const progress=Math.round(
-      completed/PHOTO_URLS.length*100
-    );
-
-    $("#loadPercent").textContent=
-      String(progress).padStart(2,"0")+"%";
-
-    $("#loadFill").style.width=progress+"%";
-
-    return img;
-  });
-
-  const loaded=await Promise.all(promises);
-
-  loaded.forEach(img=>images.push(img));
-
-  return loaded;
-}
-
-/* =========================================================
-   COLLAGE ENGINE
-   ========================================================= */
-
-const canvas=$("#collage");
-const ctx=canvas.getContext("2d",{alpha:false});
-
-let W=0;
-let H=0;
-let DPR=1;
-let regions=[];
-let currentLayout=0;
-let nextLayout=1;
-let cycleStart=0;
-let animationActive=false;
-let lastFrame=0;
-let cycleNumber=0;
-
-const mouse={
-  x:-9999,
-  y:-9999,
-  active:false
-};
-
-function resizeCanvas() {
-  const rect=canvas.getBoundingClientRect();
-
-  W=rect.width;
-  H=rect.height;
-
-  DPR=Math.min(
-    window.devicePixelRatio||1,
-    CONFIG.maxDpr
-  );
-
-  canvas.width=Math.round(W*DPR);
-  canvas.height=Math.round(H*DPR);
-
-  ctx.setTransform(DPR,0,0,DPR,0,0);
-  ctx.imageSmoothingEnabled=true;
-
-  if(regions.length) {
-    createRegions();
-  }
-}
-
-function rectFromPercent(values) {
-  return {
-    x:values[0]/100*W,
-    y:values[1]/100*H,
-    w:values[2]/100*W,
-    h:values[3]/100*H
-  };
-}
-
-/*
-  Make an irregular tile grid.
-
-  The tile dimensions are different, but the tiles
-  completely cover their region without gaps.
-
-  Larger tiles are used more frequently than in
-  previous versions for better performance.
-*/
-
-function makeTiles(columns=7,rows=5) {
-  const widths=[];
-  const heights=[];
-
-  for(let i=0;i<columns;i++) {
-    widths.push(rand(.6,1.6));
-  }
-
-  for(let j=0;j<rows;j++) {
-    heights.push(rand(.6,1.6));
-  }
-
-  const sumW=widths.reduce((a,b)=>a+b,0);
-  const sumH=heights.reduce((a,b)=>a+b,0);
-
-  let y=0;
-  const tiles=[];
-
-  for(let row=0;row<rows;row++) {
-    let x=0;
-    const rh=heights[row]/sumH;
-
-    for(let col=0;col<columns;col++) {
-      const cw=widths[col]/sumW;
-
-      tiles.push({
-        u:x,
-        v:y,
-        uw:cw,
-        vh:rh,
-
-        // Independent delay creates reconstruction waves.
-        delay:rand(0,.24),
-
-        // Geometric motion distance.
-        jumpX:rand(-1,1),
-        jumpY:rand(-1,1),
-
-        // Pixelation variation.
-        pixel:Math.random(),
-
-        // Axis order.
-        axisFirst:Math.random()>.5
+(() => {
+  "use strict";
+
+  const site = document.getElementById("site");
+  const intro = document.getElementById("intro");
+  const percent = document.getElementById("load-percent");
+  const hero = document.getElementById("hero-name");
+  const nameText = document.getElementById("name-text");
+
+  const photos = [...document.querySelectorAll(".photo")];
+  const reducedMotion = window.matchMedia(
+    "(prefers-reduced-motion: reduce)"
+  ).matches;
+
+  const random = (min, max) =>
+    min + Math.random() * (max - min);
+
+  const wait = ms =>
+    new Promise(resolve => setTimeout(resolve, ms));
+
+  /* LOADING SCREEN */
+
+  async function start() {
+    if (!reducedMotion) {
+      const startTime = performance.now();
+      const duration = 1600;
+
+      await new Promise(resolve => {
+        function frame(now) {
+          const progress = Math.min(
+            1,
+            (now - startTime) / duration
+          );
+
+          percent.textContent =
+            String(Math.floor(progress * 100)).padStart(2, "0") + "%";
+
+          if (progress < 1) {
+            requestAnimationFrame(frame);
+          } else {
+            resolve();
+          }
+        }
+
+        requestAnimationFrame(frame);
+      });
+    }
+
+    intro.classList.add("hide");
+    site.classList.add("ready");
+
+    await wait(reducedMotion ? 50 : 350);
+
+    if (!reducedMotion) {
+      photos.forEach((photo, index) => {
+        setTimeout(() => assemble(photo), index * 130);
       });
 
-      x+=cw;
+      scheduleGlitch();
+      scheduleReconstructions();
     }
 
-    y+=rh;
+    preparePixelation();
   }
 
-  return shuffle(tiles);
-}
+  /* LARGE CENTER NAME GLITCH
+     Top-left brand never changes. */
 
-function createRegions() {
-  const layout=LAYOUTS[currentLayout];
+  let glitchBusy = false;
 
-  regions=[];
+  async function glitchName() {
+    if (glitchBusy) return;
 
-  for(let i=0;i<CONFIG.regionCount;i++) {
-    const start=rectFromPercent(
-      layout[i]||[0,0,0,0]
-    );
+    glitchBusy = true;
+    hero.classList.add("glitch");
 
-    const target=rectFromPercent(
-      LAYOUTS[nextLayout][i]||[0,0,0,0]
-    );
+    nameText.textContent = "OqaoJ";
+    nameText.dataset.text = "OqaoJ";
 
-    regions.push({
-      index:i,
-      imageIndex:i%PHOTO_URLS.length,
-      start,
-      target,
-      tiles:makeTiles(
-        Math.round(rand(5,9)),
-        Math.round(rand(4,7))
-      ),
-      zoomPhase:rand(0,Math.PI*2),
-      pixelStrength:rand(.5,1.5)
-    });
-  }
-}
+    await wait(110);
 
-/*
-  Draw an image cropped to cover its region.
+    nameText.textContent = "Joaqo";
+    nameText.dataset.text = "Joaqo";
 
-  The crop changes slightly over time, producing
-  a slow zoom without moving the region itself.
-*/
+    await wait(65);
 
-function drawImageCrop(img,source,dest,zoom=1) {
-  if(!img || dest.w<=0 || dest.h<=0) return;
+    nameText.textContent = "OqaoJ";
+    nameText.dataset.text = "OqaoJ";
 
-  const imageAspect=img.width/img.height;
-  const regionAspect=source.w/source.h;
+    await wait(180);
 
-  let sw,sh;
+    nameText.textContent = "Joaqo";
+    nameText.dataset.text = "Joaqo";
 
-  if(imageAspect>regionAspect) {
-    sh=img.height/zoom;
-    sw=sh*regionAspect;
-  } else {
-    sw=img.width/zoom;
-    sh=sw/regionAspect;
+    await wait(150);
+
+    hero.classList.remove("glitch");
+    glitchBusy = false;
   }
 
-  const sx=(img.width-sw)/2;
-  const sy=(img.height-sh)/2;
+  function scheduleGlitch() {
+    const delay = random(5500, 11500);
 
-  const cropX=sx+source.u*sw;
-  const cropY=sy+source.v*sh;
-  const cropW=source.uw*sw;
-  const cropH=source.vh*sh;
-
-  ctx.drawImage(
-    img,
-    cropX,cropY,cropW,cropH,
-    dest.x,dest.y,dest.w,dest.h
-  );
-}
-
-function tileRectangle(region,tile,rect) {
-  return {
-    x:rect.x+tile.u*rect.w,
-    y:rect.y+tile.v*rect.h,
-    w:tile.uw*rect.w,
-    h:tile.vh*rect.h
-  };
-}
-
-/*
-  The key motion system:
-
-  Each tile starts in one screen region and ends
-  in a different screen region.
-
-  Movement is split into two phases:
-    phase 1 = one axis
-    phase 2 = the other axis
-
-  This creates sharp geometric / L-shaped movement,
-  rather than floating diagonally.
-*/
-
-function geometricPosition(a,b,t,axisFirst) {
-  const mid=.5;
-
-  let x,y;
-
-  if(axisFirst) {
-    x=lerp(a.x,b.x,ease(t/mid));
-    y=lerp(a.y,b.y,ease((t-mid)/(1-mid)));
-  } else {
-    y=lerp(a.y,b.y,ease(t/mid));
-    x=lerp(a.x,b.x,ease((t-mid)/(1-mid)));
+    setTimeout(async () => {
+      if (!document.hidden) await glitchName();
+      scheduleGlitch();
+    }, delay);
   }
 
-  return {x,y};
-}
+  /* FRAGMENT RECONSTRUCTION
+     Each photo has its own fragment layer.
+     Nothing moves outside its own image area,
+     preventing accidental image duplication. */
 
-function pixelatedTile(img,tile,rect,strength) {
-  /*
-    Pixelation is simulated by rendering the tile
-    through a small reusable canvas.
+  const running = new WeakSet();
 
-    A smaller internal image means larger blocks.
-  */
+  function getImageUrl(photo) {
+    const css = getComputedStyle(photo)
+      .getPropertyValue("--img")
+      .trim();
 
-  if(!img || rect.w<1 || rect.h<1) return;
-
-  const blockSize=clamp(
-    Math.round(strength),
-    3,
-    32
-  );
-
-  const lowW=Math.max(
-    2,
-    Math.ceil(rect.w/blockSize)
-  );
-
-  const lowH=Math.max(
-    2,
-    Math.ceil(rect.h/blockSize)
-  );
-
-  pixelCanvas.width=lowW;
-  pixelCanvas.height=lowH;
-
-  pixelCtx.clearRect(0,0,lowW,lowH);
-
-  const aspect=rect.w/rect.h;
-  const imageAspect=img.width/img.height;
-
-  let sw,sh;
-
-  if(imageAspect>aspect) {
-    sh=img.height;
-    sw=sh*aspect;
-  } else {
-    sw=img.width;
-    sh=sw/aspect;
+    const match = css.match(/url\(["']?(.*?)["']?\)/);
+    return match ? match[1] : "";
   }
 
-  const sx=(img.width-sw)/2;
-  const sy=(img.height-sh)/2;
+  async function assemble(photo) {
+    if (running.has(photo)) return;
+    if (!photo.isConnected) return;
 
-  pixelCtx.drawImage(
-    img,
-    sx+tile.u*sw,
-    sy+tile.v*sh,
-    tile.uw*sw,
-    tile.vh*sh,
-    0,0,lowW,lowH
-  );
+    running.add(photo);
 
-  ctx.imageSmoothingEnabled=false;
+    const layer = photo.querySelector(".fragment-layer");
+    const rect = photo.getBoundingClientRect();
+    const width = Math.round(rect.width);
+    const height = Math.round(rect.height);
 
-  ctx.drawImage(
-    pixelCanvas,
-    rect.x,rect.y,rect.w,rect.h
-  );
-
-  ctx.imageSmoothingEnabled=true;
-}
-
-const pixelCanvas=document.createElement("canvas");
-const pixelCtx=pixelCanvas.getContext(
-  "2d",{willReadFrequently:false}
-);
-
-function drawRegion(region,phase,elapsed) {
-  const img=images[region.imageIndex];
-
-  const isMoving=phase==="move";
-
-  const zoom=1+
-    CONFIG.zoomAmount*
-    (.5+.5*Math.sin(
-      elapsed*.00035+region.zoomPhase
-    ));
-
-  for(const tile of region.tiles) {
-    const a=tileRectangle(
-      region,tile,region.start
-    );
-
-    const b=tileRectangle(
-      region,tile,region.target
-    );
-
-    let dest;
-
-    if(isMoving) {
-      const duration=1-tile.delay;
-
-      const t=clamp(
-        (elapsed/CONFIG.assembleDuration-tile.delay)/
-        duration,
-        0,1
-      );
-
-      const pos=geometricPosition(
-        a,b,t,tile.axisFirst
-      );
-
-      /*
-        Tile dimensions interpolate independently,
-        so pieces actually resize while reconstructing.
-      */
-
-      dest={
-        x:pos.x,
-        y:pos.y,
-        w:lerp(a.w,b.w,ease(t)),
-        h:lerp(a.h,b.h,ease(t))
-      };
-
-      /*
-        A small, temporary offset creates the
-        disassembled state without drifting.
-      */
-
-      const displacement=Math.sin(Math.PI*t);
-
-      dest.x+=tile.jumpX*22*displacement;
-      dest.y+=tile.jumpY*22*displacement;
-
-    } else {
-      dest=b;
+    if (width < 10 || height < 10) {
+      running.delete(photo);
+      return;
     }
 
-    if(dest.w<1 || dest.h<1) continue;
+    layer.replaceChildren();
 
-    const cx=dest.x+dest.w/2;
-    const cy=dest.y+dest.h/2;
-
-    const distance=Math.hypot(
-      mouse.x-cx,
-      mouse.y-cy
-    );
+    const url = getImageUrl(photo);
 
     /*
-      Larger cursor influence than before.
-      Each region has a different pixel strength.
+      Different-sized rectangles, but a relatively
+      low total count to keep animation smooth.
     */
 
-    const radius=Math.max(160,W*.19);
-
-    const proximity=mouse.active
-      ?clamp(1-distance/radius,0,1)
-      :0;
-
-    const movingPixel=isMoving
-      ?Math.sin(
-        Math.PI*clamp(
-          elapsed/CONFIG.assembleDuration,0,1
-        )
-      )*.6
-      :0;
-
-    const pixelAmount=Math.max(
-      proximity,
-      movingPixel
+    const targetSize = Math.max(
+      34,
+      Math.min(85, width / 9)
     );
 
-    const strength=
-      5+
-      region.pixelStrength*22*
-      pixelAmount*
-      (.6+tile.pixel);
-
-    if(pixelAmount>.08) {
-      pixelatedTile(
-        img,tile,dest,strength
-      );
-    } else if(img) {
-      drawImageCrop(
-        img,
-        {
-          u:tile.u,
-          v:tile.v,
-          uw:tile.uw,
-          vh:tile.vh
-        },
-        dest,
-        zoom
-      );
-    } else {
-      ctx.fillStyle=[
-        "#202c6c",
-        "#3b47d4",
-        "#151622",
-        "#7060a9",
-        "#9da8cb"
-      ][region.index%5];
-
-      ctx.fillRect(
-        dest.x,dest.y,dest.w,dest.h
-      );
-    }
-  }
-}
-
-function renderCollage(timestamp) {
-  if(!animationActive) return;
-
-  requestAnimationFrame(renderCollage);
-
-  if(timestamp-lastFrame<1000/CONFIG.fps) return;
-  lastFrame=timestamp;
-
-  const elapsed=timestamp-cycleStart;
-
-  const moving=elapsed<CONFIG.assembleDuration;
-  const phase=moving?"move":"hold";
-
-  ctx.fillStyle="#efeee9";
-  ctx.fillRect(0,0,W,H);
-
-  for(const region of regions) {
-    drawRegion(region,phase,elapsed);
-  }
-
-  /*
-    A few graphic panels unify the composition.
-    These are static and cheap to render.
-  */
-
-  ctx.globalAlpha=.12;
-  ctx.fillStyle="#2c37b9";
-  ctx.fillRect(W*.48,0,W*.015,H);
-  ctx.fillRect(0,H*.72,W*.36,H*.018);
-  ctx.globalAlpha=1;
-
-  if(elapsed>
-    CONFIG.assembleDuration+
-    CONFIG.holdDuration
-  ) {
-    advanceCollage(timestamp);
-  }
-}
-
-function advanceCollage(timestamp) {
-  cycleNumber++;
-
-  /*
-    After each completed composition:
-    - the previous target becomes the new start
-    - the next target is another layout
-    - each region gets a different photograph
-    - tile sizes and arrangements are regenerated
-
-    There is never a second copy left at the
-    old position.
-  */
-
-  currentLayout=nextLayout;
-  nextLayout=(nextLayout+1)%LAYOUTS.length;
-
-  const previous=regions.map(r=>r.target);
-
-  regions.forEach((region,i)=>{
-    region.start=previous[i];
-
-    region.target=rectFromPercent(
-      LAYOUTS[nextLayout][i]||[0,0,0,0]
+    const columns = Math.max(
+      3,
+      Math.ceil(width / targetSize)
     );
 
-    region.imageIndex=
-      (region.imageIndex+1+
-      (cycleNumber%3))%PHOTO_URLS.length;
-
-    region.tiles=makeTiles(
-      Math.round(rand(5,9)),
-      Math.round(rand(4,7))
+    const rows = Math.max(
+      3,
+      Math.ceil(height / targetSize)
     );
 
-    region.pixelStrength=rand(.55,1.7);
-    region.zoomPhase=rand(0,Math.PI*2);
-  });
+    const cellW = width / columns;
+    const cellH = height / rows;
 
-  cycleStart=timestamp;
-}
+    const pieces = [];
 
-function startCollage() {
-  resizeCanvas();
-  createRegions();
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < columns; col++) {
+        /*
+          Some adjacent cells are combined to make
+          larger fragments, creating size variation.
+        */
 
-  animationActive=true;
-  cycleStart=performance.now();
+        const x = col * cellW;
+        const y = row * cellH;
 
-  requestAnimationFrame(renderCollage);
-}
+        const piece = document.createElement("div");
+        piece.className = "fragment";
 
-canvas.addEventListener("pointermove",event=>{
-  const rect=canvas.getBoundingClientRect();
+        const w = Math.ceil(cellW + 1);
+        const h = Math.ceil(cellH + 1);
 
-  mouse.x=event.clientX-rect.left;
-  mouse.y=event.clientY-rect.top;
-  mouse.active=true;
-});
+        piece.style.left = x + "px";
+        piece.style.top = y + "px";
+        piece.style.width = w + "px";
+        piece.style.height = h + "px";
 
-$("#home").addEventListener("pointermove",event=>{
-  const rect=canvas.getBoundingClientRect();
+        piece.style.backgroundImage = `url("${url}")`;
+        piece.style.backgroundSize =
+          `${width}px ${height}px`;
 
-  mouse.x=event.clientX-rect.left;
-  mouse.y=event.clientY-rect.top;
-  mouse.active=true;
-});
+        piece.style.backgroundPosition =
+          `${-x}px ${-y}px`;
 
-$("#home").addEventListener("pointerleave",()=>{
-  mouse.active=false;
-});
+        const distance = random(25, 140);
+        const angle = random(0, Math.PI * 2);
 
-window.addEventListener("resize",()=>{
-  resizeCanvas();
-});
+        const dx = Math.cos(angle) * distance;
+        const dy = Math.sin(angle) * distance;
 
-/* =========================================================
-   TYPOGRAPHY GLITCH
-   ========================================================= */
+        const scale = random(.55, 1.65);
 
-const brand=$("#brand");
-const homeTitle=$("#homeTitle");
+        piece.style.transform =
+          `translate(${dx}px, ${dy}px) scale(${scale})`;
 
-let glitching=false;
+        piece.style.opacity = "0";
 
-function glitchName() {
-  if(glitching) return;
-
-  glitching=true;
-
-  brand.classList.add("glitch");
-  homeTitle.classList.add("flash");
-
-  /*
-    The large title briefly reverses into OqaoJ.
-    It then restores Joaqo.
-  */
-
-  const letters=$$(".home-title .letter");
-
-  const original=["J","o","a","q","o"];
-  const reversed=["O","q","a","o","J"];
-
-  letters.forEach((el,i)=>{
-    el.textContent=reversed[i];
-  });
-
-  brand.textContent="OqaoJ";
-
-  setTimeout(()=>{
-    letters.forEach((el,i)=>{
-      el.textContent=original[i];
-    });
-
-    brand.textContent="Joaqo";
-    brand.classList.remove("glitch");
-    homeTitle.classList.remove("flash");
-
-    glitching=false;
-  },170);
-}
-
-function scheduleGlitch() {
-  const delay=rand(7000,14000);
-
-  setTimeout(()=>{
-    if($("#home").classList.contains("active")) {
-      glitchName();
-    }
-    scheduleGlitch();
-  },delay);
-}
-
-/* =========================================================
-   PAGE TRANSITIONS
-   ========================================================= */
-
-let currentPage="home";
-let transitioning=false;
-
-const transition=$("#transition");
-
-/*
-  Different page transitions:
-
-  WORK:
-    Horizontal bands assemble from alternating sides.
-
-  ABOUT:
-    A grid of blocks expands from the center outward.
-
-  CONTACT:
-    Vertical strips rise in staggered timing.
-
-  HOME:
-    Reverse geometric wipe.
-*/
-
-function buildTransition(type) {
-  transition.innerHTML="";
-  transition.className="running "+type;
-
-  const pieces=[];
-
-  if(type==="work") {
-    const count=10;
-
-    for(let i=0;i<count;i++) {
-      const piece=document.createElement("div");
-      piece.className="transition-piece";
-
-      piece.style.cssText=`
-        left:0;
-        top:${i*10}%;
-        width:100%;
-        height:10.3%;
-        transform:translateX(${i%2?-105:105}%);
-      `;
-
-      transition.appendChild(piece);
-      pieces.push(piece);
-    }
-
-    return pieces.map((el,i)=>({
-      el,
-      delay:i*25,
-      from:`translateX(${i%2?-105:105}%)`
-    }));
-  }
-
-  if(type==="about") {
-    const cols=8,rows=6;
-
-    for(let y=0;y<rows;y++) {
-      for(let x=0;x<cols;x++) {
-        const piece=document.createElement("div");
-        piece.className="transition-piece";
-
-        piece.style.cssText=`
-          left:${x/cols*100}%;
-          top:${y/rows*100}%;
-          width:${100/cols+.1}%;
-          height:${100/rows+.1}%;
-          transform:scale(0);
-        `;
-
-        transition.appendChild(piece);
-
-        const distance=Math.hypot(
-          x-(cols-1)/2,
-          y-(rows-1)/2
-        );
+        layer.appendChild(piece);
 
         pieces.push({
-          el:piece,
-          delay:distance*35,
-          from:"scale(0)"
+          element: piece,
+          delay: random(0, 420)
         });
       }
     }
 
-    return pieces;
-  }
+    /*
+      Hide the underlying full photo while its
+      fragments reassemble, so it isn't duplicated.
+    */
 
-  if(type==="contact") {
-    const count=14;
+    const image = photo.querySelector(".photo-image");
+    image.style.opacity = "0";
 
-    for(let i=0;i<count;i++) {
-      const piece=document.createElement("div");
-      piece.className="transition-piece";
-
-      piece.style.cssText=`
-        left:${i/count*100}%;
-        top:0;
-        width:${100/count+.1}%;
-        height:100%;
-        transform:translateY(105%);
-      `;
-
-      transition.appendChild(piece);
-
-      pieces.push({
-        el:piece,
-        delay:i*27,
-        from:"translateY(105%)"
-      });
-    }
-
-    return pieces;
-  }
-
-  const count=12;
-
-  for(let i=0;i<count;i++) {
-    const piece=document.createElement("div");
-    piece.className="transition-piece";
-
-    piece.style.cssText=`
-      left:${i/count*100}%;
-      top:0;
-      width:${100/count+.1}%;
-      height:100%;
-      transform:translateY(-105%);
-    `;
-
-    transition.appendChild(piece);
-
-    pieces.push({
-      el:piece,
-      delay:(count-i)*18,
-      from:"translateY(-105%)"
-    });
-  }
-
-  return pieces;
-}
-
-async function goToPage(page) {
-  if(transitioning || page===currentPage) return;
-
-  transitioning=true;
-
-  const pieces=buildTransition(page);
-
-  /*
-    Animate pieces to cover the entire screen.
-  */
-
-  const animations=pieces.map(({el,delay,from})=>
-    el.animate(
-      [
-        {transform:from},
-        {transform:"none"}
-      ],
-      {
-        duration:480,
+    const animations = pieces.map(({ element, delay }) => {
+      return element.animate([
+        {
+          transform: element.style.transform,
+          opacity: 0
+        },
+        {
+          transform: "translate(0px, 0px) scale(1)",
+          opacity: 1
+        }
+      ], {
+        duration: random(450, 850),
         delay,
-        easing:"cubic-bezier(.65,0,.2,1)",
-        fill:"forwards"
-      }
-    )
-  );
+        easing: "cubic-bezier(.2,.75,.2,1)",
+        fill: "forwards"
+      }).finished.catch(() => {});
+    });
 
-  await Promise.all(
-    animations.map(a=>a.finished.catch(()=>{}))
-  );
+    await Promise.all(animations);
 
-  $$(".page").forEach(section=>{
-    section.classList.toggle(
-      "active",
-      section.id===page
-    );
-  });
+    image.style.opacity = "1";
+    layer.replaceChildren();
 
-  currentPage=page;
-
-  if(page==="home") {
-    animationActive=false;
-    startCollage();
-  } else {
-    animationActive=false;
+    running.delete(photo);
   }
 
-  window.scrollTo(0,0);
+  function scheduleReconstructions() {
+    setTimeout(async () => {
+      if (!document.hidden) {
+        const eligible = photos.filter(
+          photo => !running.has(photo)
+        );
 
-  /*
-    Uncover with a different motion:
-    scale and opacity instead of simply reversing
-    the original wipe.
-  */
+        if (eligible.length) {
+          const photo = eligible[
+            Math.floor(Math.random() * eligible.length)
+          ];
 
-  await transition.animate(
-    [
-      {opacity:1,transform:"scale(1)"},
-      {opacity:0,transform:"scale(1.08)"}
-    ],
-    {
-      duration:450,
-      easing:"cubic-bezier(.2,.8,.2,1)",
-      fill:"forwards"
-    }
-  ).finished.catch(()=>{});
+          await assemble(photo);
+        }
+      }
 
-  transition.className="";
-  transition.innerHTML="";
-  transition.style.opacity="";
-  transition.style.transform="";
+      scheduleReconstructions();
+    }, random(6500, 11000));
+  }
 
-  transitioning=false;
-}
+  /* PIXELATED HOVER
+     Each photo has a different pixel size.
+     Canvas only updates on hover, not every frame. */
 
-$$("[data-page]").forEach(button=>{
-  button.addEventListener("click",()=>{
-    goToPage(button.dataset.page);
-  });
-});
+  function preparePixelation() {
+    photos.forEach(photo => {
+      const canvas = photo.querySelector(".pixel-overlay");
+      const ctx = canvas.getContext("2d");
 
-brand.addEventListener("click",event=>{
-  event.preventDefault();
-  goToPage("home");
-});
+      if (!ctx) return;
 
-/* =========================================================
-   WORK GALLERY
-   ========================================================= */
+      const imageUrl = getImageUrl(photo);
+      const image = new Image();
+      image.crossOrigin = "anonymous";
+      image.src = imageUrl;
 
-const gallery=$("#gallery");
+      let ready = false;
 
-function buildGallery() {
-  gallery.innerHTML=PROJECTS.map((project,i)=>`
-    <button class="project-card"
-      data-project="${i}"
-      aria-label="Open ${project.name}">
-      <img
-        src="${project.image}"
-        alt=""
-        loading="lazy">
-      <span class="project-arrow">↗</span>
-      <span class="project-meta">
-        <small>
-          ${String(i+1).padStart(2,"0")} /
-          ${project.category}
-        </small>
-        <strong>${project.name}</strong>
-      </span>
-    </button>
-  `).join("");
+      image.onload = () => {
+        ready = true;
+      };
 
-  $$("[data-project]").forEach(button=>{
-    button.addEventListener("click",()=>{
-      openProject(Number(button.dataset.project));
+      function renderPixelation() {
+        if (!ready) return;
+
+        const rect = photo.getBoundingClientRect();
+        const w = Math.round(rect.width);
+        const h = Math.round(rect.height);
+
+        if (!w || !h) return;
+
+        canvas.width = w;
+        canvas.height = h;
+
+        const pixel = Number(photo.dataset.pixel) || 12;
+        const smallW = Math.max(8, Math.round(w / pixel));
+        const smallH = Math.max(8, Math.round(h / pixel));
+
+        const small = document.createElement("canvas");
+        small.width = smallW;
+        small.height = smallH;
+
+        const smallCtx = small.getContext("2d");
+
+        if (!smallCtx) return;
+
+        /*
+          Draw the image using cover positioning.
+        */
+
+        const scale = Math.max(
+          w / image.width,
+          h / image.height
+        );
+
+        const cropW = w / scale;
+        const cropH = h / scale;
+
+        const sx = (image.width - cropW) / 2;
+        const sy = (image.height - cropH) / 2;
+
+        smallCtx.drawImage(
+          image,
+          sx, sy, cropW, cropH,
+          0, 0, smallW, smallH
+        );
+
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(
+          small,
+          0, 0, smallW, smallH,
+          0, 0, w, h
+        );
+      }
+
+      photo.addEventListener("mouseenter", () => {
+        try {
+          renderPixelation();
+        } catch (error) {
+          /*
+            If an image host disallows canvas access,
+            the original photograph remains visible.
+          */
+          canvas.style.opacity = "0";
+        }
+      });
+
+      photo.addEventListener("mouseleave", () => {
+        canvas.style.opacity = "";
+      });
+    });
+  }
+
+  /* NAVIGATION */
+
+  const pages = {
+    work: document.getElementById("page-work"),
+    about: document.getElementById("page-about"),
+    contact: document.getElementById("page-contact")
+  };
+
+  function closePages() {
+    Object.values(pages).forEach(page => {
+      page.classList.remove("open");
+      page.setAttribute("aria-hidden", "true");
+    });
+
+    document.querySelectorAll(".nav-item").forEach(item => {
+      item.classList.toggle(
+        "active",
+        item.dataset.page === "home"
+      );
+    });
+
+    document.body.style.overflow = "";
+  }
+
+  function openPage(name) {
+    closePages();
+
+    if (name === "home") return;
+
+    const page = pages[name];
+    if (!page) return;
+
+    page.classList.add("open");
+    page.setAttribute("aria-hidden", "false");
+    page.scrollTop = 0;
+
+    document.querySelectorAll(".nav-item").forEach(item => {
+      item.classList.toggle(
+        "active",
+        item.dataset.page === name
+      );
+    });
+
+    document.body.style.overflow = "hidden";
+  }
+
+  document.querySelectorAll(".nav-item").forEach(button => {
+    button.addEventListener("click", () => {
+      openPage(button.dataset.page);
     });
   });
-}
 
-function updateGalleryCount() {
-  const cards=$$(".project-card");
-  if(!cards.length) return;
-
-  const center=gallery.scrollLeft+
-    gallery.clientWidth/2;
-
-  let closest=0;
-  let best=Infinity;
-
-  cards.forEach((card,i)=>{
-    const cardCenter=card.offsetLeft+
-      card.offsetWidth/2;
-
-    const distance=Math.abs(
-      center-cardCenter
-    );
-
-    if(distance<best) {
-      best=distance;
-      closest=i;
-    }
+  document.querySelectorAll(".close-page").forEach(button => {
+    button.addEventListener("click", closePages);
   });
 
-  $("#galleryCount").textContent=
-    String(closest+1).padStart(2,"0")+
-    " / "+
-    String(PROJECTS.length).padStart(2,"0");
-}
+  document.getElementById("home-logo")
+    .addEventListener("click", event => {
+      event.preventDefault();
+      closePages();
+    });
 
-gallery.addEventListener(
-  "scroll",
-  updateGalleryCount,
-  {passive:true}
-);
-
-function scrollGallery(direction) {
-  const card=$(".project-card");
-  if(!card) return;
-
-  gallery.scrollBy({
-    left:direction*(card.offsetWidth+24),
-    behavior:"smooth"
-  });
-}
-
-$("#galleryPrev").addEventListener(
-  "click",()=>scrollGallery(-1)
-);
-
-$("#galleryNext").addEventListener(
-  "click",()=>scrollGallery(1)
-);
-
-/* =========================================================
-   VIDEO VIEWER
-   ========================================================= */
-
-const viewer=$("#viewer");
-const viewerFrame=$("#viewerFrame");
-
-function openProject(index) {
-  const project=PROJECTS[index];
-
-  $("#viewerName").textContent=project.name;
-  $("#viewerCategory").textContent=project.category;
-
-  viewerFrame.innerHTML="";
-
-  if(project.youtube) {
-    const iframe=document.createElement("iframe");
-
-    iframe.src=
-      "https://www.youtube-nocookie.com/embed/"+
-      encodeURIComponent(project.youtube)+
-      "?autoplay=1&rel=0";
-
-    iframe.title=project.name;
-    iframe.allow=
-      "accelerometer; autoplay; clipboard-write; "+
-      "encrypted-media; gyroscope; picture-in-picture";
-
-    iframe.allowFullscreen=true;
-
-    viewerFrame.appendChild(iframe);
-  } else {
-    const placeholder=document.createElement("div");
-    placeholder.className="viewer-placeholder";
-
-    const heading=document.createElement("h2");
-    heading.textContent=project.name;
-
-    const description=document.createElement("p");
-    description.textContent=
-      "Video coming soon. Add this project's YouTube ID "+
-      "in the PROJECTS section of the code.";
-
-    placeholder.append(heading,description);
-    viewerFrame.appendChild(placeholder);
-  }
-
-  viewer.classList.add("open");
-  document.body.style.overflow="hidden";
-
-  $("#closeViewer").focus();
-}
-
-function closeProject() {
-  viewer.classList.remove("open");
-  viewerFrame.innerHTML="";
-  document.body.style.overflow="";
-}
-
-$("#closeViewer").addEventListener(
-  "click",closeProject
-);
-
-viewer.addEventListener("click",event=>{
-  if(event.target===viewer) closeProject();
-});
-
-document.addEventListener("keydown",event=>{
-  if(event.key==="Escape") {
-    if(viewer.classList.contains("open")) {
-      closeProject();
-    } else if(currentPage!=="home") {
-      goToPage("home");
-    }
-  }
-
-  if(currentPage==="work" &&
-     !viewer.classList.contains("open")) {
-    if(event.key==="ArrowRight") {
-      scrollGallery(1);
-    }
-    if(event.key==="ArrowLeft") {
-      scrollGallery(-1);
-    }
-  }
-});
-
-/* =========================================================
-   INITIALIZATION
-   ========================================================= */
-
-async function init() {
-  buildGallery();
-
-  /*
-    Avoid an indefinitely stuck loader if a remote
-    image is unavailable.
-  */
-
-  await Promise.race([
-    preload(),
-    new Promise(resolve=>setTimeout(resolve,5000))
-  ]);
-
-  $("#loadFill").style.width="100%";
-  $("#loadPercent").textContent="100%";
-
-  await new Promise(resolve=>setTimeout(resolve,350));
-
-  $("#loader").classList.add("done");
-  $("#app").classList.add("ready");
-
-  homeTitle.classList.add("assembled");
-
-  $$(".nav-link").forEach(link=>{
-    link.classList.add("assembled");
+  document.addEventListener("keydown", event => {
+    if (event.key === "Escape") closePages();
   });
 
-  startCollage();
-  scheduleGlitch();
-
-  updateGalleryCount();
-}
-
-init();
+  start();
+})();
 </script>
 
 </body>
