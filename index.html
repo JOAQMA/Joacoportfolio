@@ -4,574 +4,195 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Joaqo — Portfolio</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=DM+Mono:wght@400;500&family=Playfair+Display:wght@900&family=UnifrakturCook:wght@700&display=swap" rel="stylesheet">
-
+<title>Joaqo — Collage Animation Test</title>
 <style>
 * { box-sizing:border-box; }
+body { margin:0; background:#f2f1ed; font-family:monospace; }
+canvas { display:block; width:100%; height:100vh; }
 
-html { scroll-behavior:smooth; }
-
-body {
-  margin:0;
-  background:#f4f3f0;
-  color:#111;
-  font-family:"DM Mono",monospace;
-}
-
-a { color:inherit;text-decoration:none; }
-
-button { font:inherit;cursor:pointer; }
-
-.hero {
-  position:relative;
-  height:100svh;
-  min-height:650px;
-  overflow:hidden;
-  isolation:isolate;
-  background:#f4f3f0;
-}
-
-.hero::before {
-  content:"";
-  position:absolute;
-  inset:0;
-  background-image:
-    linear-gradient(#00000008 1px,transparent 1px),
-    linear-gradient(90deg,#00000008 1px,transparent 1px);
-  background-size:21px 21px;
-  z-index:-1;
-}
-
-#visual {
-  position:absolute;
-  inset:0;
-  width:100%;
-  height:100%;
-  z-index:0;
-}
-
-.interface {
-  position:absolute;
-  inset:0;
-  z-index:5;
-  pointer-events:none;
-}
-
-.interface a,
-.interface button { pointer-events:auto; }
-
-.header {
-  position:absolute;
-  top:6%;
-  left:4%;
-  right:4%;
-  display:flex;
-  justify-content:space-between;
-}
-
-.identity {
-  display:flex;
-  align-items:center;
-  gap:18px;
-}
-
-.logo {
-  font:bold 30px Arial,sans-serif;
-  letter-spacing:-2px;
-}
-
-.logo sup {
-  font-size:10px;
-  vertical-align:top;
-}
-
-.social {
-  font:bold 19px Arial,sans-serif;
-  display:flex;
-  gap:15px;
-}
-
-.subtitle {
-  margin-top:9px;
-  font-size:10px;
-  letter-spacing:2px;
-}
-
-.languages {
-  display:flex;
-  gap:10px;
-  align-items:flex-start;
-}
-
-.languages button {
-  border:0;
-  background:transparent;
-  padding:4px;
+.panel {
+  position:fixed;
+  left:20px;
+  bottom:20px;
+  z-index:10;
+  background:#111;
+  color:white;
+  padding:18px;
+  width:250px;
   font-size:12px;
 }
-
-.languages .selected {
-  border-bottom:2px solid #111;
-}
-
-.navigation {
-  position:absolute;
-  top:23%;
-  left:4%;
-  display:flex;
-  flex-direction:column;
-  gap:8px;
-}
-
-.navigation a {
-  display:flex;
-  align-items:center;
-  gap:12px;
-  font-size:11px;
-}
-
-.navigation .item {
-  min-width:145px;
+.panel label {
   display:flex;
   justify-content:space-between;
-  padding:9px 13px;
-  font:bold 16px Arial,sans-serif;
+  margin:12px 0 5px;
 }
-
-.navigation a:first-child .item,
-.navigation a:hover .item {
-  background:#111;
-  color:white;
+.panel input { width:100%; accent-color:#e92832; }
+.panel button {
+  background:white;
+  color:black;
+  border:0;
+  padding:8px 12px;
+  margin-top:10px;
+  cursor:pointer;
 }
-
-.wordmark {
-  position:absolute;
-  left:18%;
-  top:35%;
-  display:flex;
-  align-items:center;
-  transform:rotate(-4deg);
-  filter:drop-shadow(8px 10px 0 #0002);
-  pointer-events:none;
+.note {
+  position:fixed;
+  left:20px;
+  top:20px;
+  font-size:11px;
+  background:#f2f1ed;
+  padding:10px;
+  z-index:5;
 }
-
-.letter {
-  font-size:clamp(75px,11vw,190px);
-  line-height:1;
-  padding:0 .055em;
-  color:white;
-  background:#111;
-  display:block;
-  position:relative;
-}
-
-.letter:nth-child(1) {
-  font-family:Anton,sans-serif;
-  transform:rotate(-8deg) translateY(9px);
-}
-
-.letter:nth-child(2) {
-  font-family:"Playfair Display",serif;
-  background:#e9262c;
-  color:#111;
-  transform:rotate(7deg) translateY(-12px);
-}
-
-.letter:nth-child(3) {
-  font-family:"UnifrakturCook",serif;
-  background:#eee;
-  color:#111;
-  transform:rotate(-5deg) translateY(10px);
-}
-
-.letter:nth-child(4) {
-  font-family:Anton,sans-serif;
-  transform:rotate(5deg) translateY(-8px);
-}
-
-.letter:nth-child(5) {
-  font-family:"Playfair Display",serif;
-  background:#1547d5;
-  transform:rotate(-8deg) translateY(10px);
-}
-
-.footer-line {
-  position:absolute;
-  bottom:4%;
-  left:7%;
-  width:30%;
-  border-top:1px solid #777;
-}
-
-.content {
-  padding:100px 8%;
-  min-height:45vh;
-}
-
-.content h2 {
-  font:80px Anton,sans-serif;
-  margin:0 0 20px;
-}
-
-.content p {
-  max-width:620px;
-  line-height:1.8;
-}
-
-@media(max-width:700px) {
-  .hero { min-height:720px; }
-
-  .wordmark {
-    left:7%;
-    top:49%;
-  }
-
-  .letter { font-size:17vw; }
-
-  .navigation { top:21%; }
-
-  .navigation .item { min-width:125px; }
-
-  .content h2 { font-size:55px; }
-}
-
-@media(prefers-reduced-motion:reduce) {
-  html { scroll-behavior:auto; }
+@media(max-width:600px) {
+  .panel { width:200px; padding:12px; }
 }
 </style>
 </head>
-
 <body>
 
-<section class="hero" id="home">
-  <canvas id="visual"></canvas>
+<canvas id="stage"></canvas>
 
-  <div class="interface">
-    <header class="header">
-      <div>
-        <div class="identity">
-          <a href="#home" class="logo">Joaqo<sup>©</sup></a>
-          <div class="social">
-            <a href="#" aria-label="Instagram">◎</a>
-            <a href="#" aria-label="X">𝕏</a>
-          </div>
-        </div>
-        <div class="subtitle">VIDEO EDITOR</div>
-      </div>
+<div class="note">JOAQO / PHOTOGRAPHIC FRAGMENTATION TEST 03</div>
 
-      <div class="languages">
-        <button id="es">ES</button>
-        <span>/</span>
-        <button id="en" class="selected">EN</button>
-      </div>
-    </header>
+<div class="panel">
+  <strong>ANIMATION CONTROLS</strong>
 
-    <nav class="navigation">
-      <a href="#home">
-        01
-        <span class="item">
-          <span data-en="HOME" data-es="INICIO">HOME</span> →
-        </span>
-      </a>
-      <a href="#work">
-        02
-        <span class="item">
-          <span data-en="WORK" data-es="TRABAJOS">WORK</span> →
-        </span>
-      </a>
-      <a href="#about">
-        03
-        <span class="item">
-          <span data-en="ABOUT" data-es="SOBRE MÍ">ABOUT</span> →
-        </span>
-      </a>
-      <a href="#contact">
-        04
-        <span class="item">
-          <span data-en="CONTACT" data-es="CONTACTO">CONTACT</span> →
-        </span>
-      </a>
-    </nav>
+  <label>Activity <span id="activityValue">5</span></label>
+  <input id="activity" type="range" min="1" max="10" value="5">
 
-    <h1 class="wordmark" aria-label="Joaqo">
-      <span class="letter">J</span>
-      <span class="letter">o</span>
-      <span class="letter">a</span>
-      <span class="letter">q</span>
-      <span class="letter">o</span>
-    </h1>
+  <label>Fragmentation <span id="fragmentValue">6</span></label>
+  <input id="fragment" type="range" min="1" max="10" value="6">
 
-    <div class="footer-line"></div>
-  </div>
-</section>
+  <label>Transition speed <span id="speedValue">5</span></label>
+  <input id="speed" type="range" min="1" max="10" value="5">
 
-<section id="work" class="content">
-  <h2 data-en="WORK" data-es="TRABAJOS">WORK</h2>
-  <p>Selected editing projects coming soon.</p>
-</section>
-
-<section id="about" class="content">
-  <h2 data-en="ABOUT" data-es="SOBRE MÍ">ABOUT</h2>
-  <p>Joaqo — Video editor specializing in cinematic storytelling.</p>
-</section>
-
-<section id="contact" class="content">
-  <h2 data-en="CONTACT" data-es="CONTACTO">CONTACT</h2>
-  <a href="mailto:hello@example.com">hello@example.com</a>
-</section>
+  <button id="pause">PAUSE</button>
+  <button id="reset">REBUILD</button>
+</div>
 
 <script>
-// ===========================================
-// 01. LANGUAGE
-// ===========================================
+const canvas=document.getElementById("stage");
+const ctx=canvas.getContext("2d");
 
-const es = document.getElementById("es");
-const en = document.getElementById("en");
+const settings={
+  activity:5,
+  fragmentation:6,
+  speed:5
+};
 
-function language(lang) {
-  document.documentElement.lang = lang;
+for(const [id,key] of [
+  ["activity","activity"],
+  ["fragment","fragmentation"],
+  ["speed","speed"]
+]){
+  const input=document.getElementById(id);
+  const output=document.getElementById(id+"Value");
 
-  document.querySelectorAll("[data-en]").forEach(el => {
-    el.textContent = el.dataset[lang];
-  });
-
-  es.classList.toggle("selected",lang==="es");
-  en.classList.toggle("selected",lang==="en");
+  input.oninput=()=>{
+    settings[key]=Number(input.value);
+    output.textContent=input.value;
+  };
 }
 
-es.onclick = () => language("es");
-en.onclick = () => language("en");
-
-
-// ===========================================
-// 02. PHOTOGRAPHIC SOURCES
-// ===========================================
-
-// Replace these with your own city photographs.
-// Images are loaded once and reused.
-
-const sources = [
-  "https://images.unsplash.com/photo-1519608487953-e999c86e7455?w=1600",
-  "https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=1600",
-  "https://images.unsplash.com/photo-1514565131-fce0801e5785?w=1600",
-  "https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=1600",
-  "https://images.unsplash.com/photo-1494522358652-f30e61d6a23a?w=1600",
-  "https://images.unsplash.com/photo-1514905552197-0610a4d8fd73?w=1600"
-];
-
-const images = sources.map(url => {
-  const image = new Image();
-  image.crossOrigin = "anonymous";
-  image.src = url;
-  return image;
-});
-
-
-// ===========================================
-// 03. CANVAS SETUP
-// ===========================================
-
-const canvas = document.getElementById("visual");
-const ctx = canvas.getContext("2d");
-
-let W=0,H=0;
-let scenes=[];
-let currentScene=0;
-let nextScene=1;
-let pieces=[];
-let transitionStart=0;
-
-const HOLD=3000;
-const TRANSITION=2200;
-const TOTAL=HOLD+TRANSITION;
-
-const reducedMotion=window.matchMedia(
-  "(prefers-reduced-motion: reduce)"
-).matches;
-
-const random=(a,b)=>a+Math.random()*(b-a);
+const rand=(a,b)=>a+Math.random()*(b-a);
 const clamp=x=>Math.max(0,Math.min(1,x));
-const smooth=x=>{
+const ease=x=>{
   x=clamp(x);
   return x*x*(3-2*x);
 };
 
-function resize() {
-  const dpr=Math.min(devicePixelRatio||1,2);
+// Replace these image addresses with local
+// photographs for your final portfolio.
+const urls=[
+  "https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=1400",
+  "https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=1400",
+  "https://images.unsplash.com/photo-1514565131-fce0801e5785?w=1400",
+  "https://images.unsplash.com/photo-1519608487953-e999c86e7455?w=1400",
+  "https://images.unsplash.com/photo-1494522358652-f30e61d6a23a?w=1400",
+  "https://images.unsplash.com/photo-1514905552197-0610a4d8fd73?w=1400"
+];
 
-  W=canvas.clientWidth;
-  H=canvas.clientHeight;
+const images=urls.map(url=>{
+  const img=new Image();
+  img.src=url;
+  return img;
+});
 
-  canvas.width=Math.round(W*dpr);
-  canvas.height=Math.round(H*dpr);
+let W,H,DPR;
+let regions=[];
+let paused=false;
+let last=0;
+let clock=0;
 
-  ctx.setTransform(dpr,0,0,dpr,0,0);
+const paper="#f2f1ed";
 
-  buildScenes();
-  buildPieces();
+function makeRegion(x,y,w,h,imageIndex){
+  return {
+    x,y,w,h,
+    current:imageIndex,
+    next:imageIndex,
+    cells:[],
+    elapsed:0,
+    duration:1500,
+    transitioning:false,
+    wait:rand(300,2200),
+    zoom:1,
+    zoomDirection:1
+  };
 }
 
-window.addEventListener("resize",resize);
-
-
-// ===========================================
-// 04. PHOTOGRAPHIC SCENES
-// ===========================================
-
-// Each scene is one complete offscreen image.
-// This is important: fragments are sampled
-// from aligned compositions rather than
-// independently positioned photographs.
-
-function createBuffer() {
-  const c=document.createElement("canvas");
-  c.width=Math.ceil(W);
-  c.height=Math.ceil(H);
-  return c;
-}
-
-function cover(g,img,x,y,w,h,zoom=1) {
-  if(!img.complete || !img.naturalWidth) return;
-
-  const iw=img.naturalWidth;
-  const ih=img.naturalHeight;
-
-  const scale=Math.max(w/iw,h/ih)*zoom;
-  const dw=iw*scale;
-  const dh=ih*scale;
-
-  g.drawImage(
-    img,
-    x+(w-dw)/2,
-    y+(h-dh)/2,
-    dw,dh
-  );
-}
-
-function photo(g,index,x,y,w,h,zoom=1) {
-  const img=images[index%images.length];
-
-  g.save();
-  g.beginPath();
-  g.rect(x,y,w,h);
-  g.clip();
-
-  cover(g,img,x,y,w,h,zoom);
-
-  g.restore();
-}
-
-function buildScenes() {
-  scenes=[];
-
-  // Four deliberately different layouts.
-  const layouts=[
-    [
-      [0,.51,-.05,.51,.55],
-      [1,.67,.42,.36,.42],
-      [2,.00,.67,.49,.34],
-      [3,.40,.70,.38,.34]
-    ],
-    [
-      [3,.52,-.03,.48,.45],
-      [4,.60,.35,.42,.45],
-      [1,.00,.68,.48,.33],
-      [5,.39,.65,.39,.36]
-    ],
-    [
-      [2,.54,-.04,.47,.55],
-      [0,.72,.48,.30,.48],
-      [4,.00,.68,.53,.34],
-      [1,.46,.64,.35,.36]
-    ],
-    [
-      [5,.55,-.04,.46,.51],
-      [3,.64,.43,.40,.41],
-      [0,.00,.69,.50,.32],
-      [2,.43,.68,.37,.33]
-    ]
+function createRegions(){
+  regions=[
+    makeRegion(.53,-.03,.49,.49,0),
+    makeRegion(.79,.35,.23,.32,1),
+    makeRegion(.55,.44,.31,.35,2),
+    makeRegion(.00,.66,.43,.36,3),
+    makeRegion(.40,.70,.34,.32,4),
+    makeRegion(.73,.72,.29,.31,5)
   ];
 
-  layouts.forEach((layout,sceneIndex)=>{
-    const buffer=createBuffer();
-    const g=buffer.getContext("2d");
-
-    g.clearRect(0,0,W,H);
-
-    layout.forEach(([id,x,y,w,h],i)=>{
-      photo(
-        g,id,
-        x*W,y*H,w*W,h*H,
-        1.03+(sceneIndex+i)*.015
-      );
-    });
-
-    // Add a few smaller photographic regions.
-    for(let i=0;i<12;i++){
-      const x=random(.45,1)*W;
-      const y=random(.08,.94)*H;
-      const w=random(15,100);
-      const h=random(12,90);
-
-      photo(g,sceneIndex+i,x,y,w,h);
-    }
-
-    scenes.push(buffer);
-  });
+  for(const r of regions) generateCells(r);
 }
 
+function generateCells(r){
+  r.cells=[];
 
-// ===========================================
-// 05. IRREGULAR FRAGMENT MAP
-// ===========================================
+  const rw=r.w*W;
+  const rh=r.h*H;
 
-// Fragment sizes vary substantially.
-// A coarse grid defines the overall structure,
-// while smaller fragments subdivide selected
-// cells to create pixel-like regions.
+  const base=Math.max(
+    18,
+    95-settings.fragmentation*7
+  );
 
-function buildPieces() {
-  pieces=[];
-
-  const base=70;
-
-  for(let y=0;y<H;y+=base){
-    for(let x=0;x<W;x+=base){
-
-      // Finer fragmentation toward the edges
-      // of the photographic regions.
-      const small=Math.random()<.35;
-
-      const divisions=small
-        ? (Math.random()<.5 ? 4 : 7)
+  for(let y=0;y<rh;y+=base){
+    for(let x=0;x<rw;x+=base){
+      const fine=Math.random()<.38;
+      const parts=fine
+        ? (Math.random()<.5?3:5)
         : 1;
 
-      const sw=base/divisions;
+      const cw=Math.min(base,rw-x);
+      const ch=Math.min(base,rh-y);
 
-      for(let yy=0;yy<divisions;yy++){
-        for(let xx=0;xx<divisions;xx++){
-          const px=x+xx*sw;
-          const py=y+yy*sw;
+      for(let j=0;j<parts;j++){
+        for(let i=0;i<parts;i++){
+          const px=x+cw*i/parts;
+          const py=y+ch*j/parts;
 
-          pieces.push({
+          r.cells.push({
             x:px,
             y:py,
-            w:Math.min(sw,W-px),
-            h:Math.min(sw,H-py),
-
-            delay:random(0,.58),
-            speed:random(.32,.58),
-
+            w:cw/parts,
+            h:ch/parts,
+            delay:rand(0,.65),
+            duration:rand(.25,.5),
             axis:Math.random()<.5?"x":"y",
             direction:Math.random()<.5?-1:1,
-
-            shift:random(8,65),
-            pixel:Math.random()<.55,
-
-            // Some fragments temporarily vanish.
-            vanish:Math.random()<.18
+            distance:rand(4,40),
+            vanish:Math.random()<.22,
+            pixel:Math.random()<.6
           });
         }
       }
@@ -579,218 +200,252 @@ function buildPieces() {
   }
 }
 
+function resize(){
+  W=innerWidth;
+  H=innerHeight;
+  DPR=Math.min(devicePixelRatio||1,2);
 
-// ===========================================
-// 06. PIXELATION CACHE
-// ===========================================
+  canvas.width=Math.round(W*DPR);
+  canvas.height=Math.round(H*DPR);
 
-// Low-resolution copies are prepared once
-// per scene, not every animation frame.
-
-let lowRes=[];
-
-function buildLowRes() {
-  lowRes=scenes.map(scene=>{
-    const c=document.createElement("canvas");
-
-    c.width=Math.max(1,Math.ceil(W/15));
-    c.height=Math.max(1,Math.ceil(H/15));
-
-    c.getContext("2d").drawImage(
-      scene,0,0,c.width,c.height
-    );
-
-    return c;
-  });
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  createRegions();
 }
 
+function chooseImage(except){
+  const available=images
+    .map((img,i)=>img.complete&&img.naturalWidth?i:-1)
+    .filter(i=>i>=0&&i!==except);
 
-// ===========================================
-// 07. DRAW FRAGMENTS
-// ===========================================
-
-function drawPiece(source,p,dx=0,dy=0,alpha=1) {
-  if(alpha<=0) return;
-
-  ctx.save();
-  ctx.globalAlpha=alpha;
-
-  ctx.drawImage(
-    source,
-    p.x,p.y,p.w,p.h,
-    p.x+dx,p.y+dy,p.w,p.h
-  );
-
-  ctx.restore();
+  if(!available.length) return except;
+  return available[Math.floor(Math.random()*available.length)];
 }
 
-function drawPixelPiece(source,p,dx,dy,alpha) {
-  if(alpha<=0) return;
-
-  ctx.save();
-
-  ctx.globalAlpha=alpha;
-  ctx.imageSmoothingEnabled=false;
-
-  const sx=p.x/W*source.width;
-  const sy=p.y/H*source.height;
-  const sw=p.w/W*source.width;
-  const sh=p.h/H*source.height;
-
-  ctx.drawImage(
-    source,
-    sx,sy,
-    Math.max(.01,sw),
-    Math.max(.01,sh),
-    p.x+dx,p.y+dy,p.w,p.h
-  );
-
-  ctx.restore();
-}
-
-function transitionPiece(p,progress) {
-  // Each fragment has an independent
-  // time window within the transition.
-
-  const local=clamp(
-    (progress-p.delay)/p.speed
-  );
-
-  const t=smooth(local);
-
-  const motion=Math.sin(t*Math.PI)*p.shift;
-
-  let dx=0,dy=0;
-
-  if(p.axis==="x") dx=motion*p.direction;
-  else dy=motion*p.direction;
-
-  // At the transition midpoint, fragments
-  // can become pixelated or disappear.
-  const pixelStrength=Math.sin(t*Math.PI);
-
-  const gap=p.vanish
-    ? Math.max(0,1-pixelStrength*.95)
-    : 1;
-
-  const oldAlpha=(1-t)*gap;
-  const newAlpha=t*gap;
-
-  const usePixel=p.pixel && pixelStrength>.35;
-
-  const oldSource=usePixel
-    ? lowRes[currentScene]
-    : scenes[currentScene];
-
-  const newSource=usePixel
-    ? lowRes[nextScene]
-    : scenes[nextScene];
-
-  if(usePixel){
-    drawPixelPiece(
-      oldSource,p,dx,dy,oldAlpha
-    );
-
-    drawPixelPiece(
-      newSource,p,dx,dy,newAlpha
-    );
-  } else {
-    drawPiece(oldSource,p,dx,dy,oldAlpha);
-    drawPiece(newSource,p,dx,dy,newAlpha);
-  }
-}
-
-
-// ===========================================
-// 08. RENDERING
-// ===========================================
-
-function render(time) {
-  requestAnimationFrame(render);
-
-  if(!scenes.length) return;
-
-  ctx.clearRect(0,0,W,H);
-
-  if(reducedMotion) {
-    ctx.drawImage(scenes[0],0,0);
+function begin(r){
+  r.next=chooseImage(r.current);
+  if(r.next===r.current) {
+    r.wait=500;
     return;
   }
 
-  const elapsed=time-transitionStart;
+  r.elapsed=0;
+  r.duration=rand(1100,2400)*
+    (1.6-settings.speed*.1);
 
-  if(elapsed>=TOTAL){
-    currentScene=nextScene;
-    nextScene=(nextScene+1)%scenes.length;
-    transitionStart=time;
+  r.transitioning=true;
+  generateCells(r);
+}
 
-    // A new fragmentation pattern each cycle.
-    buildPieces();
+function update(dt){
+  clock+=dt;
+
+  for(const r of regions){
+    if(r.transitioning){
+      r.elapsed+=dt;
+
+      if(r.elapsed>=r.duration){
+        r.current=r.next;
+        r.transitioning=false;
+        r.wait=rand(400,2600)*
+          (1.6-settings.activity*.13);
+      }
+    } else {
+      r.wait-=dt;
+      if(r.wait<=0) begin(r);
+    }
+
+    // Slow continuous breathing zoom.
+    r.zoom+=r.zoomDirection*dt*.000008;
+    if(r.zoom>1.08) r.zoomDirection=-1;
+    if(r.zoom<1.0) r.zoomDirection=1;
   }
+}
 
-  const phase=time-transitionStart;
+// Image drawing uses the same image coordinates
+// across all cells in a region. This preserves
+// photographic continuity.
 
-  if(phase<HOLD){
-    ctx.drawImage(scenes[currentScene],0,0);
-  } else {
-    const progress=clamp(
-      (phase-HOLD)/TRANSITION
-    );
+function drawImagePart(img,r,c,dx,dy,alpha,pixel){
+  if(!img.complete||!img.naturalWidth||alpha<=0) return;
 
-    pieces.forEach(p=>{
-      transitionPiece(p,progress);
-    });
-  }
+  const rx=r.x*W;
+  const ry=r.y*H;
+  const rw=r.w*W;
+  const rh=r.h*H;
 
-  // Fine intermittent digital grain.
-  // Kept subtle so photographs remain visible.
+  const scale=Math.max(
+    rw/img.naturalWidth,
+    rh/img.naturalHeight
+  )*r.zoom;
+
+  const imageW=img.naturalWidth*scale;
+  const imageH=img.naturalHeight*scale;
+
+  const offsetX=(rw-imageW)/2;
+  const offsetY=(rh-imageH)/2;
+
+  const cx=rx+c.x;
+  const cy=ry+c.y;
+
   ctx.save();
+  ctx.globalAlpha=alpha;
 
-  for(let i=0;i<85;i++){
-    const x=random(0,W);
-    const y=random(0,H);
+  ctx.beginPath();
+  ctx.rect(cx+dx,cy+dy,c.w+.3,c.h+.3);
+  ctx.clip();
 
-    ctx.fillStyle=Math.random()<.5
-      ?"rgba(0,0,0,.07)"
-      :"rgba(255,255,255,.10)";
+  if(pixel){
+    // Quantized sampling gives a mosaic-like
+    // appearance without creating canvases
+    // during every animation frame.
+    const block=12;
+    const sx=Math.floor(c.x/block)*block;
+    const sy=Math.floor(c.y/block)*block;
 
-    ctx.fillRect(x,y,random(1,3),random(1,3));
+    const sourceX=(sx-offsetX)/scale;
+    const sourceY=(sy-offsetY)/scale;
+
+    const sampleX=Math.max(0,Math.min(
+      img.naturalWidth-1,sourceX
+    ));
+    const sampleY=Math.max(0,Math.min(
+      img.naturalHeight-1,sourceY
+    ));
+
+    const sw=Math.max(1,Math.min(
+      img.naturalWidth-sampleX,
+      block/scale
+    ));
+
+    const sh=Math.max(1,Math.min(
+      img.naturalHeight-sampleY,
+      block/scale
+    ));
+
+    // Enlarged source samples.
+    ctx.imageSmoothingEnabled=false;
+
+    ctx.drawImage(
+      img,
+      sampleX,sampleY,sw,sh,
+      cx+dx,cy+dy,
+      Math.max(c.w,block),
+      Math.max(c.h,block)
+    );
+  } else {
+    ctx.drawImage(
+      img,
+      rx+offsetX+dx,
+      ry+offsetY+dy,
+      imageW,imageH
+    );
   }
 
   ctx.restore();
 }
 
+function renderRegion(r){
+  const current=images[r.current];
+  const next=images[r.next];
 
-// ===========================================
-// 09. START
-// ===========================================
+  const t=r.transitioning
+    ?clamp(r.elapsed/r.duration)
+    :0;
 
-async function initialize() {
-  await Promise.all(
-    images.map(img=>{
-      if(img.complete) return Promise.resolve();
+  for(const c of r.cells){
+    const cx=r.x*W+c.x;
+    const cy=r.y*H+c.y;
 
-      return new Promise(resolve=>{
-        img.onload=resolve;
-        img.onerror=resolve;
-      });
-    })
-  );
+    // Protect the top-left interface area.
+    // No photography is drawn over it.
+    if(cx<W*.18&&cy<H*.47) continue;
 
-  resize();
-  buildLowRes();
+    if(!r.transitioning){
+      drawImagePart(current,r,c,0,0,1,false);
+      continue;
+    }
 
-  transitionStart=performance.now();
-  requestAnimationFrame(render);
+    const local=ease(
+      (t-c.delay)/c.duration
+    );
+
+    const movement=Math.sin(local*Math.PI)*
+      c.distance*c.direction;
+
+    const dx=c.axis==="x"?movement:0;
+    const dy=c.axis==="y"?movement:0;
+
+    const middle=Math.sin(local*Math.PI);
+    const pixel=c.pixel&&middle>.45;
+
+    const gap=c.vanish
+      ?1-middle*.95
+      :1;
+
+    // White interruptions are visible because
+    // the underlying canvas is paper-colored.
+    drawImagePart(
+      current,r,c,dx,dy,
+      (1-local)*gap,pixel
+    );
+
+    drawImagePart(
+      next,r,c,dx,dy,
+      local*gap,pixel
+    );
+  }
 }
 
-initialize();
+function drawGrain(){
+  ctx.save();
 
-window.addEventListener("resize",()=>{
-  buildLowRes();
-  transitionStart=performance.now();
-});
+  for(let i=0;i<75;i++){
+    ctx.fillStyle=Math.random()<.5
+      ?"rgba(0,0,0,.10)"
+      :"rgba(255,255,255,.14)";
+
+    ctx.fillRect(
+      rand(0,W),
+      rand(0,H),
+      rand(1,3),
+      rand(1,3)
+    );
+  }
+
+  ctx.restore();
+}
+
+function frame(time){
+  requestAnimationFrame(frame);
+
+  const dt=Math.min(time-last,50)||0;
+  last=time;
+
+  if(!paused) update(dt);
+
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle=paper;
+  ctx.fillRect(0,0,W,H);
+
+  // Later regions are layered over earlier ones.
+  for(const r of regions) renderRegion(r);
+
+  if(!paused) drawGrain();
+}
+
+document.getElementById("pause").onclick=()=>{
+  paused=!paused;
+  document.getElementById("pause").textContent=
+    paused?"PLAY":"PAUSE";
+};
+
+document.getElementById("reset").onclick=()=>{
+  createRegions();
+};
+
+resize();
+addEventListener("resize",resize);
+requestAnimationFrame(frame);
 </script>
-
 </body>
 </html>
