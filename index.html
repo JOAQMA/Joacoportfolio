@@ -3,52 +3,55 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#f3f2ef">
 <title>Joaqo — Video Editor</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
 
 <style>
 :root {
   --paper: #f3f2ef;
   --ink: #101015;
-  --blue: #3039d7;
-  --purple: #6639d9;
-  --grid: rgba(25,30,40,.055);
+  --blue: #363cd5;
 }
+
 * { box-sizing: border-box; }
 html, body { margin: 0; min-height: 100%; }
+
 body {
   background: var(--paper);
   color: var(--ink);
-  font-family: "Space Grotesk", Arial, sans-serif;
+  font-family: "Space Grotesk", sans-serif;
   overflow-x: hidden;
 }
+
 button { font: inherit; cursor: pointer; }
 a { color: inherit; }
-::selection { background: var(--blue); color: white; }
+::selection { background: #4640d8; color: white; }
+
+/* PAPER GRID */
 
 .grid {
   position: fixed;
   inset: 0;
-  z-index: 50;
+  z-index: 70;
   pointer-events: none;
   background-image:
-    linear-gradient(var(--grid) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    linear-gradient(rgba(0,0,0,.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,.045) 1px, transparent 1px);
   background-size: 24px 24px;
-  mix-blend-mode: multiply;
 }
-.noise {
+
+.grain {
   position: fixed;
   inset: 0;
-  z-index: 51;
+  z-index: 71;
   pointer-events: none;
-  opacity: .055;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
+  opacity: .065;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 /* INTRO */
@@ -56,133 +59,236 @@ a { color: inherit; }
 .intro {
   position: fixed;
   inset: 0;
-  z-index: 100;
+  z-index: 200;
   display: grid;
   place-items: center;
   background: var(--ink);
   color: white;
   transition: opacity .65s, visibility .65s;
 }
-.intro.hide {
+
+.intro.hidden {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
 }
-.intro-inner { width: min(320px, 70vw); }
-.intro-name {
-  font-family: "Archivo Black", sans-serif;
-  font-size: clamp(45px, 8vw, 76px);
+
+.intro-content { width: min(320px, 72vw); }
+
+.intro-title {
+  font: 900 clamp(50px, 9vw, 85px) "Archivo Black", sans-serif;
   letter-spacing: -.1em;
 }
-.intro-line {
-  margin-top: 24px;
+
+.progress-track {
   height: 2px;
-  background: #34343c;
-  overflow: hidden;
+  background: #393941;
+  margin-top: 24px;
 }
-.intro-line span {
-  display: block;
+
+.progress-bar {
   height: 100%;
   width: 0;
-  background: #7a79ff;
-  animation: load 1.55s ease forwards;
+  background: #8581ff;
+  transition: width .12s linear;
 }
-.intro-meta {
+
+.progress-meta {
   display: flex;
   justify-content: space-between;
-  margin-top: 10px;
+  margin-top: 12px;
   font: 10px "DM Mono", monospace;
-  letter-spacing: .15em;
+  letter-spacing: .14em;
 }
-@keyframes load { to { width: 100%; } }
 
-/* SCENE */
+/* MAIN SCENE */
 
-.site {
-  position: relative;
-  min-height: 100vh;
-  isolation: isolate;
-  overflow: hidden;
-}
 .scene {
   position: relative;
-  min-height: 900px;
-  height: max(900px, 100vh);
+  height: max(850px, 100vh);
   max-height: 1250px;
+  min-height: 850px;
   overflow: hidden;
+  isolation: isolate;
+}
+
+.collage {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+}
+
+/*
+  All photograph positions are controlled by JS.
+  No permanent aspect ratios or fixed locations.
+*/
+
+.photo {
+  position: absolute;
+  overflow: hidden;
+  background: transparent;
+  cursor: crosshair;
+  will-change: left, top, width, height;
+}
+
+.photo-picture {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  transform: scale(1);
+  transform-origin: center;
+}
+
+.photo-picture.zoom {
+  animation: imageZoom 8s ease-out forwards;
+}
+
+@keyframes imageZoom {
+  from { transform: scale(1); }
+  to { transform: scale(1.105); }
+}
+
+.photo-pixel {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0;
+}
+
+/*
+  The moving pieces exist ONLY on this canvas.
+  They are not duplicated in the DOM.
+*/
+
+.fragment-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  pointer-events: none;
+}
+
+/* ABSTRACT OVERLAYS */
+
+.decor {
+  position: absolute;
+  z-index: 12;
+  pointer-events: none;
+}
+
+.decor-a {
+  top: 0;
+  left: 0;
+  width: 2.5%;
+  height: 6%;
+  background: #19192d;
+}
+
+.decor-b {
+  top: 6%;
+  left: 47%;
+  width: 7%;
+  height: 5%;
+  background: rgba(243,242,239,.88);
+}
+
+.decor-c {
+  top: 48%;
+  right: 0;
+  width: 15%;
+  height: 6%;
+  background: rgba(243,242,239,.85);
 }
 
 /* HEADER */
 
 .header {
   position: absolute;
-  top: 5.2%;
+  z-index: 40;
+  top: 5.5%;
   left: 4.4%;
-  z-index: 35;
   display: flex;
+  gap: 17px;
   align-items: flex-start;
-  gap: 15px;
   opacity: 0;
-  transform: translateY(-12px);
+  transform: translateY(-15px);
   transition: opacity .65s, transform .65s;
 }
-.ready .header { opacity: 1; transform: none; }
-.brand-name {
-  font-family: "Archivo Black", sans-serif;
-  font-size: 26px;
-  line-height: 1;
+
+.ready .header {
+  opacity: 1;
+  transform: none;
+}
+
+.brand {
+  font: 900 27px "Archivo Black", sans-serif;
   letter-spacing: -.09em;
   text-decoration: none;
 }
-.brand-role {
+
+.brand-sub {
   display: block;
   margin-top: 12px;
   font: 9px "DM Mono", monospace;
   letter-spacing: .18em;
 }
-.socials { display: flex; gap: 13px; padding-top: 3px; }
+
+.socials {
+  display: flex;
+  gap: 13px;
+  padding-top: 4px;
+}
+
 .socials a {
   display: inline-flex;
-  width: 19px;
-  height: 19px;
-  align-items: center;
-  justify-content: center;
-  transition: transform .18s, color .18s;
+  width: 18px;
+  height: 18px;
+  transition: transform .2s, color .2s;
 }
+
 .socials a:hover {
   transform: skew(-10deg) scale(1.2);
   color: var(--blue);
 }
-.socials svg { width: 17px; height: 17px; fill: currentColor; }
 
-.top-right {
+.socials svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+
+.top-label {
   position: absolute;
+  z-index: 40;
   right: 4.4%;
   top: 6%;
-  z-index: 35;
   font: 10px "DM Mono", monospace;
-  letter-spacing: .14em;
+  letter-spacing: .13em;
   opacity: 0;
-  transition: opacity .7s .4s;
+  transition: opacity .8s .4s;
 }
-.ready .top-right { opacity: 1; }
-.top-right span { padding: 0 8px; opacity: .5; }
 
-/* NAVIGATION */
+.ready .top-label { opacity: 1; }
 
-.navigation {
+/* NAV */
+
+.nav {
   position: absolute;
-  z-index: 35;
-  left: 4.4%;
+  z-index: 40;
   top: 29%;
-  width: 172px;
-  display: flex;
-  flex-direction: column;
+  left: 4.4%;
+  width: 175px;
 }
-.nav-item {
+
+.nav button {
   display: flex;
   align-items: center;
-  gap: 13px;
   width: 100%;
   height: 43px;
   padding: 0 10px;
@@ -198,358 +304,242 @@ a { color: inherit; }
     background .2s,
     color .2s;
 }
-.ready .nav-item { opacity: 1; transform: none; }
-.ready .nav-item:nth-child(2) { transition-delay: .09s; }
-.ready .nav-item:nth-child(3) { transition-delay: .18s; }
-.ready .nav-item:nth-child(4) { transition-delay: .27s; }
-.nav-number {
-  width: 19px;
-  flex: none;
-  font: 10px "DM Mono", monospace;
+
+.ready .nav button {
+  opacity: 1;
+  transform: none;
 }
-.nav-label {
-  font: 500 15px "DM Mono", monospace;
-}
-.nav-arrow { margin-left: auto; font-size: 20px; }
-.nav-item.active,
-.nav-item:hover,
-.nav-item:focus-visible {
+
+.ready .nav button:nth-child(2) { transition-delay: .09s; }
+.ready .nav button:nth-child(3) { transition-delay: .18s; }
+.ready .nav button:nth-child(4) { transition-delay: .27s; }
+
+.nav button.active,
+.nav button:hover,
+.nav button:focus-visible {
   background: var(--ink);
   color: white;
   outline: none;
 }
-.nav-item:hover .nav-label { transform: skewX(-7deg); }
 
-/* COLLAGE */
-
-.collage {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  pointer-events: none;
-}
-.photo {
-  position: absolute;
-  overflow: hidden;
-  background: #101018;
-  pointer-events: auto;
-  cursor: crosshair;
-  isolation: isolate;
-}
-.photo-image {
-  position: absolute;
-  inset: -4%;
-  width: 108%;
-  height: 108%;
-  background-position: center;
-  background-size: cover;
-  animation: slowZoom 15s ease-in-out infinite alternate;
-  will-change: transform;
-}
-@keyframes slowZoom {
-  from { transform: scale(1.01); }
-  to { transform: scale(1.13); }
-}
-.photo::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 4;
-  background: linear-gradient(145deg, transparent 55%, rgba(20,17,80,.17));
-  pointer-events: none;
-}
-.photo-a { left: 45%; top: 0; width: 55%; height: 64%; }
-.photo-b { left: 0; top: 62%; width: 42%; height: 26%; }
-.photo-c { left: 41%; top: 58%; width: 22%; height: 38%; }
-.photo-d { left: 60%; top: 62%; width: 40%; height: 26%; }
-.photo-e { left: 71%; top: 83%; width: 29%; height: 17%; }
-.photo-f { left: 0; top: 0; width: 5%; height: 7%; }
-
-/*
-  Fragment layer is ABOVE the whole collage,
-  not confined inside an individual image.
-  This allows pieces to travel between locations.
-*/
-.fragment-stage {
-  position: absolute;
-  inset: 0;
-  z-index: 12;
-  overflow: hidden;
-  pointer-events: none;
-}
-.fragment-piece {
-  position: absolute;
-  background-repeat: no-repeat;
-  will-change: transform, opacity;
-  transform-origin: center;
+.nav-index {
+  width: 23px;
+  font: 10px "DM Mono", monospace;
 }
 
-/* TEMPORARY CURSOR PIXELATION */
+.nav-text {
+  font: 500 15px "DM Mono", monospace;
+}
 
-.pixel-canvas {
+.nav-arrow {
+  margin-left: auto;
+  font-size: 20px;
+}
+
+/* CENTRAL NAME */
+
+.hero {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 7;
-  pointer-events: none;
-  opacity: 0;
-}
-.photo:hover .pixel-canvas {
-  /* Opacity is controlled by JavaScript, not CSS hover. */
-}
-
-/* GRAPHIC BLOCKS */
-
-.block {
-  position: absolute;
-  z-index: 6;
-  pointer-events: none;
-  mix-blend-mode: multiply;
-}
-.block-one {
-  left: 0; top: 0; width: 3%; height: 6%;
-  background: #17172c;
-}
-.block-two {
-  left: 44%; top: 5%; width: 9%; height: 8%;
-  background: rgba(242,241,238,.9);
-}
-.block-three {
-  left: 55%; top: 35%; width: 4%; height: 17%;
-  background: rgba(243,242,239,.85);
-}
-.block-four {
-  left: 82%; top: 48%; width: 18%; height: 6%;
-  background: rgba(245,244,241,.92);
-}
-.block-five {
-  left: 0; top: 52%; width: 11%; height: 10%;
-  background: rgba(244,243,240,.92);
-}
-.block-six {
-  left: 60%; top: 86%; width: 12%; height: 10%;
-  background: rgba(243,242,239,.85);
-}
-
-/* CENTER NAME */
-
-.hero-name {
-  position: absolute;
-  z-index: 20;
-  left: 17.5%;
+  z-index: 30;
+  left: 17%;
   top: 21%;
   margin: 0;
-  font-family: "Archivo Black", "Arial Black", sans-serif;
-  font-size: clamp(130px, 18vw, 340px);
-  line-height: .82;
+  font: 900 clamp(130px, 18vw, 340px)/.85 "Archivo Black", sans-serif;
   letter-spacing: -.105em;
-  font-weight: 900;
   white-space: nowrap;
-  color: var(--ink);
   mix-blend-mode: multiply;
-  user-select: none;
   pointer-events: none;
+  user-select: none;
   opacity: 0;
-  transform: translateY(35px) skewX(-3deg);
-  transition: opacity .7s .25s, transform .8s .25s;
+  transform: translateY(35px);
+  transition: opacity .7s .2s, transform .7s .2s;
 }
-.ready .hero-name { opacity: 1; transform: none; }
-.name-text {
-  display: block;
-  position: relative;
-  transform-origin: left center;
+
+.ready .hero {
+  opacity: 1;
+  transform: none;
 }
-.hero-name.glitch .name-text {
-  animation: nameJolt .32s steps(2,end);
+
+.hero.glitch {
+  animation: glitchShake .32s steps(2,end);
 }
-.hero-name.glitch .name-text::before,
-.hero-name.glitch .name-text::after {
+
+.hero.glitch::before,
+.hero.glitch::after {
   content: attr(data-text);
   position: absolute;
   inset: 0;
-  overflow: hidden;
-  pointer-events: none;
 }
-.hero-name.glitch .name-text::before {
-  color: #384fff;
-  clip-path: inset(18% 0 51% 0);
+
+.hero.glitch::before {
+  color: #3446fa;
+  clip-path: inset(15% 0 56% 0);
   transform: translate(-8px, -3px);
 }
-.hero-name.glitch .name-text::after {
-  color: #9d36e7;
-  clip-path: inset(61% 0 12% 0);
-  transform: translate(10px, 4px);
+
+.hero.glitch::after {
+  color: #9136dc;
+  clip-path: inset(60% 0 12% 0);
+  transform: translate(9px, 3px);
 }
-@keyframes nameJolt {
-  0% { transform: none; }
-  25% { transform: translateX(7px) skewX(-5deg); }
-  50% { transform: translateX(-6px) skewX(4deg); }
-  75% { transform: translateX(4px); }
-  100% { transform: none; }
+
+@keyframes glitchShake {
+  25% { translate: 7px 0; skew: -5deg; }
+  50% { translate: -5px 0; }
+  75% { translate: 4px 0; }
 }
+
+/* EDITORIAL TEXT */
 
 .description {
   position: absolute;
-  z-index: 22;
-  left: 18%;
+  z-index: 32;
   top: 49%;
+  left: 18%;
   font: 11px/1.8 "DM Mono", monospace;
-  letter-spacing: .09em;
-  text-transform: uppercase;
+  letter-spacing: .1em;
   opacity: 0;
-  transition: opacity .7s .7s;
+  transition: opacity .8s .7s;
   pointer-events: none;
 }
+
 .ready .description { opacity: 1; }
+
 .description::after {
   content: "";
   display: block;
-  width: 14px;
+  margin-top: 15px;
+  width: 15px;
   height: 1px;
   background: currentColor;
-  margin-top: 16px;
-}
-.footer {
-  position: absolute;
-  bottom: 4.5%;
-  left: 4.4%;
-  z-index: 25;
-  font: 9px "DM Mono", monospace;
-  letter-spacing: .11em;
-}
-.footer-line {
-  display: inline-block;
-  width: 20vw;
-  height: 1px;
-  margin-left: 15px;
-  background: #8b8b90;
-  vertical-align: middle;
 }
 
-/* SECONDARY PAGES */
+.footer {
+  position: absolute;
+  z-index: 40;
+  left: 4.4%;
+  bottom: 4%;
+  font: 9px "DM Mono", monospace;
+  letter-spacing: .12em;
+}
+
+.footer::after {
+  content: "";
+  display: inline-block;
+  margin-left: 15px;
+  width: 20vw;
+  height: 1px;
+  vertical-align: middle;
+  background: #929298;
+}
+
+/* SIMPLE SECONDARY PAGES */
 
 .page {
   position: fixed;
   inset: 0;
-  z-index: 60;
+  z-index: 90;
   background: var(--paper);
-  padding: 100px 7vw 60px;
+  padding: 90px 7vw 60px;
   overflow-y: auto;
   visibility: hidden;
   opacity: 0;
   transform: translateY(25px);
-  transition: visibility .4s, opacity .4s, transform .4s;
+  transition: opacity .4s, transform .4s, visibility .4s;
 }
+
 .page.open {
   visibility: visible;
   opacity: 1;
   transform: none;
 }
-.page-header {
+
+.page-top {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid #bbb;
   padding-bottom: 20px;
-}
-.page-header strong {
+  border-bottom: 1px solid #aaa;
   font: 12px "DM Mono", monospace;
-  letter-spacing: .15em;
 }
-.close-page {
+
+.back {
   background: var(--ink);
   color: white;
   border: 0;
-  padding: 12px 20px;
-  font: 12px "DM Mono", monospace;
+  padding: 12px 18px;
 }
+
 .page h2 {
-  font-family: "Archivo Black", sans-serif;
-  font-size: clamp(65px, 12vw, 190px);
-  line-height: 1;
+  font: 900 clamp(65px, 12vw, 190px) "Archivo Black", sans-serif;
   letter-spacing: -.09em;
-  margin: 50px 0;
+  margin: 40px 0;
 }
+
 .page p {
-  max-width: 680px;
-  font-size: clamp(18px, 2vw, 26px);
-  line-height: 1.55;
+  max-width: 700px;
+  font-size: clamp(19px, 2.2vw, 28px);
+  line-height: 1.5;
 }
+
 .work-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
 }
+
 .work-card {
   min-height: 270px;
   display: flex;
   align-items: flex-end;
-  padding: 25px;
-  background: #171827;
+  padding: 24px;
+  background: #171725;
   color: white;
 }
-.work-card:nth-child(2) { background: #3038a1; }
-.work-card:nth-child(3) { background: #4230a0; }
-.work-card:nth-child(4) { background: #15151a; }
+
+.work-card:nth-child(2) { background: #313ab1; }
+.work-card:nth-child(3) { background: #5637a9; }
+.work-card:nth-child(4) { background: #111115; }
+
 .work-card h3 {
-  margin: 0;
-  font-family: "Archivo Black", sans-serif;
-  font-size: clamp(22px, 3vw, 43px);
+  font: 900 clamp(24px, 3vw, 43px) "Archivo Black", sans-serif;
   letter-spacing: -.06em;
 }
+
 .contact-link {
-  display: inline-block;
-  margin-top: 30px;
-  font-family: "Archivo Black", sans-serif;
-  font-size: clamp(28px, 5vw, 72px);
-  letter-spacing: -.06em;
-  text-underline-offset: 10px;
+  font: 900 clamp(32px, 5vw, 70px) "Archivo Black", sans-serif;
+  letter-spacing: -.07em;
 }
 
-/* RESPONSIVE */
-
-@media (max-width: 900px) {
-  .scene { min-height: 780px; height: 100svh; }
-  .header { top: 4%; left: 5%; }
-  .top-right { top: 5%; right: 5%; font-size: 8px; }
-  .navigation { left: 5%; top: 23%; width: 150px; }
-  .nav-item { height: 38px; }
-  .nav-label { font-size: 13px; }
-  .hero-name {
-    left: 12%;
-    top: 39%;
-    font-size: clamp(105px, 21vw, 210px);
-  }
-  .description { left: 14%; top: 56%; }
-  .photo-a { left: 31%; width: 69%; height: 54%; }
-  .photo-b { top: 62%; width: 52%; height: 28%; }
-  .photo-c { left: 46%; top: 54%; width: 31%; height: 40%; }
-  .photo-d { left: 70%; top: 65%; width: 30%; height: 25%; }
-  .footer { left: 5%; }
-}
-@media (max-width: 600px) {
-  .scene { min-height: 740px; }
-  .brand-name { font-size: 23px; }
-  .brand-role { font-size: 8px; }
-  .top-right { display: none; }
-  .navigation { top: 18%; width: 145px; }
-  .nav-item { height: 37px; }
-  .hero-name {
-    left: 4%;
+@media (max-width: 850px) {
+  .scene { min-height: 800px; height: 100svh; }
+  .nav { top: 23%; }
+  .hero {
+    left: 10%;
     top: 41%;
-    font-size: clamp(90px, 23vw, 145px);
+    font-size: clamp(105px, 22vw, 200px);
   }
-  .description { left: 7%; top: 55%; font-size: 9px; }
-  .photo-a { left: 26%; width: 74%; height: 49%; }
-  .photo-b { left: 0; top: 65%; width: 65%; height: 22%; }
-  .photo-c { left: 47%; top: 57%; width: 34%; height: 37%; }
-  .photo-d { left: 70%; top: 71%; width: 30%; height: 20%; }
-  .photo-e { display: none; }
-  .footer { bottom: 3%; font-size: 8px; }
+  .description { top: 57%; left: 12%; }
   .work-grid { grid-template-columns: 1fr; }
-  .page { padding: 80px 6vw 40px; }
 }
+
+@media (max-width: 600px) {
+  .header { left: 5%; top: 4%; }
+  .brand { font-size: 23px; }
+  .top-label { display: none; }
+  .nav { top: 19%; left: 5%; width: 145px; }
+  .nav button { height: 38px; }
+  .nav-text { font-size: 13px; }
+  .hero {
+    left: 4%;
+    top: 43%;
+    font-size: clamp(88px, 23vw, 145px);
+  }
+  .description { left: 7%; top: 56%; font-size: 9px; }
+  .footer { left: 5%; font-size: 8px; }
+  .page { padding: 75px 6vw 40px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: .01ms !important;
@@ -561,142 +551,98 @@ a { color: inherit; }
 
 <body>
 
-<div class="intro" id="intro" aria-hidden="true">
-  <div class="intro-inner">
-    <div class="intro-name">Joaqo</div>
-    <div class="intro-line"><span></span></div>
-    <div class="intro-meta">
+<div class="intro" id="intro">
+  <div class="intro-content">
+    <div class="intro-title">Joaqo</div>
+    <div class="progress-track">
+      <div class="progress-bar" id="progress-bar"></div>
+    </div>
+    <div class="progress-meta">
       <span>VIDEO EDITOR</span>
-      <span id="load-percent">00%</span>
+      <span id="progress-text">00%</span>
     </div>
   </div>
 </div>
 
-<div class="site" id="site">
-  <div class="scene" id="scene">
+<main class="scene" id="scene">
 
-    <div class="collage" id="collage">
+  <div class="collage" id="collage"></div>
 
-      <div class="photo photo-a" data-slot="0" data-pixel="14">
-        <div class="photo-image"></div>
-        <canvas class="pixel-canvas"></canvas>
-      </div>
+  <canvas class="fragment-canvas" id="fragments"></canvas>
 
-      <div class="photo photo-b" data-slot="1" data-pixel="23">
-        <div class="photo-image"></div>
-        <canvas class="pixel-canvas"></canvas>
-      </div>
+  <div class="decor decor-a"></div>
+  <div class="decor decor-b"></div>
+  <div class="decor decor-c"></div>
 
-      <div class="photo photo-c" data-slot="2" data-pixel="11">
-        <div class="photo-image"></div>
-        <canvas class="pixel-canvas"></canvas>
-      </div>
-
-      <div class="photo photo-d" data-slot="3" data-pixel="18">
-        <div class="photo-image"></div>
-        <canvas class="pixel-canvas"></canvas>
-      </div>
-
-      <div class="photo photo-e" data-slot="4" data-pixel="9">
-        <div class="photo-image"></div>
-        <canvas class="pixel-canvas"></canvas>
-      </div>
-
-      <div class="photo photo-f" data-slot="5" data-pixel="7">
-        <div class="photo-image"></div>
-        <canvas class="pixel-canvas"></canvas>
-      </div>
-
+  <header class="header">
+    <div>
+      <a href="#" class="brand" id="brand-home">Joaqo</a>
+      <span class="brand-sub">VIDEO EDITOR</span>
     </div>
 
-    <div class="fragment-stage" id="fragment-stage"></div>
+    <div class="socials">
+      <a href="https://www.instagram.com/oqaoj/"
+         target="_blank" rel="noopener noreferrer"
+         aria-label="Instagram">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7zm5 3a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6zm5.5-3.5a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3z"/>
+        </svg>
+      </a>
 
-    <div class="block block-one"></div>
-    <div class="block block-two"></div>
-    <div class="block block-three"></div>
-    <div class="block block-four"></div>
-    <div class="block block-five"></div>
-    <div class="block block-six"></div>
-
-    <header class="header">
-      <div>
-        <a class="brand-name" href="#" id="home-logo">Joaqo</a>
-        <span class="brand-role">VIDEO EDITOR</span>
-      </div>
-
-      <div class="socials">
-        <a href="https://www.instagram.com/oqaoj/"
-           target="_blank"
-           rel="noopener noreferrer"
-           aria-label="Instagram">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7zm5 3a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6zm5.5-3.5a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3z"/>
-          </svg>
-        </a>
-
-        <a href="https://x.com/oqaoj6"
-           target="_blank"
-           rel="noopener noreferrer"
-           aria-label="X">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M18.9 2H22l-6.8 7.8L23.2 22h-6.3L12 14.6 5.5 22H2.3l7.3-8.5L1.8 2h6.5l4.5 6.8L18.9 2zm-1.1 18h1.7L7.4 3.9H5.6L17.8 20z"/>
-          </svg>
-        </a>
-      </div>
-    </header>
-
-    <div class="top-right">
-      EDIT <span>/</span> COLOR <span>/</span> SOUND
+      <a href="https://x.com/oqaoj6"
+         target="_blank" rel="noopener noreferrer"
+         aria-label="X">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M18.9 2H22l-6.8 7.8L23.2 22h-6.3L12 14.6 5.5 22H2.3l7.3-8.5L1.8 2h6.5l4.5 6.8L18.9 2zm-1.1 18h1.7L7.4 3.9H5.6L17.8 20z"/>
+        </svg>
+      </a>
     </div>
+  </header>
 
-    <nav class="navigation" aria-label="Main navigation">
-      <button class="nav-item active" data-page="home">
-        <span class="nav-number">01</span>
-        <span class="nav-label">HOME</span>
-        <span class="nav-arrow">→</span>
-      </button>
-      <button class="nav-item" data-page="work">
-        <span class="nav-number">02</span>
-        <span class="nav-label">WORK</span>
-        <span class="nav-arrow">→</span>
-      </button>
-      <button class="nav-item" data-page="about">
-        <span class="nav-number">03</span>
-        <span class="nav-label">ABOUT</span>
-        <span class="nav-arrow">→</span>
-      </button>
-      <button class="nav-item" data-page="contact">
-        <span class="nav-number">04</span>
-        <span class="nav-label">CONTACT</span>
-        <span class="nav-arrow">→</span>
-      </button>
-    </nav>
+  <div class="top-label">EDIT / COLOR / SOUND</div>
 
-    <h1 class="hero-name" id="hero-name">
-      <span class="name-text" id="name-text" data-text="Joaqo">Joaqo</span>
-    </h1>
+  <nav class="nav" aria-label="Main navigation">
+    <button class="active" data-page="home">
+      <span class="nav-index">01</span>
+      <span class="nav-text">HOME</span>
+      <span class="nav-arrow">→</span>
+    </button>
+    <button data-page="work">
+      <span class="nav-index">02</span>
+      <span class="nav-text">WORK</span>
+      <span class="nav-arrow">→</span>
+    </button>
+    <button data-page="about">
+      <span class="nav-index">03</span>
+      <span class="nav-text">ABOUT</span>
+      <span class="nav-arrow">→</span>
+    </button>
+    <button data-page="contact">
+      <span class="nav-index">04</span>
+      <span class="nav-text">CONTACT</span>
+      <span class="nav-arrow">→</span>
+    </button>
+  </nav>
 
-    <div class="description">
-      VIDEO EDITING<br>
-      FOR FILM, MUSIC<br>
-      AND DIGITAL MEDIA.
-    </div>
+  <h1 class="hero" id="hero" data-text="Joaqo">Joaqo</h1>
 
-    <div class="footer">
-      (C) 2026 — JOACO MANSILLA
-      <span class="footer-line"></span>
-    </div>
-
+  <div class="description">
+    VIDEO EDITING<br>
+    FOR FILM, MUSIC<br>
+    AND DIGITAL MEDIA.
   </div>
-</div>
+
+  <div class="footer">(C) 2026 — JOACO MANSILLA</div>
+
+</main>
 
 <div class="grid"></div>
-<div class="noise"></div>
+<div class="grain"></div>
 
 <section class="page" id="page-work" aria-hidden="true">
-  <div class="page-header">
+  <div class="page-top">
     <strong>JOAQO / SELECTED WORK</strong>
-    <button class="close-page">← BACK</button>
+    <button class="back">← BACK</button>
   </div>
   <h2>WORK</h2>
   <div class="work-grid">
@@ -708,9 +654,9 @@ a { color: inherit; }
 </section>
 
 <section class="page" id="page-about" aria-hidden="true">
-  <div class="page-header">
+  <div class="page-top">
     <strong>JOAQO / ABOUT</strong>
-    <button class="close-page">← BACK</button>
+    <button class="back">← BACK</button>
   </div>
   <h2>ABOUT</h2>
   <p>
@@ -722,270 +668,343 @@ a { color: inherit; }
 </section>
 
 <section class="page" id="page-contact" aria-hidden="true">
-  <div class="page-header">
+  <div class="page-top">
     <strong>JOAQO / CONTACT</strong>
-    <button class="close-page">← BACK</button>
+    <button class="back">← BACK</button>
   </div>
   <h2>CONTACT</h2>
   <p>For projects and collaborations, reach out through Instagram.</p>
   <a class="contact-link"
      href="https://www.instagram.com/oqaoj/"
      target="_blank"
-     rel="noopener noreferrer">
-    INSTAGRAM ↗
-  </a>
+     rel="noopener noreferrer">INSTAGRAM ↗</a>
 </section>
 
 <script>
 (() => {
   "use strict";
 
-  const site = document.getElementById("site");
-  const scene = document.getElementById("scene");
-  const intro = document.getElementById("intro");
-  const percent = document.getElementById("load-percent");
-  const hero = document.getElementById("hero-name");
-  const nameText = document.getElementById("name-text");
-  const stage = document.getElementById("fragment-stage");
-  const photos = [...document.querySelectorAll(".photo")];
+  /* ========================================
+     CONFIGURATION
+  ======================================== */
 
-  const reducedMotion = window.matchMedia(
+  const CONFIG = {
+    imageCount: 5,
+
+    // Pause between complete collage transformations.
+    pauseMin: 3600,
+    pauseMax: 5600,
+
+    // Different images finish at different times.
+    animationMin: 950,
+    animationMax: 2200,
+
+    // Fragment count per image, approximately.
+    minFragments: 16,
+    maxFragments: 34,
+
+    pixelDuration: 1250
+  };
+
+  const IMAGE_URLS = [
+    "https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?auto=format&fit=crop&w=1600&q=85",
+    "https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=1600&q=85",
+    "https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=1600&q=85",
+    "https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=1600&q=85",
+    "https://images.unsplash.com/photo-1518391846015-55a9cc003b25?auto=format&fit=crop&w=1600&q=85",
+    "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1600&q=85",
+    "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=1600&q=85",
+    "https://images.unsplash.com/photo-1494522358652-f30e61b6f8a6?auto=format&fit=crop&w=1600&q=85"
+  ];
+
+  const scene = document.getElementById("scene");
+  const collage = document.getElementById("collage");
+  const canvas = document.getElementById("fragments");
+  const ctx = canvas.getContext("2d");
+  const intro = document.getElementById("intro");
+  const hero = document.getElementById("hero");
+
+  const reducedMotion = matchMedia(
     "(prefers-reduced-motion: reduce)"
   ).matches;
 
-  const random = (min, max) =>
-    min + Math.random() * (max - min);
+  const rand = (a, b) => a + Math.random() * (b - a);
+  const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+  const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const lerp = (a, b, t) => a + (b - a) * t;
 
-  const wait = ms =>
-    new Promise(resolve => setTimeout(resolve, ms));
+  const ease = t =>
+    t < .5
+      ? 4 * t * t * t
+      : 1 - Math.pow(-2 * t + 2, 3) / 2;
 
-  /*
-    Image bank. Every slot can change to a different
-    image without creating duplicate photo elements.
-  */
-
-  const IMAGE_URLS = [
-    "https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?auto=format&fit=crop&w=1800&q=85",
-    "https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=1400&q=85",
-    "https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=1100&q=85",
-    "https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=1300&q=85",
-    "https://images.unsplash.com/photo-1518391846015-55a9cc003b25?auto=format&fit=crop&w=1100&q=85",
-    "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=85",
-    "https://images.unsplash.com/photo-1494522358652-f30e61b6f8a6?auto=format&fit=crop&w=1400&q=85",
-    "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=1400&q=85"
-  ];
-
-  const imageCache = new Map();
+  const images = [];
 
   function loadImage(url) {
-    if (imageCache.has(url)) return imageCache.get(url);
-
-    const promise = new Promise(resolve => {
-      const image = new Image();
-      image.crossOrigin = "anonymous";
-      image.onload = () => resolve(image);
-      image.onerror = () => resolve(null);
-      image.src = url;
+    return new Promise(resolve => {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => resolve(img);
+      img.onerror = () => resolve(null);
+      img.src = url;
     });
-
-    imageCache.set(url, promise);
-    return promise;
-  }
-
-  const slots = photos.map((photo, index) => ({
-    element: photo,
-    imageElement: photo.querySelector(".photo-image"),
-    canvas: photo.querySelector(".pixel-canvas"),
-    imageIndex: index,
-    pixelAnimation: null,
-    busy: false,
-    lastPointerBurst: 0
-  }));
-
-  function setSlotImage(slot, imageIndex) {
-    slot.imageIndex = imageIndex;
-
-    const url = IMAGE_URLS[imageIndex];
-
-    slot.imageElement.style.backgroundImage =
-      `url("${url}")`;
-
-    slot.imageElement.style.backgroundColor = "#151522";
-  }
-
-  slots.forEach(slot => {
-    setSlotImage(slot, slot.imageIndex);
-  });
-
-  IMAGE_URLS.forEach(loadImage);
-
-  /* LOADING */
-
-  async function start() {
-    if (!reducedMotion) {
-      const startTime = performance.now();
-      const duration = 1600;
-
-      await new Promise(resolve => {
-        function frame(now) {
-          const progress = Math.min(
-            1,
-            (now - startTime) / duration
-          );
-
-          percent.textContent =
-            String(Math.floor(progress * 100)).padStart(2, "0") + "%";
-
-          if (progress < 1) {
-            requestAnimationFrame(frame);
-          } else {
-            resolve();
-          }
-        }
-        requestAnimationFrame(frame);
-      });
-    }
-
-    intro.classList.add("hide");
-    site.classList.add("ready");
-
-    if (!reducedMotion) {
-      scheduleGlitch();
-      scheduleTransitions();
-    }
-
-    setupPixelation();
-  }
-
-  /* CENTER NAME GLITCH */
-
-  let glitchBusy = false;
-
-  async function glitchName() {
-    if (glitchBusy) return;
-
-    glitchBusy = true;
-    hero.classList.add("glitch");
-
-    nameText.textContent = "OqaoJ";
-    nameText.dataset.text = "OqaoJ";
-
-    await wait(120);
-
-    nameText.textContent = "Joaqo";
-    nameText.dataset.text = "Joaqo";
-
-    await wait(80);
-
-    nameText.textContent = "OqaoJ";
-    nameText.dataset.text = "OqaoJ";
-
-    await wait(170);
-
-    nameText.textContent = "Joaqo";
-    nameText.dataset.text = "Joaqo";
-
-    await wait(150);
-
-    hero.classList.remove("glitch");
-    glitchBusy = false;
-  }
-
-  function scheduleGlitch() {
-    setTimeout(async () => {
-      if (!document.hidden) await glitchName();
-      scheduleGlitch();
-    }, random(5500, 11000));
   }
 
   /*
-    TRANSITION ENGINE
+    Each layout has five rectangles:
+    [left%, top%, width%, height%]
 
-    Source slot -> Destination slot.
+    Their aspect ratios and positions are intentionally
+    different from one layout to the next.
 
-    The source image is cut into rectangular pieces.
-    Each piece has an initial source coordinate and a
-    final destination coordinate.
-
-    Pieces move on X/Y axes and change scale.
-    At the destination they display the NEW image.
-
-    The destination's previous image is hidden.
-    After the animation, the destination shows
-    its newly assigned photograph.
-
-    The source receives the destination's previous
-    photograph, so no slot is left empty.
+    Rectangles do not overlap one another.
+    Text may overlap the collage intentionally.
   */
 
-  let transitionBusy = false;
+  const LAYOUTS = [
+    [
+      [45, 0, 55, 62],
+      [0, 63, 41, 25],
+      [41, 63, 20, 37],
+      [61, 63, 39, 23],
+      [61, 86, 39, 14]
+    ],
+    [
+      [55, 0, 45, 46],
+      [0, 60, 30, 40],
+      [30, 60, 35, 25],
+      [65, 46, 35, 54],
+      [30, 85, 35, 15]
+    ],
+    [
+      [41, 0, 59, 35],
+      [0, 58, 52, 22],
+      [52, 35, 48, 34],
+      [52, 69, 48, 31],
+      [0, 80, 52, 20]
+    ],
+    [
+      [58, 0, 42, 56],
+      [0, 55, 27, 45],
+      [27, 66, 31, 34],
+      [58, 56, 42, 20],
+      [58, 76, 42, 24]
+    ],
+    [
+      [48, 0, 52, 47],
+      [0, 64, 49, 36],
+      [49, 47, 24, 53],
+      [73, 47, 27, 29],
+      [73, 76, 27, 24]
+    ]
+  ];
 
-  function getSceneRect(element) {
-    const base = scene.getBoundingClientRect();
-    const rect = element.getBoundingClientRect();
+  /*
+    On narrow screens, use a separate set of
+    arrangements that preserve reasonable sizes.
+  */
 
+  const MOBILE_LAYOUTS = [
+    [
+      [26, 0, 74, 48],
+      [0, 64, 52, 23],
+      [52, 58, 23, 42],
+      [75, 58, 25, 29],
+      [0, 87, 52, 13]
+    ],
+    [
+      [35, 0, 65, 38],
+      [0, 60, 43, 40],
+      [43, 60, 31, 22],
+      [74, 38, 26, 62],
+      [43, 82, 31, 18]
+    ],
+    [
+      [28, 0, 72, 52],
+      [0, 66, 61, 19],
+      [61, 52, 39, 25],
+      [61, 77, 39, 23],
+      [0, 85, 61, 15]
+    ]
+  ];
+
+  function currentLayouts() {
+    return innerWidth <= 650
+      ? MOBILE_LAYOUTS
+      : LAYOUTS;
+  }
+
+  function rectFromPercent(values) {
     return {
-      x: rect.left - base.left,
-      y: rect.top - base.top,
-      width: rect.width,
-      height: rect.height
+      x: scene.clientWidth * values[0] / 100,
+      y: scene.clientHeight * values[1] / 100,
+      w: scene.clientWidth * values[2] / 100,
+      h: scene.clientHeight * values[3] / 100
     };
   }
 
-  function createTiles(width, height) {
-    const tiles = [];
+  function getRects(index) {
+    const layouts = currentLayouts();
+    return layouts[index % layouts.length].map(rectFromPercent);
+  }
+
+  /*
+    Image objects persist throughout the page.
+    We never create a duplicate photograph.
+  */
+
+  const slots = [];
+
+  function makeSlots() {
+    const initial = getRects(0);
+
+    for (let i = 0; i < CONFIG.imageCount; i++) {
+      const element = document.createElement("div");
+      element.className = "photo";
+
+      const picture = document.createElement("div");
+      picture.className = "photo-picture";
+
+      const pixel = document.createElement("canvas");
+      pixel.className = "photo-pixel";
+
+      element.append(picture, pixel);
+      collage.appendChild(element);
+
+      const slot = {
+        element,
+        picture,
+        pixel,
+        rect: initial[i],
+        imageIndex: i,
+        zoom: false,
+        pixelLast: 0,
+        pixelFrame: null
+      };
+
+      slots.push(slot);
+      positionSlot(slot, initial[i]);
+      setSlotImage(slot, i);
+      setupHover(slot);
+    }
+  }
+
+  function positionSlot(slot, rect) {
+    slot.rect = { ...rect };
+
+    Object.assign(slot.element.style, {
+      left: rect.x + "px",
+      top: rect.y + "px",
+      width: rect.w + "px",
+      height: rect.h + "px"
+    });
+  }
+
+  function setSlotImage(slot, index) {
+    slot.imageIndex = index;
+
+    slot.picture.style.backgroundImage =
+      `url("${IMAGE_URLS[index]}")`;
+  }
+
+  function finishZoom(slot) {
+    slot.picture.classList.remove("zoom");
+    slot.picture.style.animation = "none";
+    void slot.picture.offsetWidth;
+    slot.picture.style.animation = "";
 
     /*
-      Variable rectangle dimensions. A grid is used
-      for complete coverage, but boundaries vary.
+      Some images move, some remain completely still.
+      Zoom begins only AFTER full reconstruction.
     */
 
-    const cols = Math.max(
-      5,
-      Math.min(12, Math.round(width / 65))
+    if (!reducedMotion && Math.random() < .52) {
+      slot.picture.classList.add("zoom");
+    }
+  }
+
+  /*
+    Draw an image into a rectangle using CSS-cover
+    cropping, including source tiles.
+  */
+
+  function coverSource(img, boxW, boxH, tile) {
+    const scale = Math.max(
+      boxW / img.width,
+      boxH / img.height
     );
 
-    const rows = Math.max(
-      4,
-      Math.min(9, Math.round(height / 65))
-    );
+    const visibleW = boxW / scale;
+    const visibleH = boxH / scale;
+
+    const offsetX = (img.width - visibleW) / 2;
+    const offsetY = (img.height - visibleH) / 2;
+
+    return {
+      sx: offsetX + tile.x / scale,
+      sy: offsetY + tile.y / scale,
+      sw: tile.w / scale,
+      sh: tile.h / scale
+    };
+  }
+
+  /*
+    Generate variable-size rectangular fragments.
+    Different row and column boundaries produce
+    both small and large tiles.
+  */
+
+  function makeTiles(rect) {
+    const count = Math.floor(rand(
+      CONFIG.minFragments,
+      CONFIG.maxFragments + 1
+    ));
+
+    const cols = Math.max(3, Math.round(Math.sqrt(
+      count * rect.w / Math.max(1, rect.h)
+    )));
+
+    const rows = Math.max(3, Math.round(count / cols));
 
     const xEdges = [0];
     const yEdges = [0];
 
-    for (let c = 1; c < cols; c++) {
-      const ideal = (c / cols) * width;
-      xEdges.push(
-        Math.max(
-          xEdges[c - 1] + 8,
-          Math.min(width - (cols - c) * 8,
-            ideal + random(-width / cols * .25, width / cols * .25)
-          )
-        )
-      );
-    }
-    xEdges.push(width);
+    const weightsX = Array.from(
+      { length: cols },
+      () => rand(.5, 1.7)
+    );
 
-    for (let r = 1; r < rows; r++) {
-      const ideal = (r / rows) * height;
-      yEdges.push(
-        Math.max(
-          yEdges[r - 1] + 8,
-          Math.min(height - (rows - r) * 8,
-            ideal + random(-height / rows * .25, height / rows * .25)
-          )
-        )
-      );
-    }
-    yEdges.push(height);
+    const weightsY = Array.from(
+      { length: rows },
+      () => rand(.5, 1.7)
+    );
 
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
+    const sumX = weightsX.reduce((a, b) => a + b, 0);
+    const sumY = weightsY.reduce((a, b) => a + b, 0);
+
+    let x = 0;
+    let y = 0;
+
+    for (const weight of weightsX) {
+      x += rect.w * weight / sumX;
+      xEdges.push(x);
+    }
+
+    for (const weight of weightsY) {
+      y += rect.h * weight / sumY;
+      yEdges.push(y);
+    }
+
+    const tiles = [];
+
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < cols; col++) {
         tiles.push({
-          x: xEdges[c],
-          y: yEdges[r],
-          w: xEdges[c + 1] - xEdges[c],
-          h: yEdges[r + 1] - yEdges[r]
+          x: xEdges[col],
+          y: yEdges[row],
+          w: xEdges[col + 1] - xEdges[col],
+          h: yEdges[row + 1] - yEdges[row]
         });
       }
     }
@@ -993,391 +1012,583 @@ a { color: inherit; }
     return tiles;
   }
 
-  function tileImageStyle(tile, imageUrl, totalW, totalH) {
+  /*
+    Every fragment is assigned an axis-only route.
+
+    Route A: horizontal -> vertical
+    Route B: vertical -> horizontal
+    Route C: horizontal only
+    Route D: vertical only
+
+    For C/D, the other axis is completed by an
+    additional axis-only segment if required.
+    No segment ever changes X and Y simultaneously.
+  */
+
+  function createPath(startX, startY, endX, endY) {
+    const dx = endX - startX;
+    const dy = endY - startY;
+
+    if (Math.abs(dx) < 1) {
+      return [
+        { x: startX, y: startY },
+        { x: endX, y: endY }
+      ];
+    }
+
+    if (Math.abs(dy) < 1) {
+      return [
+        { x: startX, y: startY },
+        { x: endX, y: endY }
+      ];
+    }
+
+    if (Math.random() < .5) {
+      return [
+        { x: startX, y: startY },
+        { x: endX, y: startY },
+        { x: endX, y: endY }
+      ];
+    }
+
+    return [
+      { x: startX, y: startY },
+      { x: startX, y: endY },
+      { x: endX, y: endY }
+    ];
+  }
+
+  function pointOnPath(path, t) {
+    if (path.length === 2) {
+      return {
+        x: lerp(path[0].x, path[1].x, t),
+        y: lerp(path[0].y, path[1].y, t)
+      };
+    }
+
+    /*
+      Both legs are timed separately.
+      This is essential: linear interpolation between
+      start and end would create diagonal movement.
+    */
+
+    const split = .5;
+
+    if (t < split) {
+      const p = ease(t / split);
+
+      return {
+        x: lerp(path[0].x, path[1].x, p),
+        y: lerp(path[0].y, path[1].y, p)
+      };
+    }
+
+    const p = ease((t - split) / (1 - split));
+
     return {
-      backgroundImage: `url("${imageUrl}")`,
-      backgroundSize: `${totalW}px ${totalH}px`,
-      backgroundPosition: `${-tile.x}px ${-tile.y}px`
+      x: lerp(path[1].x, path[2].x, p),
+      y: lerp(path[1].y, path[2].y, p)
     };
   }
 
-  async function transitionBetween(source, destination) {
-    if (transitionBusy) return;
-    if (source === destination) return;
-    if (source.busy || destination.busy) return;
+  /*
+    CANVAS
+  */
 
-    const sourceRect = getSceneRect(source.element);
-    const destinationRect = getSceneRect(destination.element);
+  let pixelRatio = 1;
 
-    if (
-      sourceRect.width < 20 ||
-      destinationRect.width < 20
-    ) return;
+  function resizeCanvas() {
+    pixelRatio = Math.min(devicePixelRatio || 1, 1.5);
 
-    transitionBusy = true;
-    source.busy = true;
-    destination.busy = true;
-
-    const oldSourceIndex = source.imageIndex;
-    const oldDestinationIndex = destination.imageIndex;
-
-    const oldSourceUrl = IMAGE_URLS[oldSourceIndex];
-    const newDestinationUrl = IMAGE_URLS[oldDestinationIndex];
-
-    /*
-      We exchange the two photographs. The fragments
-      visibly travel from source to destination,
-      then reassemble as the new image.
-    */
-
-    const tiles = createTiles(
-      sourceRect.width,
-      sourceRect.height
+    canvas.width = Math.round(
+      scene.clientWidth * pixelRatio
     );
 
-    const animations = [];
+    canvas.height = Math.round(
+      scene.clientHeight * pixelRatio
+    );
 
-    source.imageElement.style.visibility = "hidden";
-    destination.imageElement.style.visibility = "hidden";
-
-    for (const tile of tiles) {
-      const piece = document.createElement("div");
-      piece.className = "fragment-piece";
-
-      const startX = sourceRect.x + tile.x;
-      const startY = sourceRect.y + tile.y;
-
-      const normalizedX = tile.x / sourceRect.width;
-      const normalizedY = tile.y / sourceRect.height;
-      const normalizedW = tile.w / sourceRect.width;
-      const normalizedH = tile.h / sourceRect.height;
-
-      const endX =
-        destinationRect.x + normalizedX * destinationRect.width;
-
-      const endY =
-        destinationRect.y + normalizedY * destinationRect.height;
-
-      const endW = normalizedW * destinationRect.width;
-      const endH = normalizedH * destinationRect.height;
-
-      piece.style.left = startX + "px";
-      piece.style.top = startY + "px";
-      piece.style.width = tile.w + "px";
-      piece.style.height = tile.h + "px";
-
-      Object.assign(
-        piece.style,
-        tileImageStyle(
-          tile,
-          oldSourceUrl,
-          sourceRect.width,
-          sourceRect.height
-        )
-      );
-
-      stage.appendChild(piece);
-
-      const dx = endX - startX;
-      const dy = endY - startY;
-
-      const sx = endW / tile.w;
-      const sy = endH / tile.h;
-
-      const detourX = random(-45, 45);
-      const detourY = random(-45, 45);
-
-      const delay = random(0, 330);
-      const duration = random(850, 1350);
-
-      const animation = piece.animate([
-        {
-          transform: "translate(0px,0px) scale(1,1)",
-          opacity: 1,
-          offset: 0
-        },
-        {
-          transform:
-            `translate(${dx * .55 + detourX}px,${dy * .55 + detourY}px) scale(${random(.55,.95)},${random(.6,1.25)})`,
-          opacity: .8,
-          offset: .48
-        },
-        {
-          transform:
-            `translate(${dx}px,${dy}px) scale(${sx},${sy})`,
-          opacity: 1,
-          offset: 1
-        }
-      ], {
-        duration,
-        delay,
-        easing: "cubic-bezier(.32,.04,.15,1)",
-        fill: "forwards"
-      });
-
-      /*
-        At the midpoint, the fragment switches to
-        the destination photograph's corresponding
-        region. This creates the morph/reconstruction.
-      */
-
-      const switchTimer = setTimeout(() => {
-        const finalTile = {
-          x: normalizedX * destinationRect.width,
-          y: normalizedY * destinationRect.height
-        };
-
-        piece.style.backgroundImage =
-          `url("${newDestinationUrl}")`;
-
-        piece.style.backgroundSize =
-          `${destinationRect.width / sx}px ${destinationRect.height / sy}px`;
-
-        piece.style.backgroundPosition =
-          `${-finalTile.x / sx}px ${-finalTile.y / sy}px`;
-      }, delay + duration * .56);
-
-      animations.push(
-        animation.finished
-          .catch(() => {})
-          .then(() => clearTimeout(switchTimer))
-      );
-    }
-
-    await Promise.all(animations);
-
-    /*
-      Source becomes the old destination image;
-      destination becomes the old source image.
-      The fragment animation itself is the visual
-      bridge between the two.
-    */
-
-    setSlotImage(source, oldDestinationIndex);
-    setSlotImage(destination, oldSourceIndex);
-
-    source.imageElement.style.visibility = "visible";
-    destination.imageElement.style.visibility = "visible";
-
-    stage.replaceChildren();
-
-    source.busy = false;
-    destination.busy = false;
-    transitionBusy = false;
+    ctx.setTransform(
+      pixelRatio, 0, 0, pixelRatio, 0, 0
+    );
   }
 
-  function scheduleTransitions() {
-    setTimeout(async () => {
-      if (!document.hidden && !transitionBusy) {
-        const visible = slots.filter(slot => {
-          const rect = slot.element.getBoundingClientRect();
-          return rect.width > 60 && rect.height > 60;
-        });
-
-        if (visible.length >= 2) {
-          const source = visible[
-            Math.floor(Math.random() * visible.length)
-          ];
-
-          const others = visible.filter(s => s !== source);
-
-          const destination = others[
-            Math.floor(Math.random() * others.length)
-          ];
-
-          await transitionBetween(source, destination);
-        }
-      }
-
-      scheduleTransitions();
-    }, random(5500, 8500));
+  function clearCanvas() {
+    ctx.clearRect(
+      0, 0,
+      scene.clientWidth,
+      scene.clientHeight
+    );
   }
 
   /*
-    TEMPORARY PIXELATION
+    A permutation ensures every image leaves its
+    original slot and arrives in another.
 
-    Pixelation peaks immediately and dissolves
-    over approximately 1.2 seconds.
-
-    It does NOT stay pixelated while hovered.
-
-    Pointer movement can produce new bursts, but
-    they're throttled to avoid constant flashing.
+    No image remains duplicated in its old position.
   */
 
-  function setupPixelation() {
-    slots.forEach(slot => {
-      const canvas = slot.canvas;
-      const ctx = canvas.getContext("2d");
+  function shuffledDerangement(n) {
+    const indices = Array.from(
+      { length: n },
+      (_, i) => i
+    );
 
-      if (!ctx) return;
+    for (let attempts = 0; attempts < 100; attempts++) {
+      const result = [...indices];
 
-      let burstStart = 0;
-      let burstX = .5;
-      let burstY = .5;
-      let active = false;
-      let raf = 0;
-
-      const offscreen = document.createElement("canvas");
-      const offCtx = offscreen.getContext("2d");
-
-      if (!offCtx) return;
-
-      function drawCover(image, targetCtx, w, h) {
-        const scale = Math.max(
-          w / image.width,
-          h / image.height
-        );
-
-        const sw = w / scale;
-        const sh = h / scale;
-
-        const sx = (image.width - sw) / 2;
-        const sy = (image.height - sh) / 2;
-
-        targetCtx.drawImage(
-          image,
-          sx, sy, sw, sh,
-          0, 0, w, h
-        );
+      for (let i = n - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [result[i], result[j]] = [result[j], result[i]];
       }
 
-      async function burst(event) {
-        if (reducedMotion || slot.busy) return;
+      if (result.every((value, i) => value !== i)) {
+        return result;
+      }
+    }
 
-        const now = performance.now();
+    return indices.map(i => (i + 1) % n);
+  }
 
-        if (now - slot.lastPointerBurst < 950) return;
+  let layoutIndex = 0;
+  let animating = false;
 
-        slot.lastPointerBurst = now;
+  async function transformCollage() {
+    if (animating || reducedMotion || document.hidden) return;
 
-        const rect = slot.element.getBoundingClientRect();
+    animating = true;
 
-        burstX = (event.clientX - rect.left) / rect.width;
-        burstY = (event.clientY - rect.top) / rect.height;
+    const layouts = currentLayouts();
+    const nextIndex = (layoutIndex + 1) % layouts.length;
 
-        const image = await loadImage(
-          IMAGE_URLS[slot.imageIndex]
-        );
+    const oldRects = slots.map(slot => ({ ...slot.rect }));
+    const newRects = getRects(nextIndex);
 
-        if (!image) return;
+    const oldImages = slots.map(slot => slot.imageIndex);
 
-        if (slot.pixelAnimation) {
-          cancelAnimationFrame(slot.pixelAnimation);
-        }
+    /*
+      Destination mapping:
+      every old image goes to a different slot.
+    */
 
-        canvas.width = Math.round(rect.width);
-        canvas.height = Math.round(rect.height);
+    const destinations = shuffledDerangement(slots.length);
 
-        burstStart = performance.now();
-        active = true;
+    const pieces = [];
+    const sourceFinishTimes = [];
 
-        const duration = 1300;
+    for (let sourceIndex = 0; sourceIndex < slots.length; sourceIndex++) {
+      const sourceRect = oldRects[sourceIndex];
 
-        function frame(now) {
-          if (!active) return;
+      const destinationIndex = destinations[sourceIndex];
+      const destinationRect = newRects[destinationIndex];
 
-          const progress = Math.min(
-            1,
-            (now - burstStart) / duration
+      const imageIndex = oldImages[sourceIndex];
+      const image = images[imageIndex];
+
+      const duration = rand(
+        CONFIG.animationMin,
+        CONFIG.animationMax
+      );
+
+      const delay = rand(0, 280);
+
+      sourceFinishTimes.push(delay + duration);
+
+      const tiles = makeTiles(sourceRect);
+
+      for (const tile of tiles) {
+        const nx = tile.x / sourceRect.w;
+        const ny = tile.y / sourceRect.h;
+        const nw = tile.w / sourceRect.w;
+        const nh = tile.h / sourceRect.h;
+
+        const startX = sourceRect.x + tile.x;
+        const startY = sourceRect.y + tile.y;
+
+        const endX =
+          destinationRect.x + nx * destinationRect.w;
+
+        const endY =
+          destinationRect.y + ny * destinationRect.h;
+
+        const endW = nw * destinationRect.w;
+        const endH = nh * destinationRect.h;
+
+        pieces.push({
+          image,
+          sourceRect,
+          sourceTile: tile,
+          destinationIndex,
+          path: createPath(
+            startX, startY,
+            endX, endY
+          ),
+          startW: tile.w,
+          startH: tile.h,
+          endW,
+          endH,
+          delay: delay + rand(0, 170),
+          duration: duration + rand(-150, 150),
+          done: false
+        });
+      }
+    }
+
+    /*
+      Hide ALL old photographs immediately.
+      The canvas now owns the moving pieces.
+      Vacated regions reveal the paper background.
+    */
+
+    slots.forEach(slot => {
+      slot.element.style.visibility = "hidden";
+      slot.picture.classList.remove("zoom");
+    });
+
+    const finishTimes = Array(slots.length).fill(0);
+
+    pieces.forEach(piece => {
+      finishTimes[piece.destinationIndex] = Math.max(
+        finishTimes[piece.destinationIndex],
+        piece.delay + piece.duration
+      );
+    });
+
+    const finalImages = Array(slots.length);
+
+    for (let source = 0; source < slots.length; source++) {
+      finalImages[destinations[source]] = oldImages[source];
+    }
+
+    let completed = Array(slots.length).fill(false);
+
+    const startTime = performance.now();
+
+    await new Promise(resolve => {
+      function frame(now) {
+        const elapsed = now - startTime;
+
+        clearCanvas();
+
+        for (const piece of pieces) {
+          if (completed[piece.destinationIndex]) continue;
+
+          const t = clamp(
+            (elapsed - piece.delay) / piece.duration,
+            0, 1
           );
 
-          const ease = 1 - Math.pow(1 - progress, 3);
+          if (elapsed < piece.delay) {
+            /*
+              Before departure, the tile is still
+              present at its original position.
+            */
+          }
+
+          if (!piece.image) continue;
+
+          const pos = pointOnPath(
+            piece.path,
+            ease(t)
+          );
 
           /*
-            Pixel blocks shrink progressively:
-            coarse -> medium -> fine -> original.
+            Resize fragments as they approach the
+            new image shape. The position still moves
+            exclusively along axis-aligned segments.
           */
 
-          const basePixel = Number(
-            slot.element.dataset.pixel
-          ) || 14;
+          const sizeT = ease(t);
 
-          const pixelSize = Math.max(
-            1,
-            Math.round(basePixel * (1 - ease))
+          const w = lerp(
+            piece.startW,
+            piece.endW,
+            sizeT
           );
 
-          const w = canvas.width;
-          const h = canvas.height;
-
-          const smallW = Math.max(
-            1,
-            Math.ceil(w / pixelSize)
+          const h = lerp(
+            piece.startH,
+            piece.endH,
+            sizeT
           );
 
-          const smallH = Math.max(
-            1,
-            Math.ceil(h / pixelSize)
+          const source = coverSource(
+            piece.image,
+            piece.sourceRect.w,
+            piece.sourceRect.h,
+            piece.sourceTile
           );
 
-          offscreen.width = smallW;
-          offscreen.height = smallH;
+          ctx.save();
 
-          offCtx.clearRect(0, 0, smallW, smallH);
-          drawCover(image, offCtx, smallW, smallH);
+          /*
+            Keep fragments rectangular and sharp.
+          */
 
-          ctx.clearRect(0, 0, w, h);
-          ctx.imageSmoothingEnabled = false;
+          ctx.imageSmoothingEnabled = true;
 
           ctx.drawImage(
-            offscreen,
-            0, 0, smallW, smallH,
-            0, 0, w, h
+            piece.image,
+            source.sx,
+            source.sy,
+            source.sw,
+            source.sh,
+            pos.x,
+            pos.y,
+            w,
+            h
           );
 
-          /*
-            Soft radial emphasis around cursor.
-            Most of the image stays visible.
-          */
+          ctx.restore();
+        }
 
-          const cx = burstX * w;
-          const cy = burstY * h;
+        /*
+          Each destination becomes a complete DOM
+          image as soon as its own pieces finish.
+          Others continue traveling independently.
+        */
 
-          const radius = Math.max(w, h) * .8;
+        for (let i = 0; i < slots.length; i++) {
+          if (completed[i]) continue;
 
-          const gradient = ctx.createRadialGradient(
-            cx, cy, radius * .1,
-            cx, cy, radius
-          );
+          if (elapsed >= finishTimes[i]) {
+            completed[i] = true;
 
-          gradient.addColorStop(0, "rgba(0,0,0,1)");
-          gradient.addColorStop(1, "rgba(0,0,0,0)");
+            positionSlot(slots[i], newRects[i]);
+            setSlotImage(slots[i], finalImages[i]);
 
-          ctx.globalCompositeOperation = "destination-in";
-          ctx.fillStyle = gradient;
-          ctx.fillRect(0, 0, w, h);
-          ctx.globalCompositeOperation = "source-over";
+            slots[i].element.style.visibility = "visible";
 
-          canvas.style.opacity =
-            String(Math.max(0, 1 - progress * .65));
-
-          if (progress < 1) {
-            slot.pixelAnimation =
-              requestAnimationFrame(frame);
-          } else {
-            canvas.style.opacity = "0";
-            ctx.clearRect(0, 0, w, h);
-            active = false;
+            finishZoom(slots[i]);
           }
         }
 
-        slot.pixelAnimation = requestAnimationFrame(frame);
+        if (completed.every(Boolean)) {
+          clearCanvas();
+          resolve();
+          return;
+        }
+
+        requestAnimationFrame(frame);
       }
 
-      slot.element.addEventListener("pointerenter", burst);
-
-      slot.element.addEventListener("pointermove", event => {
-        if (event.pointerType === "mouse") burst(event);
-      });
-
-      slot.element.addEventListener("pointerleave", () => {
-        /*
-          Let the existing burst resolve naturally
-          even after the pointer leaves.
-        */
-      });
+      requestAnimationFrame(frame);
     });
+
+    layoutIndex = nextIndex;
+    animating = false;
+  }
+
+  async function collageLoop() {
+    while (true) {
+      await wait(rand(
+        CONFIG.pauseMin,
+        CONFIG.pauseMax
+      ));
+
+      if (!document.hidden) {
+        await transformCollage();
+      }
+    }
+  }
+
+  /*
+    TEMPORARY HOVER PIXELATION
+
+    It peaks, then unpixelates automatically.
+    Keeping the cursor in place does not leave
+    the image permanently pixelated.
+  */
+
+  function setupHover(slot) {
+    const pixelCanvas = slot.pixel;
+    const pixelCtx = pixelCanvas.getContext("2d");
+
+    if (!pixelCtx) return;
+
+    const small = document.createElement("canvas");
+    const smallCtx = small.getContext("2d");
+
+    if (!smallCtx) return;
+
+    function drawCover(img, context, w, h) {
+      const scale = Math.max(
+        w / img.width,
+        h / img.height
+      );
+
+      const sw = w / scale;
+      const sh = h / scale;
+
+      context.drawImage(
+        img,
+        (img.width - sw) / 2,
+        (img.height - sh) / 2,
+        sw,
+        sh,
+        0,
+        0,
+        w,
+        h
+      );
+    }
+
+    function trigger(event) {
+      if (reducedMotion || animating) return;
+
+      const now = performance.now();
+
+      if (now - slot.pixelLast < 1050) return;
+      slot.pixelLast = now;
+
+      const image = images[slot.imageIndex];
+      if (!image) return;
+
+      if (slot.pixelFrame) {
+        cancelAnimationFrame(slot.pixelFrame);
+      }
+
+      const rect = slot.element.getBoundingClientRect();
+
+      const w = Math.max(1, Math.round(rect.width));
+      const h = Math.max(1, Math.round(rect.height));
+
+      pixelCanvas.width = w;
+      pixelCanvas.height = h;
+
+      const cursorX = clamp(
+        (event.clientX - rect.left) / rect.width,
+        0, 1
+      );
+
+      const cursorY = clamp(
+        (event.clientY - rect.top) / rect.height,
+        0, 1
+      );
+
+      const pixelStrength = pick([9, 13, 18, 25, 32]);
+
+      const started = performance.now();
+
+      function frame(time) {
+        const t = clamp(
+          (time - started) / CONFIG.pixelDuration,
+          0, 1
+        );
+
+        const smooth = 1 - Math.pow(1 - t, 3);
+
+        const pixelSize = Math.max(
+          1,
+          Math.round(pixelStrength * (1 - smooth))
+        );
+
+        const sw = Math.max(
+          1,
+          Math.ceil(w / pixelSize)
+        );
+
+        const sh = Math.max(
+          1,
+          Math.ceil(h / pixelSize)
+        );
+
+        small.width = sw;
+        small.height = sh;
+
+        smallCtx.clearRect(0, 0, sw, sh);
+        drawCover(image, smallCtx, sw, sh);
+
+        pixelCtx.clearRect(0, 0, w, h);
+        pixelCtx.imageSmoothingEnabled = false;
+
+        pixelCtx.drawImage(
+          small,
+          0, 0, sw, sh,
+          0, 0, w, h
+        );
+
+        /*
+          Radial falloff keeps the strongest
+          pixelation around the pointer.
+        */
+
+        const radius = Math.max(w, h) * .85;
+
+        const gradient = pixelCtx.createRadialGradient(
+          cursorX * w,
+          cursorY * h,
+          radius * .05,
+          cursorX * w,
+          cursorY * h,
+          radius
+        );
+
+        gradient.addColorStop(0, "rgba(0,0,0,1)");
+        gradient.addColorStop(1, "rgba(0,0,0,0)");
+
+        pixelCtx.globalCompositeOperation = "destination-in";
+        pixelCtx.fillStyle = gradient;
+        pixelCtx.fillRect(0, 0, w, h);
+        pixelCtx.globalCompositeOperation = "source-over";
+
+        pixelCanvas.style.opacity =
+          String(Math.max(0, 1 - t * .7));
+
+        if (t < 1) {
+          slot.pixelFrame = requestAnimationFrame(frame);
+        } else {
+          pixelCanvas.style.opacity = "0";
+          pixelCtx.clearRect(0, 0, w, h);
+        }
+      }
+
+      slot.pixelFrame = requestAnimationFrame(frame);
+    }
+
+    slot.element.addEventListener("pointerenter", trigger);
+
+    slot.element.addEventListener("pointermove", event => {
+      if (event.pointerType === "mouse") trigger(event);
+    });
+  }
+
+  /* NAME GLITCH */
+
+  async function glitchName() {
+    hero.classList.add("glitch");
+
+    hero.textContent = "OqaoJ";
+    hero.dataset.text = "OqaoJ";
+
+    await wait(130);
+
+    hero.textContent = "Joaqo";
+    hero.dataset.text = "Joaqo";
+
+    await wait(90);
+
+    hero.textContent = "OqaoJ";
+    hero.dataset.text = "OqaoJ";
+
+    await wait(160);
+
+    hero.textContent = "Joaqo";
+    hero.dataset.text = "Joaqo";
+
+    await wait(140);
+
+    hero.classList.remove("glitch");
+  }
+
+  async function glitchLoop() {
+    while (true) {
+      await wait(rand(6000, 11500));
+
+      if (!document.hidden) {
+        await glitchName();
+      }
+    }
   }
 
   /* NAVIGATION */
@@ -1394,10 +1605,10 @@ a { color: inherit; }
       page.setAttribute("aria-hidden", "true");
     });
 
-    document.querySelectorAll(".nav-item").forEach(item => {
-      item.classList.toggle(
+    document.querySelectorAll(".nav button").forEach(button => {
+      button.classList.toggle(
         "active",
-        item.dataset.page === "home"
+        button.dataset.page === "home"
       );
     });
 
@@ -1406,6 +1617,7 @@ a { color: inherit; }
 
   function openPage(name) {
     closePages();
+
     if (name === "home") return;
 
     const page = pages[name];
@@ -1415,27 +1627,27 @@ a { color: inherit; }
     page.setAttribute("aria-hidden", "false");
     page.scrollTop = 0;
 
-    document.querySelectorAll(".nav-item").forEach(item => {
-      item.classList.toggle(
+    document.querySelectorAll(".nav button").forEach(button => {
+      button.classList.toggle(
         "active",
-        item.dataset.page === name
+        button.dataset.page === name
       );
     });
 
     document.body.style.overflow = "hidden";
   }
 
-  document.querySelectorAll(".nav-item").forEach(button => {
+  document.querySelectorAll(".nav button").forEach(button => {
     button.addEventListener("click", () => {
       openPage(button.dataset.page);
     });
   });
 
-  document.querySelectorAll(".close-page").forEach(button => {
+  document.querySelectorAll(".back").forEach(button => {
     button.addEventListener("click", closePages);
   });
 
-  document.getElementById("home-logo")
+  document.getElementById("brand-home")
     .addEventListener("click", event => {
       event.preventDefault();
       closePages();
@@ -1445,7 +1657,95 @@ a { color: inherit; }
     if (event.key === "Escape") closePages();
   });
 
-  start();
+  /* RESIZE */
+
+  let resizeTimer;
+
+  window.addEventListener("resize", () => {
+    clearTimeout(resizeTimer);
+
+    resizeTimer = setTimeout(() => {
+      if (animating) return;
+
+      resizeCanvas();
+
+      const layouts = currentLayouts();
+      layoutIndex %= layouts.length;
+
+      const rects = getRects(layoutIndex);
+
+      slots.forEach((slot, i) => {
+        positionSlot(slot, rects[i]);
+      });
+    }, 200);
+  });
+
+  /* INITIALIZATION */
+
+  async function initialize() {
+    makeSlots();
+    resizeCanvas();
+
+    const bar = document.getElementById("progress-bar");
+    const label = document.getElementById("progress-text");
+
+    const preload = IMAGE_URLS.map(loadImage);
+
+    let progress = 0;
+
+    const interval = setInterval(() => {
+      progress = Math.min(92, progress + rand(2, 9));
+
+      bar.style.width = progress + "%";
+      label.textContent =
+        String(Math.floor(progress)).padStart(2, "0") + "%";
+    }, 100);
+
+    /*
+      Don't allow one slow image request to hold the
+      intro indefinitely.
+    */
+
+    const loaded = await Promise.race([
+      Promise.all(preload),
+      wait(2600).then(() => null)
+    ]);
+
+    if (loaded) {
+      loaded.forEach((img, i) => {
+        images[i] = img;
+      });
+    }
+
+    /*
+      Individual image requests continue to populate
+      the cache even if the loading timeout expires.
+    */
+
+    preload.forEach((promise, i) => {
+      promise.then(img => {
+        images[i] = img;
+      });
+    });
+
+    clearInterval(interval);
+
+    bar.style.width = "100%";
+    label.textContent = "100%";
+
+    await wait(300);
+
+    intro.classList.add("hidden");
+    scene.classList.add("ready");
+
+    if (!reducedMotion) {
+      collageLoop();
+      glitchLoop();
+    }
+  }
+
+  initialize();
+
 })();
 </script>
 
