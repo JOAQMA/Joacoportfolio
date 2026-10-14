@@ -4,2355 +4,890 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#f3f2ef">
 <title>Joaqo — Video Editor</title>
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo+Black&family=DM+Mono:wght@400;500&family=Playfair+Display:wght@900&family=Roboto+Condensed:wght@500;700;900&family=UnifrakturCook:wght@700&display=swap" rel="stylesheet">
 
 <style>
 :root {
-  --paper: #f3f2ef;
-  --ink: #101015;
-  --blue: #363cd5;
+  --paper: #f3f2ee;
+  --ink: #101014;
+  --red: #ed2029;
+  --blue: #1648d6;
 }
 
 * { box-sizing: border-box; }
 
-html, body {
-  margin: 0;
-  min-height: 100%;
-}
+html { scroll-behavior: smooth; }
 
 body {
+  margin: 0;
   background: var(--paper);
   color: var(--ink);
-  font-family: "Space Grotesk", sans-serif;
+  font-family: "DM Mono", monospace;
   overflow-x: hidden;
 }
 
-button {
-  font: inherit;
-  cursor: pointer;
-}
+button, a { -webkit-tap-highlight-color: transparent; }
 
-a { color: inherit; }
+button { font: inherit; }
 
-::selection {
-  background: #4640d8;
-  color: white;
-}
+a { color: inherit; text-decoration: none; }
 
-/* ======================================
-   PAPER TEXTURE
-====================================== */
-
-.grid {
-  position: fixed;
-  inset: 0;
-  z-index: 70;
-  pointer-events: none;
-  background-image:
-    linear-gradient(rgba(0,0,0,.045) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,0,0,.045) 1px, transparent 1px);
-  background-size: 24px 24px;
-}
-
-.grain {
-  position: fixed;
-  inset: 0;
-  z-index: 71;
-  pointer-events: none;
-  opacity: .075;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-}
-
-/* ======================================
-   INTRO
-====================================== */
-
-.intro {
-  position: fixed;
-  inset: 0;
-  z-index: 200;
-  display: grid;
-  place-items: center;
-  background: var(--ink);
-  color: white;
-  transition: opacity .65s, visibility .65s;
-}
-
-.intro.hidden {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-}
-
-.intro-content {
-  width: min(320px, 72vw);
-}
-
-.intro-title {
-  font: 900 clamp(50px, 9vw, 85px) "Archivo Black", sans-serif;
-  letter-spacing: -.1em;
-}
-
-.progress-track {
-  height: 2px;
-  background: #393941;
-  margin-top: 24px;
-}
-
-.progress-bar {
-  height: 100%;
-  width: 0;
-  background: #8581ff;
-  transition: width .12s linear;
-}
-
-.progress-meta {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 12px;
-  font: 10px "DM Mono", monospace;
-  letter-spacing: .14em;
-}
-
-/* ======================================
-   MAIN SCENE
-====================================== */
-
-.scene {
+#home {
+  min-height: 100svh;
   position: relative;
-  height: max(850px, 100vh);
-  max-height: 1250px;
-  min-height: 850px;
   overflow: hidden;
   isolation: isolate;
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(#15151509 1px, transparent 1px),
+    linear-gradient(90deg, #15151509 1px, transparent 1px);
+  background-size: 21px 21px;
 }
 
-.collage {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-}
-
-.photo {
-  position: absolute;
-  overflow: hidden;
-  background: transparent;
-  cursor: crosshair;
-}
-
-.photo-picture {
-  position: absolute;
-  inset: 0;
-  background-size: cover;
-  background-position: center;
-  transform-origin: center;
-  will-change: transform;
-}
-
-.photo-pixel {
+#collage {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  pointer-events: none;
-  opacity: 0;
-}
-
-/* ======================================
-   IMPERFECT COLLAGE DETAILS
-
-   These are sampled pieces of the actual
-   photographs, not decorative white boxes.
-====================================== */
-
-.scatter-layer {
-  position: absolute;
-  inset: 0;
-  z-index: 11;
-  pointer-events: none;
-  overflow: hidden;
-}
-
-.scatter-piece {
-  position: absolute;
-  background-repeat: no-repeat;
-  background-position: center;
-  overflow: hidden;
-  mix-blend-mode: multiply;
-  transition: opacity .6s ease;
-}
-
-.scatter-piece.fade {
-  opacity: 0 !important;
-}
-
-/* Main fragment animation canvas */
-
-.fragment-canvas {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 10;
+  z-index: -1;
   pointer-events: none;
 }
 
-/* The top-left dark square stays.
-   The top-middle and right white
-   rectangles are intentionally gone. */
-
-.decor-a {
+.topbar {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 2.5%;
-  height: 6%;
-  z-index: 12;
-  background: #19192d;
-  pointer-events: none;
-}
-
-/* ======================================
-   HEADER
-====================================== */
-
-.header {
-  position: absolute;
-  z-index: 40;
-  top: 5.5%;
-  left: 4.4%;
+  top: 6%;
+  left: 4.3%;
+  right: 4%;
   display: flex;
-  gap: 17px;
+  justify-content: space-between;
   align-items: flex-start;
-  opacity: 0;
-  transform: translateY(-15px);
-  transition: opacity .65s, transform .65s;
+  z-index: 5;
 }
 
-.ready .header {
-  opacity: 1;
-  transform: none;
+.brandline {
+  display: flex;
+  align-items: center;
+  gap: 18px;
 }
 
 .brand {
-  font: 900 27px "Archivo Black", sans-serif;
-  letter-spacing: -.09em;
-  text-decoration: none;
+  font: 900 29px Arial, sans-serif;
+  letter-spacing: -2px;
 }
 
-.brand-sub {
-  display: block;
-  margin-top: 12px;
-  font: 9px "DM Mono", monospace;
-  letter-spacing: .18em;
+.brand sup {
+  font-size: 11px;
+  letter-spacing: 0;
+  position: relative;
+  top: -7px;
 }
 
 .socials {
   display: flex;
+  align-items: center;
   gap: 13px;
-  padding-top: 4px;
 }
 
 .socials a {
   display: inline-flex;
-  width: 18px;
-  height: 18px;
-  transition: transform .2s, color .2s;
+  transition: transform .2s;
 }
 
-.socials a:hover {
-  transform: skew(-10deg) scale(1.2);
-  color: var(--blue);
-}
+.socials a:hover { transform: translateY(-3px); }
 
 .socials svg {
-  width: 18px;
-  height: 18px;
-  fill: currentColor;
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
 }
 
-.top-label {
-  position: absolute;
-  z-index: 40;
-  right: 4.4%;
-  top: 6%;
-  font: 10px "DM Mono", monospace;
-  letter-spacing: .13em;
-  opacity: 0;
-  transition: opacity .8s .4s;
+.role {
+  margin-top: 10px;
+  font-size: 10px;
+  letter-spacing: 2px;
 }
 
-.ready .top-label {
-  opacity: 1;
-}
-
-/* ======================================
-   NAVIGATION
-====================================== */
-
-.nav {
-  position: absolute;
-  z-index: 40;
-  top: 29%;
-  left: 4.4%;
-  width: 175px;
-}
-
-.nav button {
+.language {
   display: flex;
   align-items: center;
-  width: 100%;
-  height: 43px;
-  padding: 0 10px;
-  border: 0;
+  gap: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.language button {
   background: transparent;
-  color: var(--ink);
-  text-align: left;
-  opacity: 0;
-  transform: translateX(-25px);
-  transition:
-    opacity .45s,
-    transform .45s,
-    background .2s,
-    color .2s;
+  border: 0;
+  padding: 4px 0;
+  cursor: pointer;
+  color: inherit;
+  letter-spacing: 1px;
 }
 
-.ready .nav button {
-  opacity: 1;
-  transform: none;
+.language button.active {
+  border-bottom: 2px solid currentColor;
 }
 
-.ready .nav button:nth-child(2) {
-  transition-delay: .09s;
-}
-
-.ready .nav button:nth-child(3) {
-  transition-delay: .18s;
-}
-
-.ready .nav button:nth-child(4) {
-  transition-delay: .27s;
-}
-
-.nav button.active,
-.nav button:hover,
-.nav button:focus-visible {
-  background: var(--ink);
-  color: white;
-  outline: none;
-}
-
-.nav-index {
-  width: 23px;
-  font: 10px "DM Mono", monospace;
-}
-
-.nav-text {
-  font: 500 15px "DM Mono", monospace;
-}
-
-.nav-arrow {
-  margin-left: auto;
-  font-size: 20px;
-}
-
-/* ======================================
-   CENTRAL JO AQO
-====================================== */
-
-.hero {
+.menu {
   position: absolute;
-  z-index: 30;
-  left: 17%;
-  top: 21%;
-  margin: 0;
-  font: 900 clamp(130px, 18vw, 340px)/.85 "Archivo Black", sans-serif;
-  letter-spacing: -.105em;
-  white-space: nowrap;
-  mix-blend-mode: multiply;
-  pointer-events: none;
-  user-select: none;
-  opacity: 0;
-  transform: translateY(35px);
-  transition: opacity .7s .2s, transform .7s .2s;
+  top: 23%;
+  left: 4.3%;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
 }
 
-.ready .hero {
-  opacity: 1;
-  transform: none;
+.menu a {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  width: max-content;
 }
 
-.hero.glitch {
-  animation: glitchShake .32s steps(2,end);
+.num {
+  font-size: 10px;
+  width: 16px;
 }
 
-.hero.glitch::before,
-.hero.glitch::after {
-  content: attr(data-text);
-  position: absolute;
-  inset: 0;
-}
-
-.hero.glitch::before {
-  color: #3446fa;
-  clip-path: inset(15% 0 56% 0);
-  transform: translate(-8px, -3px);
-}
-
-.hero.glitch::after {
-  color: #9136dc;
-  clip-path: inset(60% 0 12% 0);
-  transform: translate(9px, 3px);
-}
-
-@keyframes glitchShake {
-  25% { translate: 7px 0; skew: -5deg; }
-  50% { translate: -5px 0; }
-  75% { translate: 4px 0; }
-}
-
-/* ======================================
-   EDITORIAL TEXT
-====================================== */
-
-.description {
-  position: absolute;
-  z-index: 32;
-  top: 49%;
-  left: 18%;
-  font: 11px/1.8 "DM Mono", monospace;
-  letter-spacing: .1em;
-  opacity: 0;
-  transition: opacity .8s .7s;
-  pointer-events: none;
-}
-
-.ready .description {
-  opacity: 1;
-}
-
-.description::after {
-  content: "";
-  display: block;
-  margin-top: 15px;
-  width: 15px;
-  height: 1px;
-  background: currentColor;
-}
-
-.footer {
-  position: absolute;
-  z-index: 40;
-  left: 4.4%;
-  bottom: 4%;
-  font: 9px "DM Mono", monospace;
-  letter-spacing: .12em;
-}
-
-.footer::after {
-  content: "";
-  display: inline-block;
-  margin-left: 15px;
-  width: 20vw;
-  height: 1px;
-  vertical-align: middle;
-  background: #929298;
-}
-
-/* ======================================
-   SECONDARY PAGES
-====================================== */
-
-.page {
-  position: fixed;
-  inset: 0;
-  z-index: 90;
-  background: var(--paper);
-  padding: 90px 7vw 60px;
-  overflow-y: auto;
-  visibility: hidden;
-  opacity: 0;
-  transform: translateY(25px);
-  transition: opacity .4s, transform .4s, visibility .4s;
-}
-
-.page.open {
-  visibility: visible;
-  opacity: 1;
-  transform: none;
-}
-
-.page-top {
+.menu-label {
+  min-width: 148px;
+  padding: 9px 13px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-bottom: 20px;
-  border-bottom: 1px solid #aaa;
-  font: 12px "DM Mono", monospace;
+  font: 700 16px "Roboto Condensed", sans-serif;
+  letter-spacing: .4px;
+  transition: background .2s, color .2s, transform .2s;
 }
 
-.back {
-  background: var(--ink);
+.menu a.active .menu-label,
+.menu a:hover .menu-label {
+  background: #111;
   color: white;
-  border: 0;
-  padding: 12px 18px;
+  transform: translateX(4px);
 }
 
-.page h2 {
-  font: 900 clamp(65px, 12vw, 190px) "Archivo Black", sans-serif;
-  letter-spacing: -.09em;
-  margin: 40px 0;
+.arrow { font: 20px Arial, sans-serif; }
+
+.hero-title {
+  position: absolute;
+  left: 19%;
+  top: 30%;
+  display: flex;
+  align-items: center;
+  z-index: 2;
+  transform: rotate(-3deg);
+  filter: drop-shadow(8px 12px 0 #00000015);
 }
 
-.page p {
-  max-width: 700px;
-  font-size: clamp(19px, 2.2vw, 28px);
-  line-height: 1.5;
+.letter {
+  position: relative;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  line-height: .95;
+  height: 170px;
+  padding: 0 10px;
+  color: white;
+  font-size: clamp(90px, 12vw, 205px);
+  background: #111;
+  text-shadow: 3px 3px 0 #0003;
+  box-shadow: 5px 8px 0 #1112;
+}
+
+.letter::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: .23;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent 0px,
+      transparent 3px,
+      #ffffff65 4px
+    );
+  mix-blend-mode: screen;
+}
+
+.l1 {
+  font-family: "Anton", sans-serif;
+  transform: rotate(-9deg) translateY(5px);
+  background: #111;
+  z-index: 3;
+}
+
+.l2 {
+  font-family: "Playfair Display", serif;
+  transform: rotate(5deg) translateY(-11px);
+  background: var(--red);
+  color: #111;
+  z-index: 4;
+}
+
+.l3 {
+  font-family: "UnifrakturCook", serif;
+  transform: rotate(-5deg) translateY(12px);
+  background: #ecebe6;
+  color: #111;
+  z-index: 5;
+}
+
+.l4 {
+  font-family: "Archivo Black", sans-serif;
+  transform: rotate(7deg) translateY(-5px);
+  background: #101014;
+  z-index: 4;
+}
+
+.l5 {
+  font-family: "Playfair Display", serif;
+  font-style: italic;
+  transform: rotate(-8deg) translateY(8px);
+  background: var(--blue);
+  z-index: 3;
+}
+
+.hero-title:hover .letter {
+  animation: jitter .3s steps(2) infinite;
+}
+
+@keyframes jitter {
+  0%, 100% { translate: 0 0; }
+  25% { translate: 2px -2px; }
+  50% { translate: -2px 1px; }
+  75% { translate: 1px 2px; }
+}
+
+.hero-decor {
+  position: absolute;
+  top: 26%;
+  left: 26%;
+  width: 250px;
+  height: 100px;
+  border-top: 3px solid var(--red);
+  transform: rotate(-17deg);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.hero-decor::after {
+  content: "";
+  position: absolute;
+  width: 150px;
+  top: 110px;
+  left: 300px;
+  border-top: 3px solid #111;
+  transform: rotate(30deg);
+}
+
+.bottom-line {
+  position: absolute;
+  left: 7%;
+  bottom: 4%;
+  width: 27%;
+  height: 1px;
+  background: #888;
+}
+
+.section {
+  padding: 110px 7%;
+  background: #f3f2ee;
+  border-top: 1px solid #ddd;
+}
+
+.section:nth-of-type(odd) { background: #eae9e5; }
+
+.section h2 {
+  margin: 0 0 30px;
+  font: 900 clamp(50px, 8vw, 110px) "Anton", sans-serif;
+  letter-spacing: -2px;
+}
+
+.section p {
+  max-width: 650px;
+  font-size: 16px;
+  line-height: 1.8;
 }
 
 .work-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
 }
 
-.work-card {
-  min-height: 270px;
-  display: flex;
-  align-items: flex-end;
-  padding: 24px;
-  background: #171725;
+.project {
+  min-height: 260px;
+  position: relative;
+  background: #111;
+  overflow: hidden;
+}
+
+.project img {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  object-fit: cover;
+  filter: grayscale(65%);
+  transition: transform .6s, filter .6s;
+}
+
+.project:hover img {
+  transform: scale(1.08);
+  filter: grayscale(0);
+}
+
+.project span {
+  position: absolute;
+  bottom: 15px;
+  left: 15px;
   color: white;
-}
-
-.work-card:nth-child(2) {
-  background: #313ab1;
-}
-
-.work-card:nth-child(3) {
-  background: #5637a9;
-}
-
-.work-card:nth-child(4) {
-  background: #111115;
-}
-
-.work-card h3 {
-  font: 900 clamp(24px, 3vw, 43px) "Archivo Black", sans-serif;
-  letter-spacing: -.06em;
+  background: #111;
+  padding: 9px 13px;
+  font-size: 12px;
 }
 
 .contact-link {
-  font: 900 clamp(32px, 5vw, 70px) "Archivo Black", sans-serif;
-  letter-spacing: -.07em;
+  font: 700 clamp(22px, 4vw, 48px) "Roboto Condensed", sans-serif;
+  border-bottom: 3px solid #111;
+  overflow-wrap: anywhere;
 }
 
-/* ======================================
-   RESPONSIVE
-====================================== */
+@media(max-width: 900px) {
+  #home { min-height: 780px; }
 
-@media (max-width: 850px) {
-  .scene {
-    min-height: 800px;
-    height: 100svh;
-  }
-
-  .nav {
-    top: 23%;
-  }
-
-  .hero {
-    left: 10%;
-    top: 41%;
-    font-size: clamp(105px, 22vw, 200px);
-  }
-
-  .description {
-    top: 57%;
-    left: 12%;
-  }
-
-  .work-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 600px) {
-  .header {
-    left: 5%;
-    top: 4%;
-  }
-
-  .brand {
-    font-size: 23px;
-  }
-
-  .top-label {
-    display: none;
-  }
-
-  .nav {
-    top: 19%;
-    left: 5%;
-    width: 145px;
-  }
-
-  .nav button {
-    height: 38px;
-  }
-
-  .nav-text {
-    font-size: 13px;
-  }
-
-  .hero {
-    left: 4%;
-    top: 43%;
-    font-size: clamp(88px, 23vw, 145px);
-  }
-
-  .description {
+  .hero-title {
     left: 7%;
-    top: 56%;
-    font-size: 9px;
+    top: 45%;
+    transform: scale(.7) rotate(-3deg);
+    transform-origin: left center;
   }
 
-  .footer {
-    left: 5%;
-    font-size: 8px;
-  }
+  .menu { top: 21%; }
 
-  .page {
-    padding: 75px 6vw 40px;
-  }
+  .work-grid { grid-template-columns: 1fr; }
+
+  .project { min-height: 350px; }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: .01ms !important;
-    transition-duration: .01ms !important;
+@media(max-width: 550px) {
+  .brand { font-size: 24px; }
+  .brandline { gap: 10px; }
+  .socials { gap: 8px; }
+  .socials svg { width: 17px; height: 17px; }
+
+  .hero-title {
+    transform: scale(.36) rotate(-3deg);
+    top: 50%;
+    left: 4%;
   }
+
+  .letter {
+    font-size: 150px;
+    height: 160px;
+  }
+
+  .menu-label { min-width: 130px; }
+
+  .section { padding: 75px 6%; }
+}
+
+@media(prefers-reduced-motion: reduce) {
+  .hero-title:hover .letter { animation: none; }
+  * { scroll-behavior: auto !important; }
 }
 </style>
 </head>
 
 <body>
 
-<div class="intro" id="intro">
-  <div class="intro-content">
-    <div class="intro-title">Joaqo</div>
+<main id="home">
+  <canvas id="collage" aria-hidden="true"></canvas>
 
-    <div class="progress-track">
-      <div class="progress-bar" id="progress-bar"></div>
-    </div>
-
-    <div class="progress-meta">
-      <span>VIDEO EDITOR</span>
-      <span id="progress-text">00%</span>
-    </div>
-  </div>
-</div>
-
-<main class="scene" id="scene">
-
-  <div class="collage" id="collage"></div>
-
-  <canvas class="fragment-canvas" id="fragments"></canvas>
-
-  <div class="scatter-layer" id="scatter-layer"></div>
-
-  <div class="decor-a"></div>
-
-  <header class="header">
+  <header class="topbar">
     <div>
-      <a href="#" class="brand" id="brand-home">Joaqo</a>
-      <span class="brand-sub">VIDEO EDITOR</span>
+      <div class="brandline">
+        <a href="#home" class="brand">Joaqo<sup>©</sup></a>
+
+        <div class="socials">
+          <!-- Replace # with your Instagram URL -->
+          <a href="#" aria-label="Instagram">
+            <svg viewBox="0 0 24 24">
+              <rect x="3" y="3" width="18" height="18" rx="5"/>
+              <circle cx="12" cy="12" r="4"/>
+              <circle cx="17.5" cy="6.5" r=".8" fill="currentColor"/>
+            </svg>
+          </a>
+
+          <!-- Replace # with your X URL -->
+          <a href="#" aria-label="X">
+            <svg viewBox="0 0 24 24">
+              <path d="M3 3L21 21M21 3L3 21M3 3h5l13 18h-5z"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+
+      <div class="role">VIDEO EDITOR</div>
     </div>
 
-    <div class="socials">
-      <a
-        href="https://www.instagram.com/oqaoj/"
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="Instagram"
-      >
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7zm5 3a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6zm5.5-3.5a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3z"/>
-        </svg>
-      </a>
-
-      <a
-        href="https://x.com/oqaoj6"
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="X"
-      >
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M18.9 2H22l-6.8 7.8L23.2 22h-6.3L12 14.6 5.5 22H2.3l7.3-8.5L1.8 2h6.5l4.5 6.8L18.9 2zm-1.1 18h1.7L7.4 3.9H5.6L17.8 20z"/>
-        </svg>
-      </a>
+    <div class="language">
+      <button id="esBtn" type="button">ES</button>
+      <span>/</span>
+      <button id="enBtn" class="active" type="button">EN</button>
     </div>
   </header>
 
-  <div class="top-label">EDIT / COLOR / SOUND</div>
+  <nav class="menu">
+    <a href="#home" class="active">
+      <span class="num">01</span>
+      <span class="menu-label">
+        <span data-en="HOME" data-es="INICIO">HOME</span>
+        <span class="arrow">→</span>
+      </span>
+    </a>
 
-  <nav class="nav" aria-label="Main navigation">
+    <a href="#work">
+      <span class="num">02</span>
+      <span class="menu-label">
+        <span data-en="WORK" data-es="TRABAJOS">WORK</span>
+        <span class="arrow">→</span>
+      </span>
+    </a>
 
-    <button class="active" data-page="home">
-      <span class="nav-index">01</span>
-      <span class="nav-text">HOME</span>
-      <span class="nav-arrow">→</span>
-    </button>
+    <a href="#about">
+      <span class="num">03</span>
+      <span class="menu-label">
+        <span data-en="ABOUT" data-es="SOBRE MÍ">ABOUT</span>
+        <span class="arrow">→</span>
+      </span>
+    </a>
 
-    <button data-page="work">
-      <span class="nav-index">02</span>
-      <span class="nav-text">WORK</span>
-      <span class="nav-arrow">→</span>
-    </button>
-
-    <button data-page="about">
-      <span class="nav-index">03</span>
-      <span class="nav-text">ABOUT</span>
-      <span class="nav-arrow">→</span>
-    </button>
-
-    <button data-page="contact">
-      <span class="nav-index">04</span>
-      <span class="nav-text">CONTACT</span>
-      <span class="nav-arrow">→</span>
-    </button>
-
+    <a href="#contact">
+      <span class="num">04</span>
+      <span class="menu-label">
+        <span data-en="CONTACT" data-es="CONTACTO">CONTACT</span>
+        <span class="arrow">→</span>
+      </span>
+    </a>
   </nav>
 
-  <h1 class="hero" id="hero" data-text="Joaqo">Joaqo</h1>
+  <div class="hero-decor"></div>
 
-  <div class="description">
-    VIDEO EDITING<br>
-    FOR FILM, MUSIC<br>
-    AND DIGITAL MEDIA.
-  </div>
+  <h1 class="hero-title" aria-label="Joaqo">
+    <span class="letter l1">J</span>
+    <span class="letter l2">o</span>
+    <span class="letter l3">a</span>
+    <span class="letter l4">q</span>
+    <span class="letter l5">o</span>
+  </h1>
 
-  <div class="footer">(C) 2026 — JOACO MANSILLA</div>
-
+  <div class="bottom-line"></div>
 </main>
 
-<div class="grid"></div>
-<div class="grain"></div>
-
-<section class="page" id="page-work" aria-hidden="true">
-  <div class="page-top">
-    <strong>JOAQO / SELECTED WORK</strong>
-    <button class="back">← BACK</button>
-  </div>
-
-  <h2>WORK</h2>
+<section id="work" class="section">
+  <h2 data-en="SELECTED WORK" data-es="TRABAJOS">SELECTED WORK</h2>
 
   <div class="work-grid">
-    <div class="work-card"><h3>HAITI FOUNDATION</h3></div>
-    <div class="work-card"><h3>RAW FIT</h3></div>
-    <div class="work-card"><h3>SHARKCAST</h3></div>
-    <div class="work-card"><h3>3Y4</h3></div>
+    <div class="project">
+      <img src="https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=900" alt="Cinema">
+      <span>01 / CINEMATIC</span>
+    </div>
+
+    <div class="project">
+      <img src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=900" alt="Music event">
+      <span>02 / MUSIC</span>
+    </div>
+
+    <div class="project">
+      <img src="https://images.unsplash.com/photo-1519608487953-e999c86e7455?w=900" alt="Night sky">
+      <span>03 / COMMERCIAL</span>
+    </div>
   </div>
 </section>
 
-<section class="page" id="page-about" aria-hidden="true">
-  <div class="page-top">
-    <strong>JOAQO / ABOUT</strong>
-    <button class="back">← BACK</button>
-  </div>
-
-  <h2>ABOUT</h2>
-
-  <p>
-    I'm Joaco Mansilla, a video editor working across
-    film, music, commercial and digital projects.
-    My work focuses on rhythm, atmosphere, storytelling
-    and sound.
+<section id="about" class="section">
+  <h2 data-en="ABOUT" data-es="SOBRE MÍ">ABOUT</h2>
+  <p
+    data-en="I'm Joaqo, a video editor focused on cinematic storytelling, rhythm, and visual identity. I create edits that give footage character."
+    data-es="Soy Joaqo, editor de video enfocado en la narrativa cinematográfica, el ritmo y la identidad visual. Creo ediciones que le dan personalidad a cada imagen.">
+    I'm Joaqo, a video editor focused on cinematic storytelling,
+    rhythm, and visual identity. I create edits that give footage character.
   </p>
 </section>
 
-<section class="page" id="page-contact" aria-hidden="true">
-  <div class="page-top">
-    <strong>JOAQO / CONTACT</strong>
-    <button class="back">← BACK</button>
-  </div>
-
-  <h2>CONTACT</h2>
-
-  <p>For projects and collaborations, reach out through Instagram.</p>
-
-  <a
-    class="contact-link"
-    href="https://www.instagram.com/oqaoj/"
-    target="_blank"
-    rel="noopener noreferrer"
-  >
-    INSTAGRAM ↗
+<section id="contact" class="section">
+  <h2 data-en="CONTACT" data-es="CONTACTO">CONTACT</h2>
+  <a class="contact-link" href="mailto:hello@example.com">
+    hello@example.com ↗
   </a>
 </section>
 
 <script>
-(() => {
-  "use strict";
+// -------------------------------------------
+// LANGUAGE SWITCHING
+// -------------------------------------------
+const enBtn = document.getElementById("enBtn");
+const esBtn = document.getElementById("esBtn");
 
-  /* ======================================
-     SETTINGS
-  ====================================== */
+function setLanguage(lang) {
+  document.documentElement.lang = lang;
 
-  const CONFIG = {
-    imageCount: 5,
+  document.querySelectorAll("[data-en]").forEach(el => {
+    el.textContent = el.dataset[lang];
+  });
 
-    // Time a completed layout stays visible.
-    pauseMin: 2000,
-    pauseMax: 5000,
+  enBtn.classList.toggle("active", lang === "en");
+  esBtn.classList.toggle("active", lang === "es");
+}
 
-    // Time fragments take to travel.
-    animationMin: 950,
-    animationMax: 2200,
+enBtn.addEventListener("click", () => setLanguage("en"));
+esBtn.addEventListener("click", () => setLanguage("es"));
 
-    minFragments: 16,
-    maxFragments: 36,
+// -------------------------------------------
+// ANIMATED PHOTOGRAPHIC COLLAGE
+// -------------------------------------------
+const canvas = document.getElementById("collage");
+const ctx = canvas.getContext("2d", { alpha: true });
 
-    // Hover pixelation.
-    pixelDuration: 1250,
+const photoURLs = [
+  "https://images.unsplash.com/photo-1519608487953-e999c86e7455?w=1400",
+  "https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=1400",
+  "https://images.unsplash.com/photo-1514565131-fce0801e5785?w=1400",
+  "https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=1400",
+  "https://images.unsplash.com/photo-1494522358652-f30e61d6a23a?w=1400",
+  "https://images.unsplash.com/photo-1514905552197-0610a4d8fd73?w=1400"
+];
 
-    // Extremely slow, continuous zoom rates.
-    // These values are scale increase per second.
-    zoomRateMin: 0.00055,
-    zoomRateMax: 0.0028,
+const photos = [];
 
-    // Maximum zoom. Never jumps backward
-    // while the same image is visible.
-    zoomMax: 1.22,
-
-    // How many imperfect fragments remain
-    // around the finished collage.
-    scatterMin: 14,
-    scatterMax: 32
+photoURLs.forEach(url => {
+  const img = new Image();
+  img.crossOrigin = "anonymous";
+  img.onload = () => {
+    photos.push(img);
+    if (photos.length === 1) createFragments();
   };
+  img.onerror = () => console.warn("Could not load:", url);
+  img.src = url;
+});
 
-  /* ======================================
-     EXPANDED IMAGE COLLECTION
+let W = 0;
+let H = 0;
+let fragments = [];
+let lastTime = 0;
+let nextTransition = 0;
 
-     You can later replace these with your
-     own photographs or project stills.
-  ====================================== */
+const reducedMotion = window.matchMedia(
+  "(prefers-reduced-motion: reduce)"
+).matches;
 
-  const IMAGE_URLS = [
-    "https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?auto=format&fit=crop&w=1600&q=85",
-    "https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=1600&q=85",
-    "https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=1600&q=85",
-    "https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=1600&q=85",
-    "https://images.unsplash.com/photo-1518391846015-55a9cc003b25?auto=format&fit=crop&w=1600&q=85",
-    "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1600&q=85",
-    "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=1600&q=85",
-    "https://images.unsplash.com/photo-1494522358652-f30e61b6f8a6?auto=format&fit=crop&w=1600&q=85",
+function rand(min, max) {
+  return min + Math.random() * (max - min);
+}
 
-    "https://images.unsplash.com/photo-1514905552197-0610a4d8fd73?auto=format&fit=crop&w=1600&q=85",
-    "https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1600&q=85",
-    "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1600&q=85",
-    "https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=1600&q=85",
-    "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=85",
-    "https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=1600&q=85",
-    "https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=1600&q=85",
-    "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?auto=format&fit=crop&w=1600&q=85"
+function choose(array) {
+  return array[Math.floor(Math.random() * array.length)];
+}
+
+function ease(t) {
+  t = Math.max(0, Math.min(1, t));
+  return t * t * (3 - 2 * t);
+}
+
+function lerp(a, b, t) {
+  return a + (b - a) * t;
+}
+
+function resize() {
+  const rect = canvas.getBoundingClientRect();
+  W = rect.width;
+  H = rect.height;
+
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  canvas.width = Math.round(W * dpr);
+  canvas.height = Math.round(H * dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  createFragments();
+}
+
+function createFragments() {
+  if (!W || !H || photos.length === 0) return;
+
+  fragments = [];
+
+  // Reserve the top-left for the logo and menu.
+  // Images occupy the right side and lower canvas.
+  const regions = [
+    { x: .53, y: -.05, w: .51, h: .52 },
+    { x: .66, y: .37, w: .38, h: .42 },
+    { x: .00, y: .66, w: .51, h: .36 },
+    { x: .40, y: .60, w: .38, h: .42 },
+    { x: .78, y: .76, w: .25, h: .26 }
   ];
 
-  const scene = document.getElementById("scene");
-  const collage = document.getElementById("collage");
-  const canvas = document.getElementById("fragments");
-  const scatterLayer = document.getElementById("scatter-layer");
-
-  const ctx = canvas.getContext("2d");
-  const intro = document.getElementById("intro");
-  const hero = document.getElementById("hero");
-
-  const reducedMotion = matchMedia(
-    "(prefers-reduced-motion: reduce)"
-  ).matches;
-
-  const rand = (a, b) => a + Math.random() * (b - a);
-
-  const pick = arr =>
-    arr[Math.floor(Math.random() * arr.length)];
-
-  const wait = ms =>
-    new Promise(resolve => setTimeout(resolve, ms));
-
-  const clamp = (v, a, b) =>
-    Math.max(a, Math.min(b, v));
-
-  const lerp = (a, b, t) =>
-    a + (b - a) * t;
-
-  const ease = t =>
-    t < .5
-      ? 4 * t * t * t
-      : 1 - Math.pow(-2 * t + 2, 3) / 2;
-
-  const images = [];
-  const slots = [];
-
-  let layoutIndex = 0;
-  let animating = false;
-  let pixelRatio = 1;
-
-  /* ======================================
-     IMAGE LOADING
-  ====================================== */
-
-  function loadImage(url) {
-    return new Promise(resolve => {
-      const img = new Image();
-      img.crossOrigin = "anonymous";
-
-      img.onload = () => resolve(img);
-      img.onerror = () => resolve(null);
-
-      img.src = url;
-    });
-  }
-
-  /* ======================================
-     LAYOUTS
-  ====================================== */
-
-  const LAYOUTS = [
-    [
-      [45, 0, 55, 62],
-      [0, 63, 41, 25],
-      [41, 63, 20, 37],
-      [61, 63, 39, 23],
-      [61, 86, 39, 14]
-    ],
-    [
-      [55, 0, 45, 46],
-      [0, 60, 30, 40],
-      [30, 60, 35, 25],
-      [65, 46, 35, 54],
-      [30, 85, 35, 15]
-    ],
-    [
-      [41, 0, 59, 35],
-      [0, 58, 52, 22],
-      [52, 35, 48, 34],
-      [52, 69, 48, 31],
-      [0, 80, 52, 20]
-    ],
-    [
-      [58, 0, 42, 56],
-      [0, 55, 27, 45],
-      [27, 66, 31, 34],
-      [58, 56, 42, 20],
-      [58, 76, 42, 24]
-    ],
-    [
-      [48, 0, 52, 47],
-      [0, 64, 49, 36],
-      [49, 47, 24, 53],
-      [73, 47, 27, 29],
-      [73, 76, 27, 24]
-    ]
-  ];
-
-  const MOBILE_LAYOUTS = [
-    [
-      [26, 0, 74, 48],
-      [0, 64, 52, 23],
-      [52, 58, 23, 42],
-      [75, 58, 25, 29],
-      [0, 87, 52, 13]
-    ],
-    [
-      [35, 0, 65, 38],
-      [0, 60, 43, 40],
-      [43, 60, 31, 22],
-      [74, 38, 26, 62],
-      [43, 82, 31, 18]
-    ],
-    [
-      [28, 0, 72, 52],
-      [0, 66, 61, 19],
-      [61, 52, 39, 25],
-      [61, 77, 39, 23],
-      [0, 85, 61, 15]
-    ]
-  ];
-
-  function currentLayouts() {
-    return innerWidth <= 650
-      ? MOBILE_LAYOUTS
-      : LAYOUTS;
-  }
-
-  function rectFromPercent(values) {
-    return {
-      x: scene.clientWidth * values[0] / 100,
-      y: scene.clientHeight * values[1] / 100,
-      w: scene.clientWidth * values[2] / 100,
-      h: scene.clientHeight * values[3] / 100
-    };
-  }
-
-  function getRects(index) {
-    const layouts = currentLayouts();
-
-    return layouts[index % layouts.length]
-      .map(rectFromPercent);
-  }
-
-  /* ======================================
-     IMAGE ASSIGNMENT
-
-     Every new layout uses different images.
-     Recently used images are deprioritized.
-  ====================================== */
-
-  let imageHistory = [];
-
-  function chooseNewImages(count) {
-    const available = IMAGE_URLS.map((_, i) => i)
-      .filter(i => images[i]);
-
-    if (!available.length) {
-      return Array.from({ length: count }, (_, i) =>
-        i % IMAGE_URLS.length
-      );
-    }
-
-    const fresh = available.filter(
-      i => !imageHistory.includes(i)
-    );
-
-    const pool = [...fresh];
-
-    for (const i of available) {
-      if (!pool.includes(i)) pool.push(i);
-    }
-
-    // Shuffle fresh choices.
-    for (let i = pool.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [pool[i], pool[j]] = [pool[j], pool[i]];
-    }
-
-    const result = pool.slice(0, count);
-
-    while (result.length < count) {
-      result.push(pick(available));
-    }
-
-    imageHistory = [
-      ...result,
-      ...imageHistory
-    ].slice(0, 9);
-
-    return result;
-  }
-
-  /* ======================================
-     PHOTO SLOTS
-  ====================================== */
-
-  function makeSlots() {
-    const initial = getRects(0);
-
-    for (let i = 0; i < CONFIG.imageCount; i++) {
-      const element = document.createElement("div");
-      element.className = "photo";
-
-      const picture = document.createElement("div");
-      picture.className = "photo-picture";
-
-      const pixel = document.createElement("canvas");
-      pixel.className = "photo-pixel";
-
-      element.append(picture, pixel);
-      collage.appendChild(element);
-
-      const slot = {
-        element,
-        picture,
-        pixel,
-        rect: initial[i],
-        imageIndex: i,
-
-        zoomScale: 1,
-        zoomRate: rand(
-          CONFIG.zoomRateMin,
-          CONFIG.zoomRateMax
-        ),
-
-        pixelLast: 0,
-        pixelFrame: null
-      };
-
-      slots.push(slot);
-
-      positionSlot(slot, initial[i]);
-      setSlotImage(slot, i);
-      setupHover(slot);
-    }
-  }
-
-  function positionSlot(slot, rect) {
-    slot.rect = { ...rect };
-
-    Object.assign(slot.element.style, {
-      left: rect.x + "px",
-      top: rect.y + "px",
-      width: rect.w + "px",
-      height: rect.h + "px"
-    });
-  }
-
-  function setSlotImage(slot, index) {
-    slot.imageIndex = index;
-
-    slot.picture.style.backgroundImage =
-      `url("${IMAGE_URLS[index]}")`;
-  }
-
-  /* ======================================
-     CONTINUOUS ZOOM
-
-     There is no CSS zoom animation loop.
-     Therefore it never snaps back to 1.
-
-     When an image changes, the replacement
-     begins at scale 1 during the pixelated
-     reconstruction, not afterward.
-  ====================================== */
-
-  let previousZoomTime = 0;
-
-  function zoomLoop(time) {
-    if (!previousZoomTime) previousZoomTime = time;
-
-    const dt = Math.min(
-      (time - previousZoomTime) / 1000,
-      .05
-    );
-
-    previousZoomTime = time;
-
-    if (!document.hidden && !reducedMotion) {
-      for (const slot of slots) {
-        if (slot.element.style.visibility === "hidden") {
-          continue;
-        }
-
-        slot.zoomScale = Math.min(
-          CONFIG.zoomMax,
-          slot.zoomScale + slot.zoomRate * dt
-        );
-
-        slot.picture.style.transform =
-          `scale(${slot.zoomScale})`;
-      }
-    }
-
-    requestAnimationFrame(zoomLoop);
-  }
-
-  function resetZoomForNewImage(slot) {
-    slot.zoomScale = 1;
-
-    slot.zoomRate = rand(
-      CONFIG.zoomRateMin,
-      CONFIG.zoomRateMax
-    );
-
-    slot.picture.style.transform = "scale(1)";
-  }
-
-  /* ======================================
-     COVER CROPPING
-
-     Handles the same cropping in DOM
-     and fragment canvas.
-  ====================================== */
-
-  function coverSource(img, boxW, boxH, tile, zoom = 1) {
-    const scale = Math.max(
-      boxW / img.width,
-      boxH / img.height
-    ) * zoom;
-
-    const visibleW = boxW / scale;
-    const visibleH = boxH / scale;
-
-    const offsetX = (img.width - visibleW) / 2;
-    const offsetY = (img.height - visibleH) / 2;
-
-    return {
-      sx: offsetX + tile.x / scale,
-      sy: offsetY + tile.y / scale,
-      sw: tile.w / scale,
-      sh: tile.h / scale
-    };
-  }
-
-  /* ======================================
-     IRREGULAR FRAGMENT GENERATION
-  ====================================== */
-
-  function makeTiles(rect) {
-    const count = Math.floor(rand(
-      CONFIG.minFragments,
-      CONFIG.maxFragments + 1
-    ));
-
-    const cols = Math.max(3, Math.round(Math.sqrt(
-      count * rect.w / Math.max(1, rect.h)
-    )));
-
-    const rows = Math.max(3, Math.round(count / cols));
-
-    const weightsX = Array.from(
-      { length: cols },
-      () => rand(.3, 2.5)
-    );
-
-    const weightsY = Array.from(
-      { length: rows },
-      () => rand(.3, 2.5)
-    );
-
-    const sumX = weightsX.reduce((a, b) => a + b, 0);
-    const sumY = weightsY.reduce((a, b) => a + b, 0);
-
-    const xEdges = [0];
-    const yEdges = [0];
-
-    let x = 0;
-    let y = 0;
-
-    for (const weight of weightsX) {
-      x += rect.w * weight / sumX;
-      xEdges.push(x);
-    }
-
-    for (const weight of weightsY) {
-      y += rect.h * weight / sumY;
-      yEdges.push(y);
-    }
-
-    const tiles = [];
+  regions.forEach((region, regionIndex) => {
+    const x = region.x * W;
+    const y = region.y * H;
+    const w = region.w * W;
+    const h = region.h * H;
+
+    const cols = Math.max(5, Math.round(w / 65));
+    const rows = Math.max(4, Math.round(h / 58));
+    const cellW = w / cols;
+    const cellH = h / rows;
+
+    // A shared image per region makes the
+    // fragments collectively form a photograph.
+    const image = photos[regionIndex % photos.length];
 
     for (let row = 0; row < rows; row++) {
       for (let col = 0; col < cols; col++) {
-        tiles.push({
-          x: xEdges[col],
-          y: yEdges[row],
-          w: xEdges[col + 1] - xEdges[col],
-          h: yEdges[row + 1] - yEdges[row]
+        if (Math.random() < .08) continue;
+
+        const px = x + col * cellW;
+        const py = y + row * cellH;
+
+        const fw = cellW * rand(.85, 1.55);
+        const fh = cellH * rand(.85, 1.45);
+
+        fragments.push({
+          x: px,
+          y: py,
+          w: fw,
+          h: fh,
+
+          startX: px,
+          startY: py,
+          targetX: px,
+          targetY: py,
+
+          regionX: x,
+          regionY: y,
+          regionW: w,
+          regionH: h,
+
+          image,
+          nextImage: image,
+
+          startTime: 0,
+          duration: 1,
+          delay: 0,
+          opacity: 1,
+          pixelation: 1,
+          axisOrder: "xy",
+          zoom: rand(1, 1.1),
+          zoomSpeed: rand(.002, .012),
+          imageBlend: 0,
+          transitioning: false
         });
       }
     }
+  });
+}
 
-    return tiles;
-  }
+function startTransition(time) {
+  if (photos.length < 2) return;
 
-  /* ======================================
-     AXIS-ALIGNED PATHS
+  // One new photograph is assigned per region,
+  // keeping the composition coherent.
+  const regionImages = new Map();
 
-     No diagonal movement.
-  ====================================== */
+  fragments.forEach(f => {
+    const key = `${f.regionX},${f.regionY}`;
 
-  function createPath(startX, startY, endX, endY) {
-    if (Math.abs(endX - startX) < 1 ||
-        Math.abs(endY - startY) < 1) {
-      return [
-        { x: startX, y: startY },
-        { x: endX, y: endY }
-      ];
+    if (!regionImages.has(key)) {
+      const alternatives = photos.filter(p => p !== f.image);
+      regionImages.set(key, choose(alternatives));
     }
 
-    if (Math.random() < .5) {
-      return [
-        { x: startX, y: startY },
-        { x: endX, y: startY },
-        { x: endX, y: endY }
-      ];
-    }
+    f.startX = f.x;
+    f.startY = f.y;
 
-    return [
-      { x: startX, y: startY },
-      { x: startX, y: endY },
-      { x: endX, y: endY }
-    ];
-  }
+    // Mostly small movements, occasionally large ones.
+    const distance = Math.random() < .15 ? 130 : 48;
 
-  function pointOnPath(path, t) {
-    if (path.length === 2) {
-      return {
-        x: lerp(path[0].x, path[1].x, t),
-        y: lerp(path[0].y, path[1].y, t)
-      };
-    }
+    f.targetX = f.regionX +
+      Math.round((f.startX - f.regionX + rand(-distance, distance)) / 18) * 18;
 
-    if (t < .5) {
-      const p = ease(t * 2);
+    f.targetY = f.regionY +
+      Math.round((f.startY - f.regionY + rand(-distance, distance)) / 18) * 18;
 
-      return {
-        x: lerp(path[0].x, path[1].x, p),
-        y: lerp(path[0].y, path[1].y, p)
-      };
-    }
+    f.nextImage = regionImages.get(key);
+    f.startTime = time;
+    f.delay = rand(0, 650);
+    f.duration = rand(1100, 2200);
+    f.axisOrder = Math.random() < .5 ? "xy" : "yx";
+    f.transitioning = true;
+  });
 
-    const p = ease((t - .5) * 2);
+  nextTransition = time + 6500;
+}
 
-    return {
-      x: lerp(path[1].x, path[2].x, p),
-      y: lerp(path[1].y, path[2].y, p)
-    };
-  }
+function drawFragmentImage(f, image, alpha, pixelSize) {
+  if (!image || alpha <= 0) return;
 
-  /* ======================================
-     CANVAS
-  ====================================== */
+  ctx.save();
+  ctx.globalAlpha = alpha;
 
-  function resizeCanvas() {
-    pixelRatio = Math.min(devicePixelRatio || 1, 1.5);
+  const iw = image.naturalWidth;
+  const ih = image.naturalHeight;
 
-    canvas.width = Math.round(
-      scene.clientWidth * pixelRatio
-    );
+  // Crop consistently with the fragment's
+  // original region, not its moving position.
+  const localX = (f.startX - f.regionX) / f.regionW;
+  const localY = (f.startY - f.regionY) / f.regionH;
 
-    canvas.height = Math.round(
-      scene.clientHeight * pixelRatio
-    );
+  const sw = Math.max(1, iw * f.w / f.regionW / f.zoom);
+  const sh = Math.max(1, ih * f.h / f.regionH / f.zoom);
 
-    ctx.setTransform(
-      pixelRatio, 0, 0, pixelRatio, 0, 0
-    );
-  }
+  const sx = Math.max(0, Math.min(
+    iw - sw,
+    iw * localX + (iw - iw / f.zoom) * .5
+  ));
 
-  function clearCanvas() {
-    ctx.clearRect(
-      0, 0,
-      scene.clientWidth,
-      scene.clientHeight
-    );
-  }
+  const sy = Math.max(0, Math.min(
+    ih - sh,
+    ih * localY + (ih - ih / f.zoom) * .5
+  ));
 
-  /* ======================================
-     PIXELATED TILE DRAWING
+  if (pixelSize > 2) {
+    // Low-resolution intermediate buffer
+    // creates actual blocky pixelation.
+    const tiny = document.createElement("canvas");
+    tiny.width = Math.max(1, Math.ceil(f.w / pixelSize));
+    tiny.height = Math.max(1, Math.ceil(f.h / pixelSize));
 
-     The source image becomes increasingly
-     pixelated, then transitions into the
-     destination image and sharpens.
-
-     A small temporary canvas is used for
-     each fragment's pixelation.
-  ====================================== */
-
-  const pixelBuffer = document.createElement("canvas");
-  const pixelBufferCtx = pixelBuffer.getContext("2d");
-
-  function drawPixelatedTile(
-    image,
-    source,
-    x,
-    y,
-    w,
-    h,
-    pixelSize,
-    alpha
-  ) {
-    if (!image || w <= 0 || h <= 0) return;
-
-    ctx.save();
-    ctx.globalAlpha = alpha;
-
-    if (pixelSize <= 1.4 || !pixelBufferCtx) {
-      ctx.imageSmoothingEnabled = true;
-
-      ctx.drawImage(
-        image,
-        source.sx,
-        source.sy,
-        source.sw,
-        source.sh,
-        x, y, w, h
-      );
-
-      ctx.restore();
-      return;
-    }
-
-    const smallW = Math.max(
-      1,
-      Math.ceil(w / pixelSize)
-    );
-
-    const smallH = Math.max(
-      1,
-      Math.ceil(h / pixelSize)
-    );
-
-    pixelBuffer.width = smallW;
-    pixelBuffer.height = smallH;
-
-    pixelBufferCtx.clearRect(
-      0, 0, smallW, smallH
-    );
-
-    pixelBufferCtx.drawImage(
-      image,
-      source.sx,
-      source.sy,
-      source.sw,
-      source.sh,
-      0, 0, smallW, smallH
+    const tctx = tiny.getContext("2d");
+    tctx.drawImage(
+      image, sx, sy, sw, sh,
+      0, 0, tiny.width, tiny.height
     );
 
     ctx.imageSmoothingEnabled = false;
-
+    ctx.drawImage(tiny, f.x, f.y, f.w, f.h);
+    ctx.imageSmoothingEnabled = true;
+  } else {
     ctx.drawImage(
-      pixelBuffer,
-      0, 0, smallW, smallH,
-      x, y, w, h
+      image, sx, sy, sw, sh,
+      f.x, f.y, f.w, f.h
     );
-
-    ctx.restore();
   }
 
-  /* ======================================
-     TRANSITION GRAIN
+  ctx.restore();
+}
 
-     Grain is generated on the moving
-     fragments rather than on a static
-     full-screen white rectangle.
-  ====================================== */
+function render(time) {
+  requestAnimationFrame(render);
 
-  const noiseTile = document.createElement("canvas");
-  noiseTile.width = 96;
-  noiseTile.height = 96;
+  if (!W || !H || !photos.length) return;
 
-  const noiseCtx = noiseTile.getContext("2d");
+  const delta = Math.min(time - lastTime, 40);
+  lastTime = time;
 
-  if (noiseCtx) {
-    const data = noiseCtx.createImageData(96, 96);
+  ctx.clearRect(0, 0, W, H);
 
-    for (let i = 0; i < data.data.length; i += 4) {
-      const v = Math.random() * 255;
-
-      data.data[i] = v;
-      data.data[i + 1] = v;
-      data.data[i + 2] = v;
-      data.data[i + 3] = Math.random() * 105;
-    }
-
-    noiseCtx.putImageData(data, 0, 0);
+  if (!reducedMotion && time > nextTransition) {
+    startTransition(time);
   }
 
-  function drawFragmentGrain(x, y, w, h, strength) {
-    if (strength <= 0 || !noiseCtx) return;
+  for (const f of fragments) {
+    if (!reducedMotion) {
+      f.zoom += f.zoomSpeed * delta / 1000;
 
-    ctx.save();
-
-    ctx.beginPath();
-    ctx.rect(x, y, w, h);
-    ctx.clip();
-
-    ctx.globalAlpha = strength;
-    ctx.globalCompositeOperation = "overlay";
-
-    const pattern = ctx.createPattern(noiseTile, "repeat");
-
-    if (pattern) {
-      ctx.fillStyle = pattern;
-      ctx.fillRect(x, y, w, h);
+      if (f.zoom > 1.25) f.zoom = 1.0;
     }
 
-    ctx.restore();
-  }
-
-  /* ======================================
-     SCATTERED FINISHED-IMAGE FRAGMENTS
-
-     These are the imperfect pieces circled
-     in your reference.
-
-     Some fragments:
-     - extend past an image edge
-     - have different sizes
-     - overlap another photograph
-     - fade away
-     - appear partially transparent
-
-     They are intentionally not arranged
-     into perfect grids.
-  ====================================== */
-
-  function rebuildScatter() {
-    scatterLayer.innerHTML = "";
-
-    if (reducedMotion) return;
-
-    const amount = Math.floor(rand(
-      CONFIG.scatterMin,
-      CONFIG.scatterMax + 1
-    ));
-
-    for (let i = 0; i < amount; i++) {
-      const slot = pick(slots);
-      const rect = slot.rect;
-
-      const piece = document.createElement("div");
-      piece.className = "scatter-piece";
-
-      const width = rand(10, Math.max(15, rect.w * .18));
-      const height = rand(8, Math.max(12, rect.h * .16));
-
-      // Pieces cluster around image boundaries.
-      const side = Math.floor(rand(0, 4));
-
-      let x;
-      let y;
-
-      if (side === 0) {
-        x = rect.x + rand(-width, rect.w);
-        y = rect.y + rand(-height * 1.5, height);
-      } else if (side === 1) {
-        x = rect.x + rand(-width, rect.w);
-        y = rect.y + rect.h + rand(-height, height);
-      } else if (side === 2) {
-        x = rect.x + rand(-width, width);
-        y = rect.y + rand(-height, rect.h);
-      } else {
-        x = rect.x + rect.w + rand(-width, width);
-        y = rect.y + rand(-height, rect.h);
-      }
-
-      const image = IMAGE_URLS[slot.imageIndex];
-
-      // Sample the photograph at the fragment's
-      // original location, so the patch actually
-      // belongs to the nearby image.
-
-      const localX = clamp(x - rect.x, 0, rect.w - 1);
-      const localY = clamp(y - rect.y, 0, rect.h - 1);
-
-      piece.style.left = x + "px";
-      piece.style.top = y + "px";
-      piece.style.width = width + "px";
-      piece.style.height = height + "px";
-
-      piece.style.backgroundImage = `url("${image}")`;
-      piece.style.backgroundSize =
-        `${rect.w}px ${rect.h}px`;
-
-      piece.style.backgroundPosition =
-        `${-localX}px ${-localY}px`;
-
-      piece.style.opacity = String(rand(.17, .75));
-
-      // Slight variation in contrast and saturation.
-      piece.style.filter =
-        `contrast(${rand(1.05, 1.6)}) ` +
-        `saturate(${rand(.5, 1.15)})`;
-
-      scatterLayer.appendChild(piece);
-
-      // Some patches disappear after the image settles.
-      if (Math.random() < .35) {
-        setTimeout(() => {
-          piece.classList.add("fade");
-        }, rand(1100, 3500));
-      }
-    }
-  }
-
-  /* ======================================
-     TRANSFORM COLLAGE
-
-     The major difference:
-
-     Every image now transforms into
-     another photograph.
-
-     Source fragments travel to the next
-     layout while their contents change.
-  ====================================== */
-
-  async function transformCollage() {
-    if (animating || reducedMotion || document.hidden) {
-      return;
-    }
-
-    animating = true;
-
-    const layouts = currentLayouts();
-    const nextIndex = (layoutIndex + 1) % layouts.length;
-
-    const oldRects = slots.map(
-      slot => ({ ...slot.rect })
-    );
-
-    const newRects = getRects(nextIndex);
-
-    const oldImages = slots.map(
-      slot => slot.imageIndex
-    );
-
-    const oldZooms = slots.map(
-      slot => slot.zoomScale
-    );
-
-    // New photographs, not just rearrangement.
-    const newImages = chooseNewImages(
-      CONFIG.imageCount
-    );
-
-    const pieces = [];
-    const finishTimes = Array(slots.length).fill(0);
-
-    // A random mapping moves each old image
-    // into a different destination rectangle.
-
-    const destinations = Array.from(
-      { length: slots.length },
-      (_, i) => (i + 1) % slots.length
-    );
-
-    if (Math.random() < .5) {
-      destinations.reverse();
-    }
-
-    for (
-      let sourceIndex = 0;
-      sourceIndex < slots.length;
-      sourceIndex++
-    ) {
-      const sourceRect = oldRects[sourceIndex];
-
-      const destinationIndex =
-        destinations[sourceIndex];
-
-      const destinationRect =
-        newRects[destinationIndex];
-
-      const oldImage =
-        images[oldImages[sourceIndex]];
-
-      const newImage =
-        images[newImages[destinationIndex]];
-
-      const duration = rand(
-        CONFIG.animationMin,
-        CONFIG.animationMax
-      );
-
-      const delay = rand(0, 280);
-      const tiles = makeTiles(sourceRect);
-
-      for (const tile of tiles) {
-        const nx = tile.x / sourceRect.w;
-        const ny = tile.y / sourceRect.h;
-
-        const nw = tile.w / sourceRect.w;
-        const nh = tile.h / sourceRect.h;
-
-        const startX = sourceRect.x + tile.x;
-        const startY = sourceRect.y + tile.y;
-
-        const endX =
-          destinationRect.x + nx * destinationRect.w;
-
-        const endY =
-          destinationRect.y + ny * destinationRect.h;
-
-        const endW = nw * destinationRect.w;
-        const endH = nh * destinationRect.h;
-
-        const pieceDelay = delay + rand(0, 170);
-        const pieceDuration =
-          duration + rand(-150, 150);
-
-        const piece = {
-          oldImage,
-          newImage,
-
-          sourceRect,
-          destinationRect,
-          sourceTile: tile,
-
-          destinationTile: {
-            x: nx * destinationRect.w,
-            y: ny * destinationRect.h,
-            w: endW,
-            h: endH
-          },
-
-          sourceZoom: oldZooms[sourceIndex],
-          destinationIndex,
-
-          path: createPath(
-            startX,
-            startY,
-            endX,
-            endY
-          ),
-
-          startW: tile.w,
-          startH: tile.h,
-          endW,
-          endH,
-
-          delay: pieceDelay,
-          duration: pieceDuration,
-
-          // Different tiles have different
-          // levels of pixelation.
-          pixelStrength: rand(6, 38),
-
-          // Different image-switch moments.
-          switchPoint: rand(.34, .67),
-
-          // Some tiles temporarily fade.
-          fadeAmount: rand(.2, .65),
-
-          // Some tiles briefly disappear.
-          blink: Math.random() < .13
-        };
-
-        pieces.push(piece);
-
-        finishTimes[destinationIndex] = Math.max(
-          finishTimes[destinationIndex],
-          pieceDelay + pieceDuration
-        );
-      }
-    }
-
-    // Old photographs disappear.
-    // Their fragments now exist on the canvas.
-
-    scatterLayer.innerHTML = "";
-
-    slots.forEach(slot => {
-      slot.element.style.visibility = "hidden";
-    });
-
-    const completed = Array(slots.length).fill(false);
-    const startTime = performance.now();
-
-    await new Promise(resolve => {
-      function frame(now) {
-        const elapsed = now - startTime;
-
-        clearCanvas();
-
-        for (const piece of pieces) {
-          if (completed[piece.destinationIndex]) {
-            continue;
-          }
-
-          const t = clamp(
-            (elapsed - piece.delay) / piece.duration,
-            0, 1
-          );
-
-          const movementT = ease(t);
-
-          const pos = pointOnPath(
-            piece.path,
-            movementT
-          );
-
-          const w = lerp(
-            piece.startW,
-            piece.endW,
-            movementT
-          );
-
-          const h = lerp(
-            piece.startH,
-            piece.endH,
-            movementT
-          );
-
-          // The tile becomes more pixelated
-          // during the middle of the movement,
-          // then sharpens before completion.
-
-          const pixelEnvelope =
-            Math.sin(Math.PI * t);
-
-          const pixelSize = Math.max(
-            1,
-            1 + piece.pixelStrength *
-              Math.pow(pixelEnvelope, 1.1)
-          );
-
-          // The photograph changes gradually
-          // from old to new while pixelated.
-
-          const switchWidth = .26;
-
-          const imageBlend = clamp(
-            (t - piece.switchPoint + switchWidth / 2) /
-            switchWidth,
-            0, 1
-          );
-
-          const oldSource = piece.oldImage
-            ? coverSource(
-                piece.oldImage,
-                piece.sourceRect.w,
-                piece.sourceRect.h,
-                piece.sourceTile,
-                piece.sourceZoom
-              )
-            : null;
-
-          const newSource = piece.newImage
-            ? coverSource(
-                piece.newImage,
-                piece.destinationRect.w,
-                piece.destinationRect.h,
-                piece.destinationTile,
-                1
-              )
-            : null;
-
-          // Temporary transparency gives a
-          // rougher, less mathematically perfect
-          // reconstruction.
-
-          const fadeEnvelope =
-            Math.sin(Math.PI * t);
-
-          let opacity =
-            1 - piece.fadeAmount * fadeEnvelope;
-
-          if (
-            piece.blink &&
-            t > .38 &&
-            t < .51
-          ) {
-            opacity *= .16;
-          }
-
-          // Draw old and new image contents
-          // in the SAME traveling fragment.
-
-          if (piece.oldImage && oldSource) {
-            drawPixelatedTile(
-              piece.oldImage,
-              oldSource,
-              pos.x,
-              pos.y,
-              w,
-              h,
-              pixelSize,
-              opacity * (1 - imageBlend)
-            );
-          }
-
-          if (piece.newImage && newSource) {
-            drawPixelatedTile(
-              piece.newImage,
-              newSource,
-              pos.x,
-              pos.y,
-              w,
-              h,
-              pixelSize,
-              opacity * imageBlend
-            );
-          }
-
-          // Grain peaks while fragmented.
-          drawFragmentGrain(
-            pos.x,
-            pos.y,
-            w,
-            h,
-            .08 + .33 * pixelEnvelope
-          );
-        }
-
-        // Each image completes at a different time.
-
-        for (let i = 0; i < slots.length; i++) {
-          if (completed[i]) continue;
-
-          if (elapsed >= finishTimes[i]) {
-            completed[i] = true;
-
-            positionSlot(slots[i], newRects[i]);
-
-            setSlotImage(
-              slots[i],
-              newImages[i]
-            );
-
-            // IMPORTANT:
-            // The final fragment is rendered
-            // with destination zoom = 1.
-            // The DOM image also begins at 1.
-            //
-            // This removes the old visual jump.
-
-            resetZoomForNewImage(slots[i]);
-
-            slots[i].element.style.visibility =
-              "visible";
-          }
-        }
-
-        if (completed.every(Boolean)) {
-          clearCanvas();
-          resolve();
-          return;
-        }
-
-        requestAnimationFrame(frame);
-      }
-
-      requestAnimationFrame(frame);
-    });
-
-    layoutIndex = nextIndex;
-    animating = false;
-
-    // Build the imperfect edge fragments only
-    // after all photographs have reassembled.
-    rebuildScatter();
-  }
-
-  /* ======================================
-     COLLAGE LOOP
-
-     Each finished layout stays 2–5 seconds.
-  ====================================== */
-
-  async function collageLoop() {
-    while (true) {
-      await wait(rand(
-        CONFIG.pauseMin,
-        CONFIG.pauseMax
+    let blend = 0;
+    let pixelSize = 1;
+
+    if (f.transitioning && !reducedMotion) {
+      const t = Math.max(0, Math.min(
+        1,
+        (time - f.startTime - f.delay) / f.duration
       ));
 
-      if (!document.hidden) {
-        await transformCollage();
-      }
-    }
-  }
+      const p = ease(t);
 
-  /* ======================================
-     HOVER PIXELATION
+      // Manhattan movement:
+      // horizontal then vertical, or vice versa.
+      if (f.axisOrder === "xy") {
+        const tx = ease(Math.min(1, p * 2));
+        const ty = ease(Math.max(0, (p - .5) * 2));
 
-     Pixelates temporarily, then sharpens.
-  ====================================== */
+        f.x = lerp(f.startX, f.targetX, tx);
+        f.y = lerp(f.startY, f.targetY, ty);
+      } else {
+        const ty = ease(Math.min(1, p * 2));
+        const tx = ease(Math.max(0, (p - .5) * 2));
 
-  function setupHover(slot) {
-    const pixelCanvas = slot.pixel;
-    const pixelCtx = pixelCanvas.getContext("2d");
-
-    if (!pixelCtx) return;
-
-    const small = document.createElement("canvas");
-    const smallCtx = small.getContext("2d");
-
-    if (!smallCtx) return;
-
-    function drawCover(img, context, w, h) {
-      const scale = Math.max(
-        w / img.width,
-        h / img.height
-      );
-
-      const sw = w / scale;
-      const sh = h / scale;
-
-      context.drawImage(
-        img,
-        (img.width - sw) / 2,
-        (img.height - sh) / 2,
-        sw,
-        sh,
-        0, 0,
-        w, h
-      );
-    }
-
-    function trigger(event) {
-      if (reducedMotion || animating) return;
-
-      const now = performance.now();
-
-      if (now - slot.pixelLast < 1050) return;
-      slot.pixelLast = now;
-
-      const image = images[slot.imageIndex];
-      if (!image) return;
-
-      if (slot.pixelFrame) {
-        cancelAnimationFrame(slot.pixelFrame);
+        f.y = lerp(f.startY, f.targetY, ty);
+        f.x = lerp(f.startX, f.targetX, tx);
       }
 
-      const rect = slot.element.getBoundingClientRect();
+      blend = ease(Math.max(0, (p - .2) / .6));
+      pixelSize = 1 + Math.sin(p * Math.PI) * 16;
 
-      const w = Math.max(
-        1,
-        Math.round(rect.width)
-      );
-
-      const h = Math.max(
-        1,
-        Math.round(rect.height)
-      );
-
-      pixelCanvas.width = w;
-      pixelCanvas.height = h;
-
-      const cursorX = clamp(
-        (event.clientX - rect.left) / rect.width,
-        0, 1
-      );
-
-      const cursorY = clamp(
-        (event.clientY - rect.top) / rect.height,
-        0, 1
-      );
-
-      const pixelStrength = pick([
-        9, 13, 18, 25, 32
-      ]);
-
-      const started = performance.now();
-
-      function frame(time) {
-        const t = clamp(
-          (time - started) / CONFIG.pixelDuration,
-          0, 1
-        );
-
-        const smooth =
-          1 - Math.pow(1 - t, 3);
-
-        const pixelSize = Math.max(
-          1,
-          Math.round(
-            pixelStrength * (1 - smooth)
-          )
-        );
-
-        const sw = Math.max(
-          1,
-          Math.ceil(w / pixelSize)
-        );
-
-        const sh = Math.max(
-          1,
-          Math.ceil(h / pixelSize)
-        );
-
-        small.width = sw;
-        small.height = sh;
-
-        smallCtx.clearRect(0, 0, sw, sh);
-        drawCover(image, smallCtx, sw, sh);
-
-        pixelCtx.clearRect(0, 0, w, h);
-        pixelCtx.imageSmoothingEnabled = false;
-
-        pixelCtx.drawImage(
-          small,
-          0, 0, sw, sh,
-          0, 0, w, h
-        );
-
-        const radius = Math.max(w, h) * .85;
-
-        const gradient =
-          pixelCtx.createRadialGradient(
-            cursorX * w,
-            cursorY * h,
-            radius * .05,
-            cursorX * w,
-            cursorY * h,
-            radius
-          );
-
-        gradient.addColorStop(
-          0,
-          "rgba(0,0,0,1)"
-        );
-
-        gradient.addColorStop(
-          1,
-          "rgba(0,0,0,0)"
-        );
-
-        pixelCtx.globalCompositeOperation =
-          "destination-in";
-
-        pixelCtx.fillStyle = gradient;
-        pixelCtx.fillRect(0, 0, w, h);
-
-        pixelCtx.globalCompositeOperation =
-          "source-over";
-
-        pixelCanvas.style.opacity =
-          String(Math.max(0, 1 - t * .7));
-
-        if (t < 1) {
-          slot.pixelFrame =
-            requestAnimationFrame(frame);
-        } else {
-          pixelCanvas.style.opacity = "0";
-          pixelCtx.clearRect(0, 0, w, h);
-          slot.pixelFrame = null;
-        }
+      if (t >= 1) {
+        f.image = f.nextImage;
+        f.transitioning = false;
+        f.startX = f.x;
+        f.startY = f.y;
       }
-
-      slot.pixelFrame =
-        requestAnimationFrame(frame);
     }
 
-    slot.element.addEventListener(
-      "pointerenter",
-      trigger
+    drawFragmentImage(
+      f, f.image,
+      1 - blend,
+      pixelSize
     );
 
-    slot.element.addEventListener(
-      "pointermove",
-      event => {
-        if (event.pointerType === "mouse") {
-          trigger(event);
-        }
-      }
-    );
-  }
-
-  /* ======================================
-     JO AQO / OQAOJ GLITCH
-
-     Only the central name glitches.
-  ====================================== */
-
-  async function glitchName() {
-    hero.classList.add("glitch");
-
-    hero.textContent = "OqaoJ";
-    hero.dataset.text = "OqaoJ";
-
-    await wait(130);
-
-    hero.textContent = "Joaqo";
-    hero.dataset.text = "Joaqo";
-
-    await wait(90);
-
-    hero.textContent = "OqaoJ";
-    hero.dataset.text = "OqaoJ";
-
-    await wait(160);
-
-    hero.textContent = "Joaqo";
-    hero.dataset.text = "Joaqo";
-
-    await wait(140);
-
-    hero.classList.remove("glitch");
-  }
-
-  async function glitchLoop() {
-    while (true) {
-      await wait(rand(6000, 11500));
-
-      if (!document.hidden) {
-        await glitchName();
-      }
-    }
-  }
-
-  /* ======================================
-     NAVIGATION
-  ====================================== */
-
-  const pages = {
-    work: document.getElementById("page-work"),
-    about: document.getElementById("page-about"),
-    contact: document.getElementById("page-contact")
-  };
-
-  function closePages() {
-    Object.values(pages).forEach(page => {
-      page.classList.remove("open");
-      page.setAttribute("aria-hidden", "true");
-    });
-
-    document.querySelectorAll(".nav button")
-      .forEach(button => {
-        button.classList.toggle(
-          "active",
-          button.dataset.page === "home"
-        );
-      });
-
-    document.body.style.overflow = "";
-  }
-
-  function openPage(name) {
-    closePages();
-
-    if (name === "home") return;
-
-    const page = pages[name];
-    if (!page) return;
-
-    page.classList.add("open");
-    page.setAttribute("aria-hidden", "false");
-    page.scrollTop = 0;
-
-    document.querySelectorAll(".nav button")
-      .forEach(button => {
-        button.classList.toggle(
-          "active",
-          button.dataset.page === name
-        );
-      });
-
-    document.body.style.overflow = "hidden";
-  }
-
-  document.querySelectorAll(".nav button")
-    .forEach(button => {
-      button.addEventListener("click", () => {
-        openPage(button.dataset.page);
-      });
-    });
-
-  document.querySelectorAll(".back")
-    .forEach(button => {
-      button.addEventListener("click", closePages);
-    });
-
-  document.getElementById("brand-home")
-    .addEventListener("click", event => {
-      event.preventDefault();
-      closePages();
-    });
-
-  document.addEventListener("keydown", event => {
-    if (event.key === "Escape") {
-      closePages();
-    }
-  });
-
-  /* ======================================
-     RESIZE
-  ====================================== */
-
-  let resizeTimer;
-
-  window.addEventListener("resize", () => {
-    clearTimeout(resizeTimer);
-
-    resizeTimer = setTimeout(() => {
-      if (animating) return;
-
-      resizeCanvas();
-
-      const layouts = currentLayouts();
-      layoutIndex %= layouts.length;
-
-      const rects = getRects(layoutIndex);
-
-      slots.forEach((slot, i) => {
-        positionSlot(slot, rects[i]);
-      });
-
-      rebuildScatter();
-    }, 200);
-  });
-
-  /* ======================================
-     INITIALIZATION
-  ====================================== */
-
-  async function initialize() {
-    makeSlots();
-    resizeCanvas();
-
-    const bar =
-      document.getElementById("progress-bar");
-
-    const label =
-      document.getElementById("progress-text");
-
-    const preload = IMAGE_URLS.map(loadImage);
-
-    let progress = 0;
-
-    const interval = setInterval(() => {
-      progress = Math.min(
-        92,
-        progress + rand(2, 9)
+    if (blend > 0) {
+      drawFragmentImage(
+        f, f.nextImage,
+        blend,
+        pixelSize
       );
-
-      bar.style.width = progress + "%";
-
-      label.textContent =
-        String(Math.floor(progress))
-          .padStart(2, "0") + "%";
-    }, 100);
-
-    const loaded = await Promise.race([
-      Promise.all(preload),
-      wait(2600).then(() => null)
-    ]);
-
-    if (loaded) {
-      loaded.forEach((img, i) => {
-        images[i] = img;
-      });
     }
 
-    preload.forEach((promise, i) => {
-      promise.then(img => {
-        images[i] = img;
-      });
-    });
-
-    clearInterval(interval);
-
-    bar.style.width = "100%";
-    label.textContent = "100%";
-
-    await wait(300);
-
-    intro.classList.add("hidden");
-    scene.classList.add("ready");
-
-    // Continuous zoom starts immediately.
-    requestAnimationFrame(zoomLoop);
-
-    // Add imperfect collage fragments
-    // to the initial composition.
-    rebuildScatter();
-
-    if (!reducedMotion) {
-      collageLoop();
-      glitchLoop();
+    // Subtle photographic wear.
+    if (Math.random() < .06) {
+      ctx.fillStyle = "rgba(255,255,255,.08)";
+      ctx.fillRect(
+        f.x,
+        f.y + rand(0, f.h),
+        f.w,
+        rand(1, 3)
+      );
     }
   }
 
-  initialize();
+  // Grain and intermittent digital noise.
+  if (!reducedMotion) {
+    for (let i = 0; i < 130; i++) {
+      const x = rand(0, W);
+      const y = rand(0, H);
 
-})();
+      ctx.fillStyle = Math.random() < .5
+        ? "rgba(0,0,0,.12)"
+        : "rgba(255,255,255,.17)";
+
+      ctx.fillRect(x, y, rand(1, 3), rand(1, 3));
+    }
+  }
+}
+
+window.addEventListener("resize", resize);
+
+resize();
+requestAnimationFrame(render);
 </script>
 
 </body>
